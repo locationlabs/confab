@@ -58,6 +58,7 @@ class ConfFile(object):
         self.options = options
         self.mime_type = options.get_mime_type(template.filename)
         self.name = template.environment.from_string(template.name).render(**data)
+        self.remote = os.sep + self.name
 
     def _write_verbatim(self, generated_file_name):
         """
@@ -73,36 +74,46 @@ class ConfFile(object):
             generated_file.write(self.template.render(**self.data) + '\n')
             shutil.copystat(self.template.filename, generated_file_name)
 
-    def diff(self, generated_dir, remotes_dir):
+    def diff(self, generated_dir, remotes_dir, output=False):
         """
-        Show the diff between the generated and local files.
+        Compute whether there is a diff between the generated and local files.
+        
+        If output is enabled, show the diffs nicely.
         """
         generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
         local_file_name = os.sep.join([remotes_dir,env.host_string,self.name])
-        remote_file_name = os.sep + self.name
+        remote_file_name = self.remote
 
         puts('Computing diff for {file_name}'.format(file_name=remote_file_name))
 
         if not os.path.exists(generated_file_name):
-            print(red('Only in remote: {file_name}'.format(file_name=remote_file_name)))
-            return 
+            if output:
+                print(red('Only in remote: {file_name}'.format(file_name=remote_file_name)))
+            return True
 
         if not os.path.exists(local_file_name):
-            print(blue(('Only in generated: {file_name}'.format(file_name=remote_file_name))))
-            return
+            if output:
+                print(blue(('Only in generated: {file_name}'.format(file_name=remote_file_name))))
+            return True
 
         diff_lines = unified_diff(open(local_file_name).readlines(),
                                   open(generated_file_name).readlines(),
                                   fromfile='{file_name} (remote)'.format(file_name=remote_file_name),
                                   tofile='{file_name} (generated)'.format(file_name=remote_file_name))
         
-        if diff_lines:
-            if self.is_text() or self.is_empty():
-                for diff_line in diff_lines:
+        has_lines = False
+        if output:
+            for diff_line in diff_lines:
+                if self.is_text() or self.is_empty():
                     color = red if diff_line.startswith('-') else blue if diff_line.startswith('+') else green
                     print(color(diff_line.strip()))
-            else:
-                print(green('Binary files differ: {file_name}'.format(file_name=remote_file_name)))
+                    has_lines = True
+                else:
+                    print(green('Binary files differ: {file_name}'.format(file_name=remote_file_name)))
+                    has_lines = True
+                    break
+
+        return has_lines
 
     def is_text(self):
         return self.options.is_text(self.mime_type)
@@ -115,7 +126,7 @@ class ConfFile(object):
         Write the configuration file to the dest_dir.
         """
         generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
-        remote_file_name = os.sep + self.name
+        remote_file_name = self.remote
 
         puts('Generating {file_name}'.format(file_name=remote_file_name))
 
@@ -132,7 +143,7 @@ class ConfFile(object):
         Pull remote configuration file to local file.
         """
         local_file_name = os.sep.join([remotes_dir,env.host_string,self.name])
-        remote_file_name = os.sep + self.name
+        remote_file_name = self.remote
 
         puts('Pulling {file_name} from {host}'.format(file_name=remote_file_name,
                                                       host=env.host_string))
@@ -152,7 +163,7 @@ class ConfFile(object):
         Push the generated configuration file to the remote host.
         """
         generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
-        remote_file_name = os.sep + self.name
+        remote_file_name = self.remote
         remote_dir = os.path.dirname(remote_file_name)
 
         puts('Pushing {file_name} to {host}'.format(file_name=remote_file_name,

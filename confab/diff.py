@@ -15,7 +15,7 @@ def diff_conf_files(conf_files, generated_dir, remotes_dir):
     """
 
     for conf_file in conf_files:
-        conf_file.diff(generated_dir, remotes_dir)
+        conf_file.diff(generated_dir, remotes_dir, True)
 
 @task
 def diff(template_dir=None, generated_dir=None, remotes_dir=None):
