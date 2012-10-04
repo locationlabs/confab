@@ -3,8 +3,11 @@ Abstractions related to finding and representing configuration files.
 """
 
 from fabric.api import abort, env, get, put, puts, run, settings, sudo
+from fabric.colors import blue, red, green
 from fabric.contrib.files import exists
 from jinja2 import Environment, FileSystemLoader, PackageLoader, StrictUndefined
+
+from difflib import unified_diff
 
 import os
 import shutil
@@ -70,10 +73,48 @@ class ConfFile(object):
             generated_file.write(self.template.render(**self.data) + '\n')
             shutil.copystat(self.template.filename, generated_file_name)
 
-    def generate(self, generated_file_name):
+    def diff(self, generated_dir, remotes_dir):
+        """
+        Show the diff between the generated and local files.
+        """
+        generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
+        local_file_name = os.sep.join([remotes_dir,env.host_string,self.name])
+        remote_file_name = os.sep + self.name
+
+        puts('Computing diff for {file_name}'.format(file_name=remote_file_name))
+
+        if not os.path.exists(generated_file_name):
+            print(red('Only in remote: {file_name}'.format(file_name=remote_file_name)))
+            return 
+
+        if not os.path.exists(local_file_name):
+            print(blue(('Only in generated: {file_name}'.format(file_name=remote_file_name))))
+            return
+
+        diff_lines = unified_diff(open(local_file_name).readlines(),
+                                  open(generated_file_name).readlines(),
+                                  fromfile='{file_name} (remote)'.format(file_name=remote_file_name),
+                                  tofile='{file_name} (generated)'.format(file_name=remote_file_name))
+        
+        if diff_lines:
+            if self.is_text() or self.is_empty():
+                for diff_line in diff_lines:
+                    color = red if diff_line.startswith('-') else blue if diff_line.startswith('+') else green
+                    print(color(diff_line.strip()))
+            else:
+                print(green('Binary files differ: {file_name}'.format(file_name=remote_file_name)))
+
+    def is_text(self):
+        return self.options.is_text(self.mime_type)
+
+    def is_empty(self):
+        return self.options.is_empty(self.mime_type)
+
+    def generate(self, generated_dir):
         """
         Write the configuration file to the dest_dir.
         """
+        generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
         remote_file_name = os.sep + self.name
 
         puts('Generating {file_name}'.format(file_name=remote_file_name))
@@ -81,15 +122,16 @@ class ConfFile(object):
         # ensure that destination directory exists
         _ensure_dir(os.path.dirname(generated_file_name))
 
-        if self.options.is_text(self.mime_type):
+        if self.is_text():
             self._write_template(generated_file_name)
         else:
             self._write_verbatim(generated_file_name)
 
-    def pull(self, local_file_name):
+    def pull(self, remotes_dir):
         """
         Pull remote configuration file to local file.
         """
+        local_file_name = os.sep.join([remotes_dir,env.host_string,self.name])
         remote_file_name = os.sep + self.name
 
         puts('Pulling {file_name} from {host}'.format(file_name=remote_file_name,
@@ -105,10 +147,11 @@ class ConfFile(object):
                 puts('Not found: {file_name}'.format(file_name=remote_file_name))
 
 
-    def push(self, generated_file_name):
+    def push(self, generated_dir):
         """
         Push the generated configuration file to the remote host.
         """
+        generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
         remote_file_name = os.sep + self.name
         remote_dir = os.path.dirname(remote_file_name)
 
@@ -124,7 +167,30 @@ class ConfFile(object):
                 use_sudo=self.options.use_sudo, 
                 mirror_local_mode=True)
 
-def get_conf_files(env, data, options):
+class _BinaryFile(object):
+    """
+    Unfortunate workaround for Jinja2 Environment assuming templates use a
+    text encoding. Simply substitutes a duck-typed template for a Jinja
+    one. Necessary as long as we want to use the Environment's list_templates()
+    to enumerate configuration files and want to allow binary files.
+    
+    Currently only works with FileSystemLoader.
+    """
+    
+    def __init__(self, name, environment):
+        self.name = name
+        self.environment = environment
+
+        for path in environment.loader.searchpath:
+            filename = os.sep.join([path, name])
+            if os.path.exists(filename):
+                self.filename = filename
+                break
+
+    def render(self, **kwargs):
+        return open(self.filename).read()
+
+def get_conf_files(environment, data, options):
     """
     Generate a list of configuration files using a Jinja2 Environment
     and an optional filter function.
@@ -132,11 +198,17 @@ def get_conf_files(env, data, options):
     The Environment must use a Loader that supports list_templates().
     """
 
+    def get_template(template_name):
+        try:
+            return environment.get_template(template_name)
+        except UnicodeDecodeError:
+            return _BinaryFile(template_name, environment)
+
     def conf_file(template_name):
-        return ConfFile(env.get_template(template_name),
+        return ConfFile(get_template(template_name),
                         data,
                         options)
 
-    return map(conf_file,env.list_templates(filter_func=options.filter_func))
+    return map(conf_file,environment.list_templates(filter_func=options.filter_func))
                      
         

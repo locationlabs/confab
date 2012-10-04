@@ -10,6 +10,9 @@ from fabric.api import abort, env, task
 import os
 
 def diff_conf_files(conf_files, generated_dir, remotes_dir):
+    """
+    Show diffs for all configuration files.
+    """
 
     for conf_file in conf_files:
         conf_file.diff(generated_dir, remotes_dir)
@@ -33,9 +36,9 @@ def diff(template_dir=None, generated_dir=None, remotes_dir=None):
         abort('Please specify a host or a role')
 
     options = get_default_options()
-    jinja_env = env_from_dir(template_dir)
+    environment = env_from_dir(template_dir)
     data = {}
-    conf_files = get_conf_files(jinja_env, data, options)
+    conf_files = get_conf_files(environment, data, options)
 
     pull_conf_files(conf_files, remotes_dir)
     generate_conf_files(conf_files, generated_dir)

@@ -14,6 +14,12 @@ def _is_text(mime_type):
     """
     return mime_type.split('/')[0] == 'text'
 
+def _is_empty(mime_type):
+    """
+    Return whether a mime type represents an empty file.
+    """
+    return mime_type == 'inode/x-empty'
+
 def _is_not_temporary(file_name):
     """
     Return whether a file name does not represent a temporary file.
@@ -37,6 +43,7 @@ def get_default_options():
     return _AttributeDict({
             'use_sudo': False,
             'is_text': _is_text,
+            'is_empty': _is_empty,
             'filter_func': _is_not_temporary,
             'get_mime_type': _get_mime_type
             })
