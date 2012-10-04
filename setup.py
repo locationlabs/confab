@@ -17,7 +17,9 @@ setup(name='confab',
         ],
       install_requires=[
         'Fabric>=1.4',
-        'Jinja'
+        'Jinja2>=2.4',
+        'python-magic'
         ],
+      test_suite = 'confab.tests',
       )
 

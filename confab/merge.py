@@ -55,11 +55,7 @@ def merge(*args):
     """Recursively merge multiple dictionaries.
     
     """
-
-    merged = args[0] if len(args) > 0 else {}
-    for override in args[1:]:
-        merged = _merge(merged,override)
-    return merged
+    return reduce(_merge,args,{})
     
  
 class Append(list):
