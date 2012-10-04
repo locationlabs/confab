@@ -16,9 +16,9 @@ def _is_text(mime_type):
 
 def _is_not_temporary(file_name):
     """
-    Return whether a file name represents a temporary file.
+    Return whether a file name does not represent a temporary file.
     
-    When listing configuration files, temporary files will be ignored.
+    When listing configuration files, we usually want temporary files to be ignored.
     """
     return not file_name.endswith('~')
 
@@ -30,13 +30,12 @@ def _get_mime_type(file_name):
     """
     return Magic(mime=True).from_file(file_name)
 
-def make_default_options():
+def get_default_options():
     """
     Return a default set of options.
     """
     return _AttributeDict({
-            'dest_dir': None,
-            'local_dir': None,
+            'use_sudo': False,
             'is_text': _is_text,
             'filter_func': _is_not_temporary,
             'get_mime_type': _get_mime_type

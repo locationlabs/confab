@@ -1,5 +1,5 @@
 from confab.files import get_conf_files, env_from_package
-from confab.options import make_default_options
+from confab.options import get_default_options
 
 from jinja2 import UndefinedError
 from unittest import TestCase
@@ -9,7 +9,7 @@ class TestFiles(TestCase):
     def setUp(self):
         self.env = env_from_package('confab.tests')
         self.data = {'bar': 'bar'}
-        self.options = make_default_options()
+        self.options = get_default_options()
 
     def test_get_conf_files(self):
         """
@@ -40,9 +40,7 @@ class TestFiles(TestCase):
         Passing a filter_func limits which templates are generated.
         """
 
-        def filter_func(file_name):
-            return file_name != 'foo.txt'
-        self.options.filter_func = filter_func
+        self.options.filter_func = lambda file_name: file_name != 'foo.txt'
 
         conf_files = get_conf_files(self.env, self.data, self.options)
 

@@ -1,111 +1,41 @@
 """
-Generate configuration files using Jinja2 templates.
-
-We expect as input a Jinja2 Environment, which must use a Loader
-that supports list_templates(). Use of the Environment abstraction
-nicely separates the concern of which templates to render from
-that of rendering them.
-
-Users can provide two further customizations:
- - a filter_func that limits which templates are returned by list_templates()
- - a mime_type_func that limits which templates are treated as templates
+Generate configuration files into generate_dir.
 """
 
+from files import get_conf_files, env_from_dir, _clear_dir, _ensure_dir
+from options import get_default_options
+from fabric.api import abort, env, task
 import os
-import shutil
-import magic
 
-def _clear_dir(dir_name):
+def generate_conf_files(conf_files, generate_dir):
     """
-    Remove an entire directory tree.
+    Write all configuration files to generate_dir.
     """
-    if os.path.isdir(dir_name):
-        shutil.rmtree(dir_name)
+    _clear_dir(generate_dir)
+    _ensure_dir(generate_dir)
 
-def _ensure_dir(dir_name):
+    for conf_file in conf_files:
+        generated_file_name = os.sep.join([generate_dir,env.host_string,conf_file.name])
+        conf_file.generate(generated_file_name)
+
+
+@task
+def generate(template_dir=None, generate_dir=None):
     """
-    Ensure that a directory exists.
+    Generate configuration files.
     """
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+    if not template_dir or not os.path.isdir(template_dir):
+        abort('Please provide a valid template_dir')
 
-def _render_string(source, env, data):
-    """
-    Render a string as a template.
-    """
-    return env.from_string(source).render(**data)
+    if not generate_dir or (os.path.exists(generate_dir) and not os.path.isdir(generate_dir)):
+        abort('Please provide a valid generate_dir')
 
-def _is_template(mime_type):
-    """
-    Should a template of this mime type be treated as a template (instead of a verbatim file)?
-    """
-    return mime_type.split('/')[0] == 'text' or mime_type == 'application/xml'
+    if not env.host_string:
+        abort('Please specify a host or a role')
 
+    options = get_default_options()
+    jinja_env = env_from_dir(template_dir)
+    data = {}
+    conf_files = get_conf_files(jinja_env, data, options)
 
-class TemplateWriter(object):
-    """
-    Helper class that encapsulates writing out a single template.
-    """
-
-    def __init__(self, env, template, data, dest_dir, mime_type_func):
-        self.env = env
-        self.template = template
-        self.data = data
-        self.mime_type = magic.Magic(mime=True).from_file(self.template.filename)
-        self.dest_file_name = _render_string(os.sep.join((dest_dir,self.template.name)),
-                                             self.env,
-                                             self.data)
-        self.mime_type_func = mime_type_func if mime_type_func else _is_template
-
-    def _write_verbatim(self):
-        """
-        Write the template file verbatim, without templating.
-        """
-        shutil.copy2(self.template.filename, self.dest_file_name)
-
-    def _write_template(self):
-        """
-        Write the template file to the destination, preserving ownership.
-        """
-        with open(self.dest_file_name, 'w') as dest_file:
-            dest_file.write(self.template.render(**self.data) + '\n')
-            shutil.copystat(self.template.filename, self.dest_file_name)
-
-    def write(self):
-        """
-        Write the template file.
-        """
-
-        # ensure that destination directory exists
-        _ensure_dir(os.path.dirname(self.dest_file_name))
-
-        if self.mime_type_func(self.mime_type):
-            self._write_template()
-        else:
-            self._write_verbatim()
-
-
-def generate(env, data, dest_dir, filter_func=None, mime_type_func=None):
-    """
-    Generate templated outputs by listing all available templates in
-    the Jinja2 Environment and writing them out.
-
-    Callers may optionally provide a filter_func, e.g. to omit temporary
-    files or files that match an unexpected pattern.
-    """
-
-    # Ensure that destination exists and is empty
-    _clear_dir(dest_dir)
-    _ensure_dir(dest_dir)
-
-    def iter_writers():
-        for template_name in env.list_templates(filter_func=filter_func):
-            yield TemplateWriter(env,
-                                 env.get_template(template_name),
-                                 data,
-                                 dest_dir,
-                                 mime_type_func)
-
-    # Write all templates
-    for writer in iter_writers():
-        writer.write()
+    generate_conf_files(conf_files, generate_dir)

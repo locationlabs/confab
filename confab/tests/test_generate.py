@@ -1,89 +1,64 @@
-from confab.generate import generate
+from confab.files import get_conf_files, env_from_package
+from confab.generate import generate_conf_files
+from confab.options import get_default_options
+from confab.tests.utils import TempDir
+
+from fabric.api import hide, settings
+from jinja2 import UndefinedError
 from unittest import TestCase
-from jinja2 import Environment, PackageLoader, StrictUndefined, UndefinedError
-
-import os
-import shutil
-import tempfile
-
-class TempDir(object):
-
-    def __init__(self):
-        self.path = None
-
-    def __enter__(self):
-        self.path = tempfile.mkdtemp()
-        return self.path
-
-    def __exit__(self, exc_type, value, traceback):
-        shutil.rmtree(self.path)
-
-def _make_env():
-    return Environment(loader=PackageLoader('confab.tests'),
-                       undefined=StrictUndefined)
 
 class TestGenerate(TestCase):
     
-    def _read_value(self, tmp_dir, file_name):
-        return open(os.sep.join((tmp_dir,file_name))).read().strip()
-
-    def test_undefined(self):
-        """
-        An exception is raised if a template value is undefined.
-        """
-        env = _make_env()
-        data = {}
-
-        with self.assertRaises(UndefinedError):
-            with TempDir() as tmp_dir:
-                generate(env, data, tmp_dir)
+    def setUp(self):
+        self.env = env_from_package('confab.tests')
+        self.data = {'bar': 'bar', 'foo': 'foo'}
+        self.options = get_default_options()
 
     def test_generate(self):
         """
         Generated templates have the correct values.
         """
-        env = _make_env()
-        data = {'foo':'foo', 'bar':'bar'}
+        conf_files = get_conf_files(self.env, self.data, self.options)
 
-        with TempDir() as tmp_dir:
-            generate(env, data, tmp_dir)
+        with settings(hide('user'),
+                      host_string = 'localhost'):
+            with TempDir() as tmp_dir: 
+                generate_conf_files(conf_files, tmp_dir.path)
 
-            # foo.txt is populated with 'foo'
-            self.assertEquals('foo', self._read_value(tmp_dir,'foo.txt'))
+                # foo.txt is populated with 'foo'
+                self.assertEquals('foo', tmp_dir.read('localhost/foo.txt'))
 
-            # bar.txt is populated with 'bar' and path is substituted
-            self.assertEquals('bar', self._read_value(tmp_dir,'bar/bar.txt'))
-                    
-    def test_filter_func(self):
+                # bar.txt is populated with 'bar' and path is substituted
+                self.assertEquals('bar', tmp_dir.read('localhost/bar/bar.txt'))
+
+    def test_undefined(self):
         """
-        Passing a filter_func limits which templates are generated.
+        An exception is raised if a template value is undefined.
         """
-        env = _make_env()
-        data = {'foo':'foo', 'bar':'bar'}
+        conf_files = get_conf_files(self.env, self.data, self.options)
 
-        def filter_func(file_name):
-            return file_name != 'foo.txt'
+        del self.data['foo']
+        with settings(hide('user'),
+                      host_string = 'localhost'):
+            with TempDir() as tmp_dir:
+                with self.assertRaises(UndefinedError):
+                    generate_conf_files(conf_files, tmp_dir.path)
 
-        with TempDir() as tmp_dir:
-            generate(env, data, tmp_dir, filter_func=filter_func)
                     
-            # not generated
-            with self.assertRaises(IOError):
-                self._read_value(tmp_dir,'foo.txt')
-
-    def test_mime_type_func(self):
+    def test_is_text(self):
         """
         Passing a mime_type_func controls whether templates are rendered.
         """
-        env = _make_env()
-        data = {'foo':'foo', 'bar':'bar'}
+        conf_files = get_conf_files(self.env, self.data, self.options)
 
-        def mime_type_func(file_name):
-            return False
+        self.options.is_text = lambda mime_type: False
 
-        with TempDir() as tmp_dir:
-            generate(env, data, tmp_dir, mime_type_func=mime_type_func)
 
-            # templates not rendered (though paths are)
-            self.assertEquals('{{foo}}', self._read_value(tmp_dir,'foo.txt'))
-            self.assertEquals('{{bar}}', self._read_value(tmp_dir,'bar/bar.txt'))
+        with settings(hide('user'),
+                      host_string = 'localhost'):
+            with TempDir() as tmp_dir:
+                generate_conf_files(conf_files, tmp_dir.path)
+
+                # templates not rendered (though paths are)
+                self.assertEquals('{{foo}}', tmp_dir.read('localhost/foo.txt'))
+                self.assertEquals('{{bar}}', tmp_dir.read('localhost/bar/bar.txt'))

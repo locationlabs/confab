@@ -1,12 +1,17 @@
 """
 Test helpers.
 """
-from jinja2 import Environment, PackageLoader, StrictUndefined
+
 import os
 import shutil
 import tempfile
 
 class TempDir(object):
+    """
+    With statement compatible temporary directory structure.
+    
+    Based on a similar construct from the skeleton project.
+    """
 
     def __init__(self):
         self.path = None
@@ -21,6 +26,3 @@ class TempDir(object):
     def __exit__(self, exc_type, value, traceback):
         shutil.rmtree(self.path)
 
-def make_env():
-    return Environment(loader=PackageLoader('confab.tests'),
-                       undefined=StrictUndefined)
