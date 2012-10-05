@@ -1,5 +1,8 @@
+"""
+Test configuration file generation.
+"""
 from confab.files import get_conf_files, env_from_package
-from confab.options import get_default_options
+from confab.tests.utils import Options
 
 from jinja2 import UndefinedError
 from unittest import TestCase
@@ -8,8 +11,6 @@ class TestFiles(TestCase):
     
     def setUp(self):
         self.env = env_from_package('confab.tests')
-        self.data = {'bar': 'bar'}
-        self.options = get_default_options()
 
     def test_get_conf_files(self):
         """
@@ -17,36 +18,37 @@ class TestFiles(TestCase):
         and generates their names properly.
         """
 
-        conf_files = get_conf_files(self.env, self.data, self.options)
+        with Options(get_configuration_data = lambda: {'bar': 'bar'}):
+            conf_files = get_conf_files(self.env)
 
-        self.assertEquals(2, len(conf_files))
+            self.assertEquals(2, len(conf_files))
 
-        names = map(lambda x: x.name, conf_files)
-
-        self.assertTrue('foo.txt' in names)
-        self.assertTrue('bar/bar.txt' in names)
+            names = map(lambda x: x.name, conf_files)
+            
+            self.assertTrue('foo.txt' in names)
+            self.assertTrue('bar/bar.txt' in names)
 
     def test_undefined(self):
         """
         Raise an error if a template value is undefined.
         """
 
-        del self.data['bar']
-        with self.assertRaises(UndefinedError):
-            conf_files = get_conf_files(self.env, self.data, self.options)
-
+        with Options(get_configuration_data = lambda: {}):
+            with self.assertRaises(UndefinedError):
+                conf_files = get_conf_files(self.env)
+            
     def test_filter_func(self):
         """
         Passing a filter_func limits which templates are generated.
         """
 
-        self.options.filter_func = lambda file_name: file_name != 'foo.txt'
+        with Options(filter_func = lambda file_name: file_name != 'foo.txt',
+                     get_configuration_data = lambda: {'bar': 'bar'}):
+            conf_files = get_conf_files(self.env)
 
-        conf_files = get_conf_files(self.env, self.data, self.options)
+            self.assertEquals(1, len(conf_files))
 
-        self.assertEquals(1, len(conf_files))
+            names = map(lambda x: x.name, conf_files)
 
-        names = map(lambda x: x.name, conf_files)
-
-        self.assertTrue('bar/bar.txt' in names)
+            self.assertTrue('bar/bar.txt' in names)
 

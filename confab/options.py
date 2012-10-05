@@ -36,14 +36,30 @@ def _get_mime_type(file_name):
     """
     return Magic(mime=True).from_file(file_name)
 
-def get_default_options():
+def _get_configuration_data():
     """
-    Return a default set of options.
+    Return configuration data as a dictionary.
     """
-    return _AttributeDict({
-            'use_sudo': False,
-            'is_text': _is_text,
-            'is_empty': _is_empty,
-            'filter_func': _is_not_temporary,
-            'get_mime_type': _get_mime_type
-            })
+    return {}
+
+
+
+options = _AttributeDict({
+        # Should sudo be used with put and in lieu of run?
+        'use_sudo': False,
+
+        # How do compute a file's mime_type?
+        'get_mime_type': _get_mime_type,
+
+        # How to determine if a mime_type represents text data?
+        'is_text': _is_text,
+
+        # How to determine if a mime_type represents an empty file?
+        'is_empty': _is_empty,
+
+        # How do filter available templates?
+        'filter_func': _is_not_temporary,
+        
+        # How to load configuration?
+        'get_configuration_data': _get_configuration_data
+        })

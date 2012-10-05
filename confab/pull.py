@@ -3,7 +3,6 @@ Pull configuration files from remote host into remotes_dir.
 """
 
 from files import get_conf_files, env_from_dir
-from options import get_default_options
 from fabric.api import abort, env, task
 import os
 
@@ -29,9 +28,7 @@ def pull(template_dir=None, remotes_dir=None):
     if not env.host_string:
         abort('Please specify a host or a role')
 
-    options = get_default_options()
     environment = env_from_dir(template_dir)
-    data = {}
-    conf_files = get_conf_files(environment, data, options)
+    conf_files = get_conf_files(environment)
 
     pull_conf_files(conf_files, remotes_dir)

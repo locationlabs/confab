@@ -2,6 +2,8 @@
 Test helpers.
 """
 
+from confab.options import options
+
 import os
 import shutil
 import tempfile
@@ -25,4 +27,25 @@ class TempDir(object):
 
     def __exit__(self, exc_type, value, traceback):
         shutil.rmtree(self.path)
+
+class Options(object):
+    """
+    With statement to temporarily set options.
+    
+    """
+
+    def __init__(self,**kwargs):
+        self.kwargs = kwargs
+        self.previous = {}
+
+    def __enter__(self):
+        for (k,v) in self.kwargs.iteritems():
+            self.previous[k] = options.get(k)
+            options[k] = v
+        return self
+
+    def __exit__(self, exc_type, value, traceback):
+        for k in self.kwargs.keys():
+            options[k] = self.previous[k]
+
 

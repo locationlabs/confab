@@ -4,7 +4,6 @@ Determine the difference between remote and generated configuration files.
 
 from confab.files import get_conf_files, env_from_dir
 from confab.generate import generate_conf_files
-from confab.options import get_default_options
 from confab.pull import pull_conf_files
 from fabric.api import abort, env, task
 import os
@@ -35,10 +34,8 @@ def diff(template_dir=None, generated_dir=None, remotes_dir=None):
     if not env.host_string:
         abort('Please specify a host or a role')
 
-    options = get_default_options()
     environment = env_from_dir(template_dir)
-    data = {}
-    conf_files = get_conf_files(environment, data, options)
+    conf_files = get_conf_files(environment)
 
     pull_conf_files(conf_files, remotes_dir)
     generate_conf_files(conf_files, generated_dir)

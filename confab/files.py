@@ -2,6 +2,8 @@
 Abstractions related to finding and representing configuration files.
 """
 
+from confab.options import options
+
 from fabric.api import abort, env, get, put, puts, run, settings, sudo
 from fabric.colors import blue, red, green
 from fabric.contrib.files import exists
@@ -52,12 +54,11 @@ class ConfFile(object):
     Representation of a configuration file.
     """
 
-    def __init__(self, template, data, options):
+    def __init__(self, template):
         self.template = template
-        self.data = data
-        self.options = options
+        self.data = options.get_configuration_data()
         self.mime_type = options.get_mime_type(template.filename)
-        self.name = template.environment.from_string(template.name).render(**data)
+        self.name = template.environment.from_string(template.name).render(**self.data)
         self.remote = os.sep + self.name
 
     def _write_verbatim(self, generated_file_name):
@@ -116,10 +117,10 @@ class ConfFile(object):
         return has_lines
 
     def is_text(self):
-        return self.options.is_text(self.mime_type)
+        return options.is_text(self.mime_type)
 
     def is_empty(self):
-        return self.options.is_empty(self.mime_type)
+        return options.is_empty(self.mime_type)
 
     def generate(self, generated_dir):
         """
@@ -152,7 +153,7 @@ class ConfFile(object):
         _clear_file(local_file_name)
 
         with settings(use_ssh_config = True):
-            if exists(remote_file_name, use_sudo=self.options.use_sudo):
+            if exists(remote_file_name, use_sudo=options.use_sudo):
                 get(remote_file_name, local_file_name)
             else:
                 puts('Not found: {file_name}'.format(file_name=remote_file_name))
@@ -170,15 +171,15 @@ class ConfFile(object):
                                                     host=env.host_string))
 
         with settings(use_ssh_config = True):
-            mkdir_cmd = sudo if self.options.use_sudo else run
+            mkdir_cmd = sudo if options.use_sudo else run
             mkdir_cmd('mkdir -p {dir_name}'.format(dir_name=remote_dir))
 
             put(generated_file_name, 
                 remote_file_name, 
-                use_sudo=self.options.use_sudo, 
+                use_sudo=options.use_sudo, 
                 mirror_local_mode=True)
 
-class _BinaryFile(object):
+class _BinaryTemplate(object):
     """
     Unfortunate workaround for Jinja2 Environment assuming templates use a
     text encoding. Simply substitutes a duck-typed template for a Jinja
@@ -201,7 +202,7 @@ class _BinaryFile(object):
     def render(self, **kwargs):
         return open(self.filename).read()
 
-def get_conf_files(environment, data, options):
+def get_conf_files(environment):
     """
     Generate a list of configuration files using a Jinja2 Environment
     and an optional filter function.
@@ -213,12 +214,11 @@ def get_conf_files(environment, data, options):
         try:
             return environment.get_template(template_name)
         except UnicodeDecodeError:
-            return _BinaryFile(template_name, environment)
+            return _BinaryTemplate(template_name, environment)
 
     def conf_file(template_name):
-        return ConfFile(get_template(template_name),
-                        data,
-                        options)
+        return ConfFile(get_template(template_name)
+)
 
     return map(conf_file,environment.list_templates(filter_func=options.filter_func))
                      
