@@ -4,13 +4,11 @@ Abstractions related to finding and representing configuration files.
 
 from confab.options import options
 
-from fabric.api import abort, env, get, put, puts, run, settings, sudo
+from fabric.api import env, get, put, puts, run, settings, sudo
 from fabric.colors import blue, red, green
 from fabric.contrib.files import exists
 from jinja2 import Environment, FileSystemLoader, PackageLoader, StrictUndefined
-
 from difflib import unified_diff
-
 import os
 import shutil
 

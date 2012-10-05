@@ -42,8 +42,11 @@ def _get_configuration_data():
     """
     return {}
 
-
-
+# Options that control how confab runs.
+#
+# These are in opposition to options likely to changed
+# between different runs of confab, such as directories, 
+# environments, roles, hosts, etc.
 options = _AttributeDict({
         # Should sudo be used with put and in lieu of run?
         'use_sudo': False,

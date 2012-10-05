@@ -2,8 +2,10 @@
 Pull configuration files from remote host into remotes_dir.
 """
 
-from files import get_conf_files, env_from_dir
-from fabric.api import abort, env, task
+from confab.files import get_conf_files, env_from_dir
+from confab.validate import validate_pull
+
+from fabric.api import task
 import os
 
 def pull_conf_files(conf_files, remotes_dir):
@@ -18,15 +20,7 @@ def pull(template_dir=None, remotes_dir=None):
     """
     Pull remote configuration files.
     """
-
-    if not template_dir or not os.path.isdir(template_dir):
-        abort('Please provide a valid template_dir')
-
-    if not remotes_dir or (os.path.exists(remotes_dir) and not os.path.isdir(remotes_dir)):
-        abort('Please provide a valid remotes_dir')
-
-    if not env.host_string:
-        abort('Please specify a host or a role')
+    validate_pull(template_dir, remotes_dir)
 
     environment = env_from_dir(template_dir)
     conf_files = get_conf_files(environment)
