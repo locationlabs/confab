@@ -3,7 +3,8 @@ Pull configuration files from remote host into remotes_dir.
 """
 
 from confab.data import get_configuration_data
-from confab.files import get_conf_files, env_from_dir
+from confab.files import get_conf_files
+from confab.loaders import load_from_dir
 from confab.options import options, Options
 from confab.validate import validate_pull
 
@@ -25,9 +26,9 @@ def pull(template_dir=None, data_dir=None, remotes_dir=None):
     Pull remote configuration files.
     """
     validate_pull(template_dir, data_dir, remotes_dir)
-    environment = env_from_dir(template_dir)
 
-    with Options(get_configuration_data = lambda: get_configuration_data(data_dir)):
-        conf_files = get_conf_files(environment)
+    with Options(get_jinja2_environment = lambda: load_from_dir(template_dir),
+                 get_configuration_data = lambda: get_configuration_data(data_dir)):
+        conf_files = get_conf_files()
 
         pull_conf_files(conf_files, remotes_dir)

@@ -1,5 +1,9 @@
-from confab.files import get_conf_files, env_from_package
+"""
+Tests for template generation.
+"""
+from confab.files import get_conf_files
 from confab.generate import generate_conf_files
+from confab.loaders import load_from_package
 from confab.options import Options
 from confab.tests.utils import TempDir
 from fabric.api import hide, settings
@@ -9,15 +13,13 @@ from unittest import TestCase
 
 class TestGenerate(TestCase):
     
-    def setUp(self):
-        self.env = env_from_package('confab.tests')
-
     def test_generate(self):
         """
         Generated templates have the correct values.
         """
-        with Options(get_configuration_data = lambda: {'bar': 'bar', 'foo': 'foo'}):
-            conf_files = get_conf_files(self.env)
+        with Options(get_jinja2_environment = lambda: load_from_package('confab.tests'),
+                     get_configuration_data = lambda: {'bar': 'bar', 'foo': 'foo'}):
+            conf_files = get_conf_files()
 
             with settings(hide('user'),
                           host_string = 'localhost'):
@@ -34,9 +36,9 @@ class TestGenerate(TestCase):
         """
         An exception is raised if a template value is undefined.
         """
-
-        with Options(get_configuration_data = lambda: {'bar': 'bar'}):
-            conf_files = get_conf_files(self.env)
+        with Options(get_jinja2_environment = lambda: load_from_package('confab.tests'),
+                     get_configuration_data = lambda: {'bar': 'bar'}):
+            conf_files = get_conf_files()
                         
             with settings(hide('user'),
                           host_string = 'localhost'):
@@ -45,13 +47,14 @@ class TestGenerate(TestCase):
                         generate_conf_files(conf_files, tmp_dir.path)
 
                     
-    def test_is_text(self):
+    def test_should_render(self):
         """
         Passing a mime_type_func controls whether templates are rendered.
         """
-        with Options(is_text = lambda mime_type: False,
+        with Options(should_render = lambda mime_type: False,
+                     get_jinja2_environment = lambda: load_from_package('confab.tests'),
                      get_configuration_data = lambda: {'bar': 'bar', 'foo': 'foo'}):
-            conf_files = get_conf_files(self.env)
+            conf_files = get_conf_files()
 
             with settings(hide('user'),
                           host_string = 'localhost'):

@@ -7,18 +7,18 @@ from fabric.utils import _AttributeDict
 from magic import Magic
 from socket import getfqdn
 
-def _is_text(mime_type):
+def _should_render(mime_type):
     """
-    Return whether a mime type represents a text file.
+    Return whether a template file of with a particular mime type should be rendered.
     
-    Only configuration files that are text will be treated as text; binary files 
-    will be copied verbatim.
+    Some files may need to be excluded from template rendering; such files will be 
+    copied verbatim.
     """
     return mime_type.split('/')[0] == 'text'
 
 def _is_empty(mime_type):
     """
-    Return whether a mime type represents an empty file.
+    Return whether a template file is an empty file.
     """
     return mime_type == 'inode/x-empty'
 
@@ -56,17 +56,23 @@ options = _AttributeDict({
         # How do compute a file's mime_type?
         'get_mime_type': _get_mime_type,
 
-        # How to determine if a mime_type represents text data?
-        'is_text': _is_text,
+        # How to determine if a template should be rendered?
+        'should_render': _should_render,
 
-        # How to determine if a mime_type represents an empty file?
+        # How to determine if a template is an empty file?
         'is_empty': _is_empty,
 
         # How to determine the current hostname?
         'get_hostname': _get_hostname,
 
-        # How do filter available templates?
+        # How do we get the jinja environment? (must be defined)
+        'get_jinja2_environment': None,
+
+        # How do filter available templates within the jinja environment?
         'filter_func': _is_not_temporary,
+
+        # How do we get template configuration data? (must be defined)
+        'get_configuration_data': None,
         })
 
 class Options(object):

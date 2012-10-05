@@ -3,7 +3,8 @@ Generate configuration files into generated_dir.
 """
 
 from confab.data import get_configuration_data
-from confab.files import get_conf_files, env_from_dir, _clear_dir, _ensure_dir
+from confab.files import get_conf_files, _clear_dir, _ensure_dir
+from confab.loaders import load_from_dir
 from confab.options import options, Options
 from confab.validate import validate_generate
 
@@ -29,9 +30,9 @@ def generate(template_dir=None, data_dir=None, generated_dir=None):
     Generate configuration files.
     """
     validate_generate(template_dir, data_dir, generated_dir)
-    environment = env_from_dir(template_dir)
 
-    with Options(get_configuration_data = lambda: get_configuration_data(data_dir)):
-        conf_files = get_conf_files(environment)
+    with Options(get_jinja2_environment = lambda: load_from_dir(template_dir),
+                 get_configuration_data = lambda: get_configuration_data(data_dir)):
+        conf_files = get_conf_files()
 
         generate_conf_files(conf_files, generated_dir)

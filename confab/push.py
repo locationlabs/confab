@@ -3,8 +3,9 @@ Push generated configuration files to remote host.
 """
 
 from confab.data import get_configuration_data
-from confab.files import get_conf_files, env_from_dir
+from confab.files import get_conf_files
 from confab.generate import generate_conf_files
+from confab.loaders import load_from_dir
 from confab.options import options, Options
 from confab.pull import pull_conf_files
 from confab.validate import validate_all
@@ -45,10 +46,10 @@ def push(template_dir=None, data_dir=None, generated_dir=None, remotes_dir=None)
     Push configuration files.
     """
     validate_all(template_dir, data_dir, generated_dir, remotes_dir)
-    environment = env_from_dir(template_dir)
 
-    with Options(get_configuration_data = lambda: get_configuration_data(data_dir)):
-        conf_files = get_conf_files(environment)
+    with Options(get_jinja2_environment = lambda: load_from_dir(template_dir),
+                 get_configuration_data = lambda: get_configuration_data(data_dir)):
+        conf_files = get_conf_files()
 
         pull_conf_files(conf_files, remotes_dir)
         generate_conf_files(conf_files, generated_dir)

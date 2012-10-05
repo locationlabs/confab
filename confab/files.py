@@ -7,24 +7,9 @@ from confab.options import options
 from fabric.api import get, put, puts, run, settings, sudo
 from fabric.colors import blue, red, green
 from fabric.contrib.files import exists
-from jinja2 import Environment, FileSystemLoader, PackageLoader, StrictUndefined
 from difflib import unified_diff
 import os
 import shutil
-
-def env_from_dir(dir_name):
-    """
-    Create a Jinja2 Environment from a directory name.
-    """
-    return Environment(loader=FileSystemLoader(dir_name),
-                       undefined=StrictUndefined)
-
-def env_from_package(package_name):
-    """
-    Create a Jinja2 Environment from a package name.
-    """
-    return Environment(loader=PackageLoader(package_name),
-                       undefined=StrictUndefined)
 
 def _clear_dir(dir_name):
     """
@@ -103,7 +88,7 @@ class ConfFile(object):
         has_lines = False
         if output:
             for diff_line in diff_lines:
-                if self.is_text() or self.is_empty():
+                if self.should_render() or self.is_empty():
                     color = red if diff_line.startswith('-') else blue if diff_line.startswith('+') else green
                     print(color(diff_line.strip()))
                     has_lines = True
@@ -114,8 +99,8 @@ class ConfFile(object):
 
         return has_lines
 
-    def is_text(self):
-        return options.is_text(self.mime_type)
+    def should_render(self):
+        return options.should_render(self.mime_type)
 
     def is_empty(self):
         return options.is_empty(self.mime_type)
@@ -132,7 +117,7 @@ class ConfFile(object):
         # ensure that destination directory exists
         _ensure_dir(os.path.dirname(generated_file_name))
 
-        if self.is_text():
+        if self.should_render():
             self._write_template(generated_file_name)
         else:
             self._write_verbatim(generated_file_name)
@@ -177,30 +162,7 @@ class ConfFile(object):
                 use_sudo=options.use_sudo, 
                 mirror_local_mode=True)
 
-class _BinaryTemplate(object):
-    """
-    Unfortunate workaround for Jinja2 Environment assuming templates use a
-    text encoding. Simply substitutes a duck-typed template for a Jinja
-    one. Necessary as long as we want to use the Environment's list_templates()
-    to enumerate configuration files and want to allow binary files.
-    
-    Currently only works with FileSystemLoader.
-    """
-    
-    def __init__(self, name, environment):
-        self.name = name
-        self.environment = environment
-
-        for path in environment.loader.searchpath:
-            filename = os.sep.join([path, name])
-            if os.path.exists(filename):
-                self.filename = filename
-                break
-
-    def render(self, **kwargs):
-        return open(self.filename).read()
-
-def get_conf_files(environment):
+def get_conf_files():
     """
     Generate a list of configuration files using a Jinja2 Environment
     and an optional filter function.
@@ -208,16 +170,9 @@ def get_conf_files(environment):
     The Environment must use a Loader that supports list_templates().
     """
 
-    def get_template(template_name):
-        try:
-            return environment.get_template(template_name)
-        except UnicodeDecodeError:
-            return _BinaryTemplate(template_name, environment)
+    environment = options.get_jinja2_environment()
 
-    def conf_file(template_name):
-        return ConfFile(get_template(template_name)
-)
+    conf_file = lambda template_name: ConfFile(environment.get_template(template_name))
 
     return map(conf_file,environment.list_templates(filter_func=options.filter_func))
-                     
         
