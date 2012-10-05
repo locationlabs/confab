@@ -65,20 +65,13 @@ options = _AttributeDict({
         # How to determine the current hostname?
         'get_hostname': _get_hostname,
 
-        # How do we get the jinja environment? (must be defined)
-        'get_jinja2_environment': None,
-
         # How do filter available templates within the jinja environment?
         'filter_func': _is_not_temporary,
-
-        # How do we get template configuration data? (must be defined)
-        'get_configuration_data': None,
         })
 
 class Options(object):
     """
     Context manager to temporarily set options.
-    
     """
 
     def __init__(self,**kwargs):
