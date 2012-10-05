@@ -4,7 +4,7 @@ Abstractions related to finding and representing configuration files.
 
 from confab.options import options
 
-from fabric.api import env, get, put, puts, run, settings, sudo
+from fabric.api import get, put, puts, run, settings, sudo
 from fabric.colors import blue, red, green
 from fabric.contrib.files import exists
 from jinja2 import Environment, FileSystemLoader, PackageLoader, StrictUndefined
@@ -79,8 +79,8 @@ class ConfFile(object):
         
         If output is enabled, show the diffs nicely.
         """
-        generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
-        local_file_name = os.sep.join([remotes_dir,env.host_string,self.name])
+        generated_file_name = os.sep.join([generated_dir,self.name])
+        local_file_name = os.sep.join([remotes_dir,self.name])
         remote_file_name = self.remote
 
         puts('Computing diff for {file_name}'.format(file_name=remote_file_name))
@@ -124,7 +124,7 @@ class ConfFile(object):
         """
         Write the configuration file to the dest_dir.
         """
-        generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
+        generated_file_name = os.sep.join([generated_dir,self.name])
         remote_file_name = self.remote
 
         puts('Generating {file_name}'.format(file_name=remote_file_name))
@@ -141,11 +141,11 @@ class ConfFile(object):
         """
         Pull remote configuration file to local file.
         """
-        local_file_name = os.sep.join([remotes_dir,env.host_string,self.name])
+        local_file_name = os.sep.join([remotes_dir,self.name])
         remote_file_name = self.remote
 
         puts('Pulling {file_name} from {host}'.format(file_name=remote_file_name,
-                                                      host=env.host_string))
+                                                      host=options.get_hostname()))
 
         _ensure_dir(os.path.dirname(local_file_name))
         _clear_file(local_file_name)
@@ -161,12 +161,12 @@ class ConfFile(object):
         """
         Push the generated configuration file to the remote host.
         """
-        generated_file_name = os.sep.join([generated_dir,env.host_string,self.name])
+        generated_file_name = os.sep.join([generated_dir,self.name])
         remote_file_name = self.remote
         remote_dir = os.path.dirname(remote_file_name)
 
         puts('Pushing {file_name} to {host}'.format(file_name=remote_file_name,
-                                                    host=env.host_string))
+                                                    host=options.get_hostname()))
 
         with settings(use_ssh_config = True):
             mkdir_cmd = sudo if options.use_sudo else run

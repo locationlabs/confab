@@ -1,9 +1,11 @@
 """
-Options for managin Confab.
+Options for managing Confab.
 """
 
+from fabric.api import env
 from fabric.utils import _AttributeDict
 from magic import Magic
+from socket import getfqdn
 
 def _is_text(mime_type):
     """
@@ -36,11 +38,11 @@ def _get_mime_type(file_name):
     """
     return Magic(mime=True).from_file(file_name)
 
-def _get_configuration_data():
+def _get_hostname():
     """
-    Return configuration data as a dictionary.
+    Return the current target hostname.
     """
-    return {}
+    return getfqdn(env.host_string)
 
 # Options that control how confab runs.
 #
@@ -60,9 +62,31 @@ options = _AttributeDict({
         # How to determine if a mime_type represents an empty file?
         'is_empty': _is_empty,
 
+        # How to determine the current hostname?
+        'get_hostname': _get_hostname,
+
         # How do filter available templates?
         'filter_func': _is_not_temporary,
-        
-        # How to load configuration?
-        'get_configuration_data': _get_configuration_data
         })
+
+class Options(object):
+    """
+    Context manager to temporarily set options.
+    
+    """
+
+    def __init__(self,**kwargs):
+        self.kwargs = kwargs
+        self.previous = {}
+
+    def __enter__(self):
+        for (k,v) in self.kwargs.iteritems():
+            self.previous[k] = options.get(k)
+            options[k] = v
+        return self
+
+    def __exit__(self, exc_type, value, traceback):
+        for k in self.kwargs.keys():
+            options[k] = self.previous[k]
+
+

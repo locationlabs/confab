@@ -1,6 +1,7 @@
 from confab.files import get_conf_files, env_from_package
 from confab.generate import generate_conf_files
-from confab.tests.utils import Options, TempDir
+from confab.options import Options
+from confab.tests.utils import TempDir
 from fabric.api import hide, settings
 
 from jinja2 import UndefinedError

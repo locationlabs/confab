@@ -12,6 +12,13 @@ def validate_templates_dir(template_dir):
     if not template_dir or not os.path.isdir(template_dir):
         abort('Please provide a valid template_dir')
 
+def validate_data_dir(data_dir):
+    """
+    Data directory must be defined and exist.
+    """
+    if not data_dir or not os.path.isdir(data_dir):
+        abort('Please provide a valid data_dir')
+
 def validate_generated_dir(generated_dir):
     """
     Generated directory must be defined and not be a regular file.
@@ -33,27 +40,30 @@ def validate_host():
     if not env.host_string:
         abort('Please specify a host or a role')
 
-def validate_all(templates_dir, generated_dir, remotes_dir):
+def validate_all(templates_dir, data_dir, generated_dir, remotes_dir):
     """
-    Validate templates_dir, generated_dir, remotes_dir, and host.
+    Validate templates_dir, data_dir, generated_dir, remotes_dir, and host.
     """
     validate_templates_dir(templates_dir)
+    validate_data_dir(data_dir)
     validate_generated_dir(generated_dir)
     validate_remotes_dir(remotes_dir)
     validate_host()
 
-def validate_generate(templates_dir, generated_dir):
+def validate_generate(templates_dir, data_dir, generated_dir):
     """
-    Validate templates_dir, generated_dir, and host.
+    Validate templates_dir, data_dir, generated_dir, and host.
     """
     validate_templates_dir(templates_dir)
+    validate_data_dir(data_dir)
     validate_generated_dir(generated_dir)
     validate_host()
 
-def validate_pull(templates_dir, remotes_dir):
+def validate_pull(templates_dir, data_dir, remotes_dir):
     """
-    Validate templates_dir, remotes_dir, and host.
+    Validate templates_dir, data_dir, remotes_dir, and host.
     """
     validate_templates_dir(templates_dir)
+    validate_data_dir(data_dir)
     validate_remotes_dir(remotes_dir)
     validate_host()

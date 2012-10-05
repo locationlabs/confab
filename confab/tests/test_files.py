@@ -2,7 +2,7 @@
 Test configuration file generation.
 """
 from confab.files import get_conf_files, env_from_package
-from confab.tests.utils import Options
+from confab.options import Options
 
 from jinja2 import UndefinedError
 from unittest import TestCase
