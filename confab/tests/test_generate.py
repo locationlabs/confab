@@ -2,7 +2,7 @@
 Tests for template generation.
 """
 from confab.conffiles import ConfFiles
-from confab.loaders import load_from_package
+from confab.loaders import load_environment_from_package
 from confab.options import Options
 from confab.tests.utils import TempDir
 from fabric.api import hide, settings
@@ -16,7 +16,7 @@ class TestGenerate(TestCase):
         """
         Generated templates have the correct values.
         """
-        conffiles = ConfFiles(load_from_package('confab.tests'),
+        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
                               {'bar': 'bar', 'foo': 'foo'})
 
         with settings(hide('user'),
@@ -34,7 +34,7 @@ class TestGenerate(TestCase):
         """
         An exception is raised if a template value is undefined.
         """
-        conffiles = ConfFiles(load_from_package('confab.tests'),
+        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
                               {'bar': 'bar'})
 
         with settings(hide('user'),
@@ -48,7 +48,7 @@ class TestGenerate(TestCase):
         """
         Passing a mime_type_func controls whether templates are rendered.
         """
-        conffiles = ConfFiles(load_from_package('confab.tests'),
+        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
                               {'bar': 'bar', 'foo': 'foo'})
 
         with Options(should_render = lambda mime_type: False):

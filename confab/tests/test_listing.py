@@ -2,7 +2,7 @@
 Test configuration file listing.
 """
 from confab.conffiles import ConfFiles
-from confab.loaders import load_from_package
+from confab.loaders import load_environment_from_package
 from confab.options import Options
 
 from jinja2 import UndefinedError
@@ -15,7 +15,7 @@ class TestListing(TestCase):
         Generating conf files finds all templates in the package
         and generates their names properly.
         """
-        conffiles = ConfFiles(load_from_package('confab.tests'),
+        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
                               {'bar': 'bar'})
 
         self.assertEquals(2, len(conffiles.conffiles))
@@ -31,7 +31,7 @@ class TestListing(TestCase):
         """
 
         with self.assertRaises(UndefinedError):
-            conffiles = ConfFiles(load_from_package('confab.tests'),
+            conffiles = ConfFiles(load_environment_from_package('confab.tests'),
                                   {})
             
     def test_filter_func(self):
@@ -40,7 +40,7 @@ class TestListing(TestCase):
         """
 
         with Options(filter_func = lambda file_name: file_name != 'foo.txt'):
-            conffiles = ConfFiles(load_from_package('confab.tests'),
+            conffiles = ConfFiles(load_environment_from_package('confab.tests'),
                                   {'bar': 'bar'})
 
             self.assertEquals(1, len(conffiles.conffiles))

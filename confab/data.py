@@ -61,7 +61,7 @@ def import_configuration(module_name, data_dir):
     except ImportError:
         return None
 
-def get_configuration_data(data_dir):
+def load_data_from_dir(data_dir):
     """
     Load and merge configuration data.
     
