@@ -9,10 +9,69 @@ from fabric.api import get, put, puts, run, settings, sudo
 from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists
 from fabric.contrib.console import confirm
-from difflib import unified_diff
 
 import os
 import shutil
+
+class ConfFileDiff(object):
+    """
+    Encapsulation of the differences between the (locally copied) remote and 
+    generated versions of a configuration file.
+    """
+
+    def __init__(self, remote_file_name, generated_file_name, conffile_name):
+        """
+        Compute whether the conffile with the given name has changed given
+        a remote and generate file copy.
+        """
+        self.missing_generated = False
+        self.missing_remote = False
+        self.conffile_name = conffile_name
+        self.diff_lines = []
+         
+        if not os.path.exists(generated_file_name):
+            # Unexpected
+            self.missing_generated = True
+
+        if not os.path.exists(remote_file_name):
+            self.missing_remote = True
+
+        if not self.missing_generated and not self.missing_remote:
+            diff_iter = options.diff(open(remote_file_name).readlines(),
+                                     open(generated_file_name).readlines(),
+                                     fromfile='{file_name} (remote)'.format(file_name=conffile_name),
+                                     tofile='{file_name} (generated)'.format(file_name=conffile_name))
+
+            # unified_diff returns a generator
+            self.diff_lines = list(diff_iter)
+
+    def show(self):
+        """
+        Print the diff using pretty colors.
+        
+        If confab is used on binary files, diffs are likely to render poorly.
+        """
+        if self.missing_generated:
+            # Unexpected
+            if not self.missing_remote:
+                print(red('Only in remote: {file_name}'.format(file_name=self.conffile_name)))
+        elif self.missing_remote:
+            print(blue(('Only in generated: {file_name}'.format(file_name=self.conffile_name))))
+        else:
+            for diff_line in self.diff_lines:
+                color = red if diff_line.startswith('-') else blue if diff_line.startswith('+') else green
+                print(color(diff_line.strip()))
+
+    def __nonzero__(self):
+        """
+        Evaluate to true if there is a diff.
+        """
+        if self.missing_generated:
+            return not self.missing_remote
+        elif self.missing_remote:
+            return True
+        else:
+            return len(self.diff_lines)
 
 class ConfFile(object):
     """
@@ -42,45 +101,17 @@ class ConfFile(object):
 
     def diff(self, generated_dir, remotes_dir, output=False):
         """
-        Compute whether there is a diff between the generated and local files.
+        Compute the diff between the generated and remote files.
         
         If output is enabled, show the diffs nicely.
         """
         generated_file_name = os.sep.join([generated_dir,self.name])
-        local_file_name = os.sep.join([remotes_dir,self.name])
-        remote_file_name = self.remote
+        remote_file_name = os.sep.join([remotes_dir,self.name])
 
-        puts('Computing diff for {file_name}'.format(file_name=remote_file_name))
+        puts('Computing diff for {file_name}'.format(file_name=self.remote))
 
-        if not os.path.exists(generated_file_name):
-            if output:
-                print(red('Only in remote: {file_name}'.format(file_name=remote_file_name)))
-            return True
-
-        if not os.path.exists(local_file_name):
-            if output:
-                print(blue(('Only in generated: {file_name}'.format(file_name=remote_file_name))))
-            return True
-
-        diff_lines = unified_diff(open(local_file_name).readlines(),
-                                  open(generated_file_name).readlines(),
-                                  fromfile='{file_name} (remote)'.format(file_name=remote_file_name),
-                                  tofile='{file_name} (generated)'.format(file_name=remote_file_name))
+        return ConfFileDiff(remote_file_name, generated_file_name, self.remote)
         
-        has_lines = False
-        if output:
-            for diff_line in diff_lines:
-                if self.should_render() or self.is_empty():
-                    color = red if diff_line.startswith('-') else blue if diff_line.startswith('+') else green
-                    print(color(diff_line.strip()))
-                    has_lines = True
-                else:
-                    print(green('Binary files differ: {file_name}'.format(file_name=remote_file_name)))
-                    has_lines = True
-                    break
-
-        return has_lines
-
     def should_render(self):
         return options.should_render(self.mime_type)
 
@@ -92,9 +123,8 @@ class ConfFile(object):
         Write the configuration file to the dest_dir.
         """
         generated_file_name = os.sep.join([generated_dir,self.name])
-        remote_file_name = self.remote
 
-        puts('Generating {file_name}'.format(file_name=remote_file_name))
+        puts('Generating {file_name}'.format(file_name=self.remote))
 
         # ensure that destination directory exists
         _ensure_dir(os.path.dirname(generated_file_name))
@@ -109,19 +139,18 @@ class ConfFile(object):
         Pull remote configuration file to local file.
         """
         local_file_name = os.sep.join([remotes_dir,self.name])
-        remote_file_name = self.remote
 
-        puts('Pulling {file_name} from {host}'.format(file_name=remote_file_name,
+        puts('Pulling {file_name} from {host}'.format(file_name=self.remote,
                                                       host=options.get_hostname()))
 
         _ensure_dir(os.path.dirname(local_file_name))
         _clear_file(local_file_name)
 
         with settings(use_ssh_config = True):
-            if exists(remote_file_name, use_sudo=options.use_sudo):
-                get(remote_file_name, local_file_name)
+            if exists(self.remote, use_sudo=options.use_sudo):
+                get(self.remote, local_file_name)
             else:
-                puts('Not found: {file_name}'.format(file_name=remote_file_name))
+                puts('Not found: {file_name}'.format(file_name=self.remote))
 
 
     def push(self, generated_dir):
@@ -129,10 +158,9 @@ class ConfFile(object):
         Push the generated configuration file to the remote host.
         """
         generated_file_name = os.sep.join([generated_dir,self.name])
-        remote_file_name = self.remote
-        remote_dir = os.path.dirname(remote_file_name)
+        remote_dir = os.path.dirname(self.remote)
 
-        puts('Pushing {file_name} to {host}'.format(file_name=remote_file_name,
+        puts('Pushing {file_name} to {host}'.format(file_name=self.remote,
                                                     host=options.get_hostname()))
 
         with settings(use_ssh_config = True):
@@ -140,7 +168,7 @@ class ConfFile(object):
             mkdir_cmd('mkdir -p {dir_name}'.format(dir_name=remote_dir))
 
             put(generated_file_name, 
-                remote_file_name, 
+                self.remote, 
                 use_sudo=options.use_sudo, 
                 mirror_local_mode=True)
 
@@ -199,7 +227,7 @@ class ConfFiles(object):
             conffile.generate(host_generated_dir)
 
         for conffile in self.conffiles:
-            conffile.diff(host_generated_dir, host_remotes_dir, True)
+            conffile.diff(host_generated_dir, host_remotes_dir).show()
         
     def push(self, generated_dir, remotes_dir):
         """

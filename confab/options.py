@@ -4,6 +4,8 @@ Options for managing Confab.
 
 from fabric.api import env
 from fabric.utils import _AttributeDict
+
+from difflib import unified_diff
 from magic import Magic
 from socket import getfqdn
 
@@ -44,6 +46,14 @@ def _get_hostname():
     """
     return getfqdn(env.host_string)
 
+def _diff(a, b, fromfile=None, tofile=None):
+    """
+    Return a diff using '---', '+++', and '@@' control lines.
+
+    By default, uses unified_diff.
+    """
+    return unified_diff(a, b, fromfile=fromfile, tofile=tofile)
+
 # Options that control how confab runs.
 #
 # These are in opposition to options likely to changed
@@ -67,6 +77,9 @@ options = _AttributeDict({
 
         # How do filter available templates within the jinja environment?
         'filter_func': _is_not_temporary,
+
+        # How to determine diffs?
+        'diff': _diff
         })
 
 class Options(object):
