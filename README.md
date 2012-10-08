@@ -31,6 +31,17 @@ Confab may be used in several ways:
 
         confab -d /path/to/directory -H hosts -u user <command>
 
+    Confab then loads its definitions, configuration data, and templates
+    from within the provided directory as follows:
+
+        /path/to/directory/settings.py           # definitions
+        /path/to/directory/templates/{role}/     # templates for {role}
+        /path/to/directory/data/default.py       # default configuration data
+        /path/to/directory/data/{environment}.py # per-environment configuration data
+        /path/to/directory/data/{role}.py        # per-role configuration data
+        /path/to/directory/generated/{hostname}/ # generated configuration files for hostname
+        /path/to/directory/remotes/{hostname}/   # copies of remote configuration files from hostname
+
  -  Confab's tasks may be included in another fabfile simply by adding:
     
         from confab.api import *
@@ -38,6 +49,9 @@ Confab may be used in several ways:
     And then running:
 
         fab <task>:<arguments>
+
+    When invoking confab tasks from *fab*, configuration directories must be provided
+    as task arguments.
 
  -  Confab's lower level API can be invoked using customized data loading 
     functions, either to create new tasks or to be called directly from 
