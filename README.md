@@ -2,6 +2,8 @@
 
 Configuration management with Fabric and Jinja2.
 
+## Overview
+
 Confab provides four basic functions:
 
  1. It assumes a data model where *hosts* belong to one or more *environments*
