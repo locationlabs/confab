@@ -4,10 +4,11 @@ from setuptools import setup, find_packages
 
 setup(name='confab',
       version='0.2',
-      description='Configuration management with Fabric and Jinja.',
+      description='Configuration management with Fabric and Jinja2.',
       author='Location Labs',
       author_email='info@locationlabs.com',
       url='http://github.com/locationlabs/confab',
+      license='Apache2',
       packages=find_packages(exclude=['*.tests']),
       namespace_packages=[
         'confab'

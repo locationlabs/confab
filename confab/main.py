@@ -8,7 +8,7 @@ tasks:
  -  A single directory root is assumed, with templates, data, generated
     and remotes directories defined as subdirectories.
 
- -  A single host must be provided on the command line.
+ -  A host list must be provided on the command line.
 
 For more complex invocation, a custom fabfile may be more appropriate.
 """
@@ -18,6 +18,7 @@ from confab.api import pull, push, diff, generate
 from fabric.api import settings, hide
 from fabric.network import disconnect_all
 from optparse import OptionParser
+import getpass
 import os
 import sys
 
@@ -36,11 +37,18 @@ def parse_options():
 
     parser = OptionParser(usage="confab [options] command")
 
-    parser.add_option('-d', '--directory', dest='directory', default=os.getcwd(),
+    parser.add_option('-d', '--directory', dest='directory', 
+                      default=os.getcwd(),
                       help='Configuration directory [default: %default]')
 
-    parser.add_option('-H', '--host', dest='host',
-                      help='Target host')
+    parser.add_option('-H', '--hosts', dest='hosts', 
+                      default="",
+                      help='comma-separated list of hosts to operate on')
+
+    parser.add_option('-u', '--user', dest='user',
+                      default=getpass.getuser(),
+                      help='sername to use when connecting to remote hosts')
+
 
     opts, args = parser.parse_args()
     return parser, opts, args
@@ -59,18 +67,18 @@ def main():
         # Parse and validate arguments
         parser, options, arguments = parse_options()
 
-        if not options.host:
-            parser.error('Host is required')
+        if not options.hosts:
+            parser.error('At least one host must be specified')
 
         if not arguments or len(arguments) != 1:
-            parser.error('Exactly one task is required')
+            parser.error('Exactly one task must be specified')
 
         task_name = arguments[0]
         (task, needs_templates, needs_remotes) = parse_task(task_name)
 
         # Identify task
         if not task:
-            parser.error('Task must be one of: %s' % (', '.join(_tasks.keys())))
+            parser.error('Specified task must be one of: %s' % (', '.join(_tasks.keys())))
 
         # Construct task arguments
         kwargs = {'data_dir':      os.path.join(options.directory, 'data'),
@@ -82,9 +90,11 @@ def main():
             kwargs['remotes_dir'] = os.path.join(options.directory, 'remotes')
 
         # Invoke task
-        with settings(hide('user'),
-                      host_string=options.host):
-            task(**kwargs)
+        for host in options.hosts.split(','):
+            with settings(hide('user'),
+                          host_string=host,
+                          user=options.user):
+                task(**kwargs)
 
     except SystemExit:
         raise
