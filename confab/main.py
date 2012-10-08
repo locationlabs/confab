@@ -14,8 +14,9 @@ For more complex invocation, a custom fabfile may be more appropriate.
 """
 
 from confab.api import pull, push, diff, generate
+from confab.model import load_model_from_dir, get_hosts_for_environment, has_roles, has_same_roles
 
-from fabric.api import settings, hide
+from fabric.api import hide, settings
 from fabric.network import disconnect_all
 from optparse import OptionParser
 import getpass
@@ -39,15 +40,23 @@ def parse_options():
 
     parser.add_option('-d', '--directory', dest='directory', 
                       default=os.getcwd(),
-                      help='Configuration directory [default: %default]')
+                      help='directory from which to load configuration [default: %default]')
+
+    parser.add_option('-e', '--environment', dest='environment', 
+                      default="local",
+                      help='environment to operate on [default: %default]')
 
     parser.add_option('-H', '--hosts', dest='hosts', 
                       default="",
                       help='comma-separated list of hosts to operate on')
 
+    parser.add_option('-R', '--roles', dest='roles', 
+                      default="",
+                      help='comma-separated list of roles to operate on')
+
     parser.add_option('-u', '--user', dest='user',
                       default=getpass.getuser(),
-                      help='sername to use when connecting to remote hosts')
+                      help='username to use when connecting to remote hosts')
 
 
     opts, args = parser.parse_args()
@@ -59,6 +68,55 @@ def parse_task(name):
     """
     return _tasks.get(name)
 
+def resolve_model(parser, options):
+    """
+    Ensure that a valid environment, host, and model have been defined.
+
+    If no hosts are defined, attempt to derive these from the current environment.
+    If hosts are defined, validate that these are members of the current environment.
+
+    If no roles are defined, attempt to derive these from the current hosts.
+    If roles are defined, validate that hosts have these roles.
+    """
+    environment_hosts = get_hosts_for_environment(options.environment)
+
+    # Validate hosts
+    if not options.hosts:
+        # Try using all hosts for the environment
+        
+        if not environment_hosts:
+            parser.error('Unrecognized or missing environment definition: {environment}'.
+                         format(environment=options.environment))
+
+        elif not has_same_roles(environment_hosts):
+            # Cannot use all hosts for the enviroment; roles don't match
+            parser.error('All hosts for environment do not have the same role; ' +
+                         'please specify a host list.')
+
+        options.hosts = environment_hosts
+    else:
+        options.hosts = options.hosts.split(',')
+
+        # Ensure that all specified hosts are part of this environment
+        if not set(options.hosts).issubset(environment_hosts):
+            parser.error('All hosts are not part of specified environment.')
+
+    # Validate roles
+    if not options.roles:
+        # Try using all roles for hosts
+
+        hosts_roles = has_same_roles(options.hosts)
+        if not hosts_roles:
+            parser.error('All hosts do not have the same role; please specify a role list.')
+
+        options.roles = hosts_roles
+    else:
+        options.roles = options.roles.split(',')
+
+        if not has_roles(options.hosts, options.roles):
+            # Ensure that specified roles are valid
+            parser.error('All hosts do not have all specified roles; please specify different roles.')
+
 def main():
     """
     Main command line entry point.
@@ -67,8 +125,13 @@ def main():
         # Parse and validate arguments
         parser, options, arguments = parse_options()
 
-        if not options.hosts:
-            parser.error('At least one host must be specified')
+        try:
+            load_model_from_dir(options.directory)
+        except ImportError:
+            parser.error('Could not find {settings}'.format(settings=os.path.join(options.directory,
+                                                                                  'settings.py')))
+        
+        resolve_model(parser, options)
 
         if not arguments or len(arguments) != 1:
             parser.error('Exactly one task must be specified')
@@ -81,21 +144,31 @@ def main():
             parser.error('Specified task must be one of: %s' % (', '.join(_tasks.keys())))
 
         # Construct task arguments
-        kwargs = {'data_dir':      os.path.join(options.directory, 'data'),
-                  'templates_dir': os.path.join(options.directory, 'templates')}
+        kwargs = {'data_dir': os.path.join(options.directory, 'data')}
 
         if needs_templates:
             kwargs['generated_dir'] = os.path.join(options.directory, 'generated')
         if needs_remotes:
             kwargs['remotes_dir'] = os.path.join(options.directory, 'remotes')
 
-        # Invoke task
-        for host in options.hosts.split(','):
-            with settings(hide('user'),
-                          host_string=host,
-                          user=options.user):
-                task(**kwargs)
+        # Invoke task once per host/role
+        for host in options.hosts:
+            for role in options.roles:
 
+                # Scope templates dir by role
+                kwargs['templates_dir'] = os.path.join(options.directory, 'templates', role)
+
+                print "Running {task} on '{host}' for '{env}' and '{role}'".format(task=task_name,
+                                                                                   host=host,
+                                                                                   env=options.environment,
+                                                                                   role=role)
+                with settings(hide('user'),
+                              environment=options.environment,
+                              host_string=host,
+                              role=role,
+                              user=options.user):
+                    task(**kwargs)
+                
     except SystemExit:
         raise
     except KeyboardInterrupt:

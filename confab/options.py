@@ -46,6 +46,31 @@ def _get_hostname():
     """
     return getfqdn(env.host_string)
 
+def _get_rolename():
+    """
+    Return the current target role.
+    
+    Assume the role value is being saved in Fabric's env;
+    if not return None.
+    """
+    try:
+        return env.role
+    except AttributeError:
+        return None
+
+def _get_environmentname():
+    """
+    Return the current target environment.
+
+    Assume the environment value is being saved in Fabric's env;
+    if not return None.
+    """
+    try:
+        return env.environment
+    except AttributeError:
+        return None
+
+
 def _diff(a, b, fromfile=None, tofile=None):
     """
     Return a diff using '---', '+++', and '@@' control lines.
@@ -72,8 +97,14 @@ options = _AttributeDict({
         # How to determine if a template is an empty file?
         'is_empty': _is_empty,
 
-        # How to determine the current hostname?
+        # How to determine the current host name?
         'get_hostname': _get_hostname,
+
+        # How to determine the current role name?
+        'get_rolename': _get_rolename,
+
+        # How to determine the current environment name?
+        'get_environmentname': _get_environmentname,
 
         # How do filter available templates within the jinja environment?
         'filter_func': _is_not_temporary,

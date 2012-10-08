@@ -2,11 +2,9 @@
 Functions for loading configuration data.
 """
 
+from confab.files import _import
 from confab.merge import merge
 from confab.options import options
-import imp
-import os
-import sys
 
 def _get_environment_module():
     """
@@ -14,7 +12,7 @@ def _get_environment_module():
 
     Placeholder.
     """
-    return None
+    return options.get_environmentname()
 
 def _get_role_module():
     """
@@ -22,7 +20,7 @@ def _get_role_module():
 
     Placeholder.
     """
-    return None
+    return options.get_rolename()
 
 def _get_host_module():
     """
@@ -37,9 +35,6 @@ def import_configuration(module_name, data_dir):
     Treats module's __all__ value as the configuration dictionary.
     """
 
-    # assign module a name that's not likely to conflict
-    safe_name = 'confab.data.' + module_name
-
     # use __all__ as the module's dictionary
     def as_dict(module):
         try:
@@ -47,16 +42,8 @@ def import_configuration(module_name, data_dir):
         except AttributeError:
             return None
 
-
-    # check if module is already loaded
-    existing = sys.modules.get(safe_name)
-    if existing:
-        return as_dict(existing)
-
-    # try to load module
     try:
-        module_info = imp.find_module(module_name, [data_dir])
-        module = imp.load_module(safe_name, *module_info)
+        module = _import(module_name, data_dir)
         return as_dict(module)
     except ImportError:
         return None

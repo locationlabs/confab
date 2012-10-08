@@ -51,7 +51,37 @@ Confab may be used in several ways:
 
 ## Roles, Environments, and Hosts
 
-TODO
+Confab assumes the existings of hosts groupings that constitute different *environments* (e.g. production).
+Likewise, confab assumes that each host has one or more *roles* that define how it is used. Within 
+the default confab console script:
+
+ -  Environment and host definitions are loaded from a **settings.py** file in the data directory, which
+    should define the environment-to-host and role-to-host mappings as follows:
+
+        environmentdefs = {
+            'local': ['localhost']
+        }
+        
+        roledefs = {
+            'foo': ['localhost']
+        }
+
+ -  Templates are loaded from a directory tree based on role. That is, roles help specify which 
+    configuration files to manage.
+
+ -  Configuration data is loaded from python modules named after the environment or role names
+    (or default), using the convention that the module's *__all__* value embodies its data:
+
+        __all__ = {'foo': 'bar'}
+
+    The dictionaries from these modules (if any) are recursively merged. (see below)
+
+ -  Generated and remote configuration files will always be saved to a directory named after
+    the fully qualified domain name (FQDN) of the target host.
+
+Confab expects roles, environments, and definitions thereof to be saved in the Fabric environment,
+though the lower level API should be tolerant to these values being absent. Confab likewise expects
+the current host to be defined in Fabric's *env.host_string*; this requirement is absolute.
 
 
 ## Configuration Data
