@@ -10,13 +10,13 @@ from confab.validate import validate_all
 from fabric.api import task
 
 @task
-def push(template_dir=None, data_dir=None, generated_dir=None, remotes_dir=None):
+def push(templates_dir=None, data_dir=None, generated_dir=None, remotes_dir=None):
     """
     Push configuration files.
     """
-    validate_all(template_dir, data_dir, generated_dir, remotes_dir)
+    validate_all(templates_dir, data_dir, generated_dir, remotes_dir)
 
-    conffiles = ConfFiles(load_environment_from_dir(template_dir),
+    conffiles = ConfFiles(load_environment_from_dir(templates_dir),
                           load_data_from_dir(data_dir))
 
     conffiles.push(generated_dir, remotes_dir)

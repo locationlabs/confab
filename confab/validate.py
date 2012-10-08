@@ -5,12 +5,12 @@ Functions for validating user input to tasks.
 from fabric.api import abort, env
 import os
 
-def validate_templates_dir(template_dir):
+def validate_templates_dir(templates_dir):
     """
     Template directory must be defined and exist.
     """
-    if not template_dir or not os.path.isdir(template_dir):
-        abort('Please provide a valid template_dir')
+    if not templates_dir or not os.path.isdir(templates_dir):
+        abort('Please provide a valid templates_dir')
 
 def validate_data_dir(data_dir):
     """

@@ -21,5 +21,10 @@ setup(name='confab',
         'python-magic'
         ],
       test_suite = 'confab.tests',
+      entry_points={
+        'console_scripts': [
+            'confab = confab.main:main',
+            ]
+        },
       )
 

@@ -10,13 +10,13 @@ from confab.validate import validate_generate
 from fabric.api import task
 
 @task
-def generate(template_dir=None, data_dir=None, generated_dir=None):
+def generate(templates_dir=None, data_dir=None, generated_dir=None):
     """
     Generate configuration files.
     """
-    validate_generate(template_dir, data_dir, generated_dir)
+    validate_generate(templates_dir, data_dir, generated_dir)
 
-    conffiles = ConfFiles(load_environment_from_dir(template_dir),
+    conffiles = ConfFiles(load_environment_from_dir(templates_dir),
                           load_data_from_dir(data_dir))
 
     conffiles.generate(generated_dir)

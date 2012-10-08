@@ -10,13 +10,13 @@ from confab.validate import validate_pull
 from fabric.api import task
 
 @task
-def pull(template_dir=None, data_dir=None, remotes_dir=None):
+def pull(templates_dir=None, data_dir=None, remotes_dir=None):
     """
     Pull remote configuration files.
     """
-    validate_pull(template_dir, data_dir, remotes_dir)
+    validate_pull(templates_dir, data_dir, remotes_dir)
 
-    conffiles = ConfFiles(load_environment_from_dir(template_dir),
+    conffiles = ConfFiles(load_environment_from_dir(templates_dir),
                           load_data_from_dir(data_dir))
 
     conffiles.pull(remotes_dir)
