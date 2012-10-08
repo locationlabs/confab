@@ -51,12 +51,12 @@ Confab may be used in several ways:
 
 ## Roles, Environments, and Hosts
 
-Confab assumes the existings of hosts groupings that constitute different *environments* (e.g. production).
+Confab assumes the existence of host groups that constitute different *environments* (e.g. production).
 Likewise, confab assumes that each host has one or more *roles* that define how it is used. Within 
 the default confab console script:
 
- -  Environment and host definitions are loaded from a **settings.py** file in the data directory, which
-    should define the environment-to-host and role-to-host mappings as follows:
+ -  Environment and host definitions are loaded from a **settings.py** file in the main input
+    directory. This module should define the environment-to-host and role-to-host mappings as follows:
 
         environmentdefs = {
             'local': ['localhost']
@@ -66,22 +66,30 @@ the default confab console script:
             'foo': ['localhost']
         }
 
- -  Templates are loaded from a directory tree based on role. That is, roles help specify which 
-    configuration files to manage.
+ -  Templates are loaded from a directory tree based on role. For example, in the following 
+    directory structure, the **foo** and **bar** roles each manage a different set of 
+    configuration files:
+
+        /path/to/templates/foo/etc/motd.tail
+        /path/to/templates/foo/etc/hostname
+        /path/to/templates/bar/etc/cron.d/baz
 
  -  Configuration data is loaded from python modules named after the environment or role names
-    (or default), using the convention that the module's *__all__* value embodies its data:
+    (or default). The dictionaries from these modules (if any) are recursively merged (see below), 
+    so that given an environment named "foo" and a role named "bar", configuration data would be
+    merged between **default.py**, **foo.py**, and **bar.py**.
+    
+    Confab uses the convention that each module's *__all__* value defines  its data, e.g.:
 
         __all__ = {'foo': 'bar'}
-
-    The dictionaries from these modules (if any) are recursively merged. (see below)
 
  -  Generated and remote configuration files will always be saved to a directory named after
     the fully qualified domain name (FQDN) of the target host.
 
-Confab expects roles, environments, and definitions thereof to be saved in the Fabric environment,
-though the lower level API should be tolerant to these values being absent. Confab likewise expects
-the current host to be defined in Fabric's *env.host_string*; this requirement is absolute.
+Confab expects roles, environments, and definitions thereof to be saved in the Fabric environment. 
+The *confab* console script requires these definitions, although the lower level API is designed
+to be tolerant of these values being absent. Both the console script and the lower level API
+require that the current host be defined in Fabric's *env.host_string*.
 
 
 ## Configuration Data
