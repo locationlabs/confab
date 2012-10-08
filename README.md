@@ -8,7 +8,7 @@ Confab provides four basic functions:
     and are assigned to one or more *roles*.
 
  2. It defines a mechanism for loading configuration data based on a set of
-    *defaults* and override values defined per *environment* or *host.
+    *defaults* and override values defined per *environment* or *host*.
 
  3. It defines a mechanism for loading Jinja2 templates for configuration files
     based on a *role*.
@@ -27,13 +27,24 @@ Confab may be used in several ways:
  -  The distribution ships with the *confab* console script, which provides a 
     simple command line usage based on common defaults.
 
- -  Confab's tasks may be included in another fabfile simply by adding:
+        confab -d /path/to/directory -H hosts -u user <command>
 
+ -  Confab's tasks may be included in another fabfile simply by adding:
+    
         from confab.api import *
+    
+    And then running:
+
+        fab <task>:<arguments>
 
  -  Confab's lower level API can be invoked using customized data loading 
     functions, either to create new tasks or to be called directly from 
     a new console script.
+
+        from confab.api import ConfFiles
+        
+        conffiles = ConfFiles(jinja2_environment,
+                              data)
 
 
 ## Roles, Environments, and Hosts
