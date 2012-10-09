@@ -52,6 +52,21 @@ Confab may be used in several ways:
 
     When invoking confab tasks from *fab*, configuration directories must be provided
     as task arguments.
+    
+    To specify *roles* and *environments* to customize configuration data, the fabfile
+    can use the *autotasks*, for example:
+
+        from confab.api import *
+        from confab.autotasks import autogenerate_tasks
+        
+        # load roledefs and environmentdefs from settings.py
+        load_model_from_dir('/path/to/directory')
+        # create tasks for each defined role and environment
+        autogenerate_tasks()
+
+    Autotasks would then allow fab to run as:
+
+        fab role_{role} env_{environment} <task>:arguments
 
  -  Confab's lower level API can be invoked using customized data loading 
     functions, either to create new tasks or to be called directly from 
@@ -133,13 +148,13 @@ Configuration file names and paths may also be templates.
 
 Confab provides four default tasks:
 
- 1. Generate configuration files from templates. (generate)
+ 1. Generate configuration files from templates. (**generate**)
 
- 2. Pull configuration files from a remote host. (pull)
+ 2. Pull configuration files from a remote host. (**pull**)
 
- 3. Show differences between generated and remote configuration files. (diff)
+ 3. Show differences between generated and remote configuration files. (**diff**)
 
- 4. Interactively push generated configuration files to a remote host. (push)
+ 4. Interactively push generated configuration files to a remote host. (**push**)
 
 
 The default tasks all expect a series of directories as inputs:

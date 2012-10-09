@@ -1,9 +1,9 @@
 """
 Functions for interacting with the defined hosts, environments, and roles.
 """
+from confab.files import _import
 
 from fabric.api import env
-from confab.files import _import
 
 import imp
 import sys
