@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
+import os
+
+version='0.2' + os.environ.get('BUILD_SUFFIX','')
 
 setup(name='confab',
-      version='0.2',
+      version=version,
       description='Configuration management with Fabric and Jinja2.',
       author='Location Labs',
       author_email='info@locationlabs.com',
