@@ -16,6 +16,7 @@ the override dictionary's list is a callable, it can be made to do
 something else, such as append a new host to the default list.
 """
 
+
 def _best(default_value, override_value):
     """
     Return the best value according the merge rules.
@@ -25,12 +26,13 @@ def _best(default_value, override_value):
         return override_value(default_value)
     elif isinstance(default_value, dict) and isinstance(override_value, dict):
         # merge recursively
-        return _merge(default_value,override_value)
+        return _merge(default_value, override_value)
     elif override_value:
         # replace with override
         return override_value
     else:
         return default_value
+
 
 def _iterkeys(default, override):
     """
@@ -38,35 +40,37 @@ def _iterkeys(default, override):
     """
     return iter(set(default.keys()) | set(override.keys()))
 
+
 def _entry(default, override, key):
     """
-    Return a dictionary entry with the best value from the default and 
+    Return a dictionary entry with the best value from the default and
     override dictionaries.
     """
     return (key, _best(default.get(key), override.get(key)))
 
+
 def _merge(default, override):
     """Recursively merge two dictionaries.
-    
     """
     return dict(_entry(default, override, key) for key in _iterkeys(default, override))
 
+
 def merge(*args):
     """Recursively merge multiple dictionaries.
-    
     """
-    return reduce(_merge,args,{})
-    
- 
+    return reduce(_merge, args, {})
+
+
 class Append(list):
     """
     Customized callable list that appends its values to the default.
     """
     def __init__(self, *args):
-        super(Append,self).__init__(args)
+        super(Append, self).__init__(args)
 
     def __call__(self, default):
         return default + self
+
 
 class Prepend(list):
     """
@@ -74,7 +78,7 @@ class Prepend(list):
     """
 
     def __init__(self, *args):
-        super(Prepend,self).__init__(args)
+        super(Prepend, self).__init__(args)
 
     def __call__(self, default):
         return self + default
@@ -83,6 +87,6 @@ class Prepend(list):
 def append(*args):
     return Append(*args)
 
+
 def prepend(*args):
     return Prepend(*args)
-

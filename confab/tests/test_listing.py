@@ -8,8 +8,9 @@ from confab.options import Options
 from jinja2 import UndefinedError
 from unittest import TestCase
 
+
 class TestListing(TestCase):
-    
+
     def test_get_conf_files(self):
         """
         Generating conf files finds all templates in the package
@@ -21,7 +22,7 @@ class TestListing(TestCase):
         self.assertEquals(2, len(conffiles.conffiles))
 
         names = map(lambda x: x.name, conffiles.conffiles)
-        
+
         self.assertTrue('foo.txt' in names)
         self.assertTrue('bar/bar.txt' in names)
 
@@ -31,15 +32,14 @@ class TestListing(TestCase):
         """
 
         with self.assertRaises(UndefinedError):
-            conffiles = ConfFiles(load_environment_from_package('confab.tests'),
-                                  {})
-            
+            ConfFiles(load_environment_from_package('confab.tests'), {})
+
     def test_filter_func(self):
         """
         Passing a filter_func limits which templates are generated.
         """
 
-        with Options(filter_func = lambda file_name: file_name != 'foo.txt'):
+        with Options(filter_func=lambda file_name: file_name != 'foo.txt'):
             conffiles = ConfFiles(load_environment_from_package('confab.tests'),
                                   {'bar': 'bar'})
 
@@ -48,4 +48,3 @@ class TestListing(TestCase):
             names = map(lambda x: x.name, conffiles.conffiles)
 
             self.assertTrue('bar/bar.txt' in names)
-

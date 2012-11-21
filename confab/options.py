@@ -9,14 +9,17 @@ from difflib import unified_diff
 from magic import Magic
 from socket import getfqdn
 
+
 def _should_render(mime_type):
     """
-    Return whether a template file of with a particular mime type should be rendered.
-    
-    Some files may need to be excluded from template rendering; such files will be 
-    copied verbatim.
+    Return whether a template file of with a particular mime type
+    should be rendered.
+
+    Some files may need to be excluded from template rendering;
+    such files will be copied verbatim.
     """
     return mime_type.split('/')[0] == 'text'
+
 
 def _is_empty(mime_type):
     """
@@ -24,21 +27,25 @@ def _is_empty(mime_type):
     """
     return mime_type == 'inode/x-empty'
 
+
 def _is_not_temporary(file_name):
     """
     Return whether a file name does not represent a temporary file.
-    
-    When listing configuration files, we usually want temporary files to be ignored.
+
+    When listing configuration files, we usually want temporary
+    files to be ignored.
     """
     return not file_name.endswith('~')
+
 
 def _get_mime_type(file_name):
     """
     Return the mime type of a file.
-    
+
     The mime_type will be used to determine if a configuration file is text.
     """
     return Magic(mime=True).from_file(file_name)
+
 
 def _get_hostname():
     """
@@ -46,10 +53,11 @@ def _get_hostname():
     """
     return getfqdn(env.host_string)
 
+
 def _get_rolename():
     """
     Return the current target role.
-    
+
     Assume the role value is being saved in Fabric's env;
     if not return None.
     """
@@ -57,6 +65,7 @@ def _get_rolename():
         return env.role
     except AttributeError:
         return None
+
 
 def _get_environmentname():
     """
@@ -82,48 +91,49 @@ def _diff(a, b, fromfile=None, tofile=None):
 # Options that control how confab runs.
 #
 # These are in opposition to options likely to changed
-# between different runs of confab, such as directories, 
+# between different runs of confab, such as directories,
 # environments, roles, hosts, etc.
 options = _AttributeDict({
-        # Should sudo be used with put and in lieu of run?
-        'use_sudo': False,
+    # Should sudo be used with put and in lieu of run?
+    'use_sudo': False,
 
-        # How do compute a file's mime_type?
-        'get_mime_type': _get_mime_type,
+    # How do compute a file's mime_type?
+    'get_mime_type': _get_mime_type,
 
-        # How to determine if a template should be rendered?
-        'should_render': _should_render,
+    # How to determine if a template should be rendered?
+    'should_render': _should_render,
 
-        # How to determine if a template is an empty file?
-        'is_empty': _is_empty,
+    # How to determine if a template is an empty file?
+    'is_empty': _is_empty,
 
-        # How to determine the current host name?
-        'get_hostname': _get_hostname,
+    # How to determine the current host name?
+    'get_hostname': _get_hostname,
 
-        # How to determine the current role name?
-        'get_rolename': _get_rolename,
+    # How to determine the current role name?
+    'get_rolename': _get_rolename,
 
-        # How to determine the current environment name?
-        'get_environmentname': _get_environmentname,
+    # How to determine the current environment name?
+    'get_environmentname': _get_environmentname,
 
-        # How do filter available templates within the jinja environment?
-        'filter_func': _is_not_temporary,
+    # How do filter available templates within the jinja environment?
+    'filter_func': _is_not_temporary,
 
-        # How to determine diffs?
-        'diff': _diff
-        })
+    # How to determine diffs?
+    'diff': _diff
+})
+
 
 class Options(object):
     """
     Context manager to temporarily set options.
     """
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         self.kwargs = kwargs
         self.previous = {}
 
     def __enter__(self):
-        for (k,v) in self.kwargs.iteritems():
+        for (k, v) in self.kwargs.iteritems():
             self.previous[k] = options.get(k)
             options[k] = v
         return self
@@ -131,5 +141,3 @@ class Options(object):
     def __exit__(self, exc_type, value, traceback):
         for k in self.kwargs.keys():
             options[k] = self.previous[k]
-
-

@@ -13,9 +13,10 @@ from fabric.contrib.console import confirm
 import os
 import shutil
 
+
 class ConfFileDiff(object):
     """
-    Encapsulation of the differences between the (locally copied) remote and 
+    Encapsulation of the differences between the (locally copied) remote and
     generated versions of a configuration file.
     """
 
@@ -28,7 +29,7 @@ class ConfFileDiff(object):
         self.missing_remote = False
         self.conffile_name = conffile_name
         self.diff_lines = []
-         
+
         if not os.path.exists(generated_file_name):
             # Unexpected
             self.missing_generated = True
@@ -48,7 +49,7 @@ class ConfFileDiff(object):
     def show(self):
         """
         Print the diff using pretty colors.
-        
+
         If confab is used on binary files, diffs are likely to render poorly.
         """
         if self.missing_generated:
@@ -72,6 +73,7 @@ class ConfFileDiff(object):
             return True
         else:
             return len(self.diff_lines)
+
 
 class ConfFile(object):
     """
@@ -102,16 +104,16 @@ class ConfFile(object):
     def diff(self, generated_dir, remotes_dir, output=False):
         """
         Compute the diff between the generated and remote files.
-        
+
         If output is enabled, show the diffs nicely.
         """
-        generated_file_name = os.sep.join([generated_dir,self.name])
-        remote_file_name = os.sep.join([remotes_dir,self.name])
+        generated_file_name = os.sep.join([generated_dir, self.name])
+        remote_file_name = os.sep.join([remotes_dir,self .name])
 
         puts('Computing diff for {file_name}'.format(file_name=self.remote))
 
         return ConfFileDiff(remote_file_name, generated_file_name, self.remote)
-        
+
     def should_render(self):
         return options.should_render(self.mime_type)
 
@@ -122,7 +124,7 @@ class ConfFile(object):
         """
         Write the configuration file to the dest_dir.
         """
-        generated_file_name = os.sep.join([generated_dir,self.name])
+        generated_file_name = os.sep.join([generated_dir, self.name])
 
         puts('Generating {file_name}'.format(file_name=self.remote))
 
@@ -138,7 +140,7 @@ class ConfFile(object):
         """
         Pull remote configuration file to local file.
         """
-        local_file_name = os.sep.join([remotes_dir,self.name])
+        local_file_name = os.sep.join([remotes_dir, self.name])
 
         puts('Pulling {file_name} from {host}'.format(file_name=self.remote,
                                                       host=options.get_hostname()))
@@ -146,37 +148,37 @@ class ConfFile(object):
         _ensure_dir(os.path.dirname(local_file_name))
         _clear_file(local_file_name)
 
-        with settings(use_ssh_config = True):
+        with settings(use_ssh_config=True):
             if exists(self.remote, use_sudo=options.use_sudo):
                 get(self.remote, local_file_name)
             else:
                 puts('Not found: {file_name}'.format(file_name=self.remote))
 
-
     def push(self, generated_dir):
         """
         Push the generated configuration file to the remote host.
         """
-        generated_file_name = os.sep.join([generated_dir,self.name])
+        generated_file_name = os.sep.join([generated_dir, self.name])
         remote_dir = os.path.dirname(self.remote)
 
         puts('Pushing {file_name} to {host}'.format(file_name=self.remote,
                                                     host=options.get_hostname()))
 
-        with settings(use_ssh_config = True):
+        with settings(use_ssh_config=True):
             mkdir_cmd = sudo if options.use_sudo else run
             mkdir_cmd('mkdir -p {dir_name}'.format(dir_name=remote_dir))
 
-            put(generated_file_name, 
-                self.remote, 
-                use_sudo=options.use_sudo, 
+            put(generated_file_name,
+                self.remote,
+                use_sudo=options.use_sudo,
                 mirror_local_mode=True)
+
 
 class ConfFiles(object):
     """
     Encapsulation of a set of configuration files.
     """
-    
+
     def __init__(self,
                  environment,
                  data):
@@ -196,7 +198,7 @@ class ConfFiles(object):
         """
         Write all configuration files to generated_dir.
         """
-        host_generated_dir = os.sep.join([generated_dir,options.get_hostname()])
+        host_generated_dir = os.sep.join([generated_dir, options.get_hostname()])
 
         _clear_dir(host_generated_dir)
         _ensure_dir(host_generated_dir)
@@ -208,17 +210,17 @@ class ConfFiles(object):
         """
         Pull remote versions of files into remotes_dir.
         """
-        host_remotes_dir = os.sep.join([remotes_dir,options.get_hostname()])
+        host_remotes_dir = os.sep.join([remotes_dir, options.get_hostname()])
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
-        
+
     def diff(self, generated_dir, remotes_dir):
         """
         Show diffs for all configuration files.
         """
-        host_generated_dir = os.sep.join([generated_dir,options.get_hostname()])
-        host_remotes_dir = os.sep.join([remotes_dir,options.get_hostname()])
+        host_generated_dir = os.sep.join([generated_dir, options.get_hostname()])
+        host_remotes_dir = os.sep.join([remotes_dir, options.get_hostname()])
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -228,13 +230,13 @@ class ConfFiles(object):
 
         for conffile in self.conffiles:
             conffile.diff(host_generated_dir, host_remotes_dir).show()
-        
+
     def push(self, generated_dir, remotes_dir):
         """
         Push configuration files that have changes, given user confirmation.
         """
-        host_generated_dir = os.sep.join([generated_dir,options.get_hostname()])
-        host_remotes_dir = os.sep.join([remotes_dir,options.get_hostname()])
+        host_generated_dir = os.sep.join([generated_dir, options.get_hostname()])
+        host_remotes_dir = os.sep.join([remotes_dir, options.get_hostname()])
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)

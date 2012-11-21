@@ -10,8 +10,9 @@ from fabric.api import hide, settings
 from jinja2 import UndefinedError
 from unittest import TestCase
 
+
 class TestGenerate(TestCase):
-    
+
     def test_generate(self):
         """
         Generated templates have the correct values.
@@ -20,7 +21,7 @@ class TestGenerate(TestCase):
                               {'bar': 'bar', 'foo': 'foo'})
 
         with settings(hide('user'),
-                      host_string = 'localhost'):
+                      host_string='localhost'):
             with TempDir() as tmp_dir:
                 conffiles.generate(tmp_dir.path)
 
@@ -38,12 +39,11 @@ class TestGenerate(TestCase):
                               {'bar': 'bar'})
 
         with settings(hide('user'),
-                      host_string = 'localhost'):
+                      host_string='localhost'):
             with TempDir() as tmp_dir:
                 with self.assertRaises(UndefinedError):
                     conffiles.generate(tmp_dir.path)
 
-                    
     def test_should_render(self):
         """
         Passing a mime_type_func controls whether templates are rendered.
@@ -51,9 +51,9 @@ class TestGenerate(TestCase):
         conffiles = ConfFiles(load_environment_from_package('confab.tests'),
                               {'bar': 'bar', 'foo': 'foo'})
 
-        with Options(should_render = lambda mime_type: False):
+        with Options(should_render=lambda mime_type: False):
             with settings(hide('user'),
-                          host_string = 'localhost'):
+                          host_string='localhost'):
                 with TempDir() as tmp_dir:
                     conffiles.generate(tmp_dir.path)
 

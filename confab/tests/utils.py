@@ -1,17 +1,15 @@
 """
 Test helpers.
 """
-
-from confab.options import options
-
 import os
 import shutil
 import tempfile
 
+
 class TempDir(object):
     """
     With statement compatible temporary directory structure.
-    
+
     Based on a similar construct from the skeleton project.
     """
 
@@ -19,7 +17,7 @@ class TempDir(object):
         self.path = None
 
     def read(self, file_name):
-        return open(os.sep.join((self.path,file_name))).read().strip()
+        return open(os.sep.join((self.path, file_name))).read().strip()
 
     def __enter__(self):
         self.path = tempfile.mkdtemp()
@@ -27,4 +25,3 @@ class TempDir(object):
 
     def __exit__(self, exc_type, value, traceback):
         shutil.rmtree(self.path)
-

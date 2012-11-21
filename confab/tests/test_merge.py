@@ -2,6 +2,7 @@ from confab.merge import merge, append, prepend
 
 from unittest import TestCase
 
+
 class TestMerge(TestCase):
 
     def test_no_inputs(self):
@@ -13,20 +14,19 @@ class TestMerge(TestCase):
 
         self.assertEquals(merged, {})
 
-
     def test_no_overrride(self):
         """
         Sane results if no overrides are provided.
         """
 
         default = {
-            'foo' : 'bar'
-            }
+            'foo': 'bar'
+        }
 
         merged = merge(default)
 
         self.assertEquals(merged, default)
-    
+
     def test_override(self):
         """
         Overrides work as expected.
@@ -34,21 +34,21 @@ class TestMerge(TestCase):
 
         default = {
             'value1': 'foo',
-            'list': [ 'foo' ],
+            'list': ['foo'],
             'dict': {
                 'value2': 'foo',
                 'value3': 'foo'
-                },
-            }
+            },
+        }
 
         override = {
             'value1': 'bar',
-            'list': [ 'bar' ],
+            'list': ['bar'],
             'dict': {
                 'value2': 'bar',
                 'value4': 'bar'
-                },
-            }
+            },
+        }
 
         merged = merge(default, override)
 
@@ -63,7 +63,6 @@ class TestMerge(TestCase):
         self.assertEqual('foo', merged['dict']['value3'])
         self.assertEqual('bar', merged['dict']['value4'])
 
-        
     def test_override_custom(self):
         """
         Custom append() and prepend() lists append and prepend to
@@ -71,16 +70,16 @@ class TestMerge(TestCase):
         """
 
         default = {
-            'list': [ 'two' ]
-            }
+            'list': ['two']
+        }
 
         override1 = {
             'list': append('three', 'four')
-            }
+        }
 
         override2 = {
             'list': prepend('one')
-            }
+        }
 
         merged = merge(default, override1, override2)
 

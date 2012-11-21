@@ -9,8 +9,12 @@ from confab.validate import validate_all
 
 from fabric.api import task
 
+
 @task
-def push(templates_dir=None, data_dir=None, generated_dir=None, remotes_dir=None):
+def push(templates_dir=None,
+         data_dir=None,
+         generated_dir=None,
+         remotes_dir=None):
     """
     Push configuration files.
     """

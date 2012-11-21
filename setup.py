@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 import os
 
-version='0.2' + os.environ.get('BUILD_SUFFIX','')
+version = '0.2' + os.environ.get('BUILD_SUFFIX', '')
 
 setup(name='confab',
       version=version,
@@ -13,22 +13,18 @@ setup(name='confab',
       url='http://github.com/locationlabs/confab',
       license='Apache2',
       packages=find_packages(exclude=['*.tests']),
-      namespace_packages=[
-        'confab'
-        ],
       setup_requires=[
-        'nose>=1.0'
-        ],
+          'nose>=1.0'
+      ],
       install_requires=[
-        'Fabric>=1.4',
-        'Jinja2>=2.4',
-        'python-magic'
-        ],
-      test_suite = 'confab.tests',
+          'Fabric>=1.4',
+          'Jinja2>=2.4',
+          'python-magic'
+      ],
+      test_suite='confab.tests',
       entry_points={
-        'console_scripts': [
-            'confab = confab.main:main',
-            ]
-        },
+          'console_scripts': [
+              'confab = confab.main:main',
+          ]
+      },
       )
-

@@ -2,7 +2,7 @@
 Main function declaration for confab console_script.
 
 Confab may be used from within a fabfile or as a library. The main
-function here is provided as a simple default way to invoke confab's 
+function here is provided as a simple default way to invoke confab's
 tasks:
 
  -  A single directory root is assumed, with templates, data, generated
@@ -14,7 +14,8 @@ For more complex invocation, a custom fabfile may be more appropriate.
 """
 
 from confab.api import pull, push, diff, generate
-from confab.model import load_model_from_dir, get_hosts_for_environment, has_roles, has_same_roles
+from confab.model import load_model_from_dir, \
+    get_hosts_for_environment, has_roles, has_same_roles
 
 from fabric.api import hide, settings
 from fabric.network import disconnect_all
@@ -28,6 +29,7 @@ _tasks = {'diff':     (diff,     True,  True),
           'pull':     (pull,     False, True),
           'push':     (push,     True,  True)}
 
+
 def parse_options():
     """
     Parse command line options.
@@ -38,7 +40,7 @@ def parse_options():
 
     parser = OptionParser(usage="confab [options] command")
 
-    parser.add_option('-d', '--directory', dest='directory', 
+    parser.add_option('-d', '--directory', dest='directory',
                       default=os.getcwd(),
                       help='directory from which to load configuration [default: %default]')
 
@@ -58,15 +60,16 @@ def parse_options():
                       default=getpass.getuser(),
                       help='username to use when connecting to remote hosts')
 
-
     opts, args = parser.parse_args()
     return parser, opts, args
+
 
 def parse_task(name):
     """
     Translate task name to task.
     """
     return _tasks.get(name)
+
 
 def resolve_model(parser, options):
     """
@@ -83,7 +86,7 @@ def resolve_model(parser, options):
     # Validate hosts
     if not options.hosts:
         # Try using all hosts for the environment
-        
+
         if not environment_hosts:
             parser.error('Unrecognized or missing environment definition: {environment}'.
                          format(environment=options.environment))
@@ -117,6 +120,7 @@ def resolve_model(parser, options):
             # Ensure that specified roles are valid
             parser.error('All hosts do not have all specified roles; please specify different roles.')
 
+
 def main():
     """
     Main command line entry point.
@@ -130,7 +134,7 @@ def main():
         except ImportError:
             parser.error('Could not find {settings}'.format(settings=os.path.join(options.directory,
                                                                                   'settings.py')))
-        
+
         resolve_model(parser, options)
 
         if not arguments or len(arguments) != 1:
@@ -168,7 +172,7 @@ def main():
                               role=role,
                               user=options.user):
                     task(**kwargs)
-                
+
     except SystemExit:
         raise
     except KeyboardInterrupt:

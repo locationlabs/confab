@@ -6,6 +6,7 @@ from confab.files import _import
 from confab.merge import merge
 from confab.options import options
 
+
 def _get_environment_module():
     """
     Return the current configuration environment.
@@ -13,6 +14,7 @@ def _get_environment_module():
     Placeholder.
     """
     return options.get_environmentname()
+
 
 def _get_role_module():
     """
@@ -22,16 +24,18 @@ def _get_role_module():
     """
     return options.get_rolename()
 
+
 def _get_host_module():
     """
     Return the current configuration hostname.
     """
     return options.get_hostname()
 
+
 def import_configuration(module_name, data_dir):
     """
     Load configuration from file as python module.
-    
+
     Treats module's __all__ value as the configuration dictionary.
     """
 
@@ -48,10 +52,11 @@ def import_configuration(module_name, data_dir):
     except ImportError:
         return None
 
+
 def load_data_from_dir(data_dir):
     """
     Load and merge configuration data.
-    
+
     Configuration data is loaded from python files by type,
     where type is defined to include defaults, per-environment values,
     per-role values and per-host values.
@@ -60,10 +65,10 @@ def load_data_from_dir(data_dir):
     is_not_none = lambda x: x is not None
 
     module_names = filter(is_not_none,
-                          [ 'default',
-                            _get_environment_module(),
-                            _get_role_module(),
-                            _get_host_module() ])
+                          ['default',
+                           _get_environment_module(),
+                           _get_role_module(),
+                           _get_host_module()])
 
     load_module = lambda module_name: import_configuration(module_name, data_dir)
 

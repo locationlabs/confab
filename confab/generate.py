@@ -9,6 +9,7 @@ from confab.validate import validate_generate
 
 from fabric.api import task
 
+
 @task
 def generate(templates_dir=None, data_dir=None, generated_dir=None):
     """
