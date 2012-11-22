@@ -1,6 +1,7 @@
 """
 Test helpers.
 """
+import codecs
 import os
 import shutil
 import tempfile
@@ -17,7 +18,7 @@ class TempDir(object):
         self.path = None
 
     def read(self, file_name):
-        return open(os.sep.join((self.path, file_name))).read().strip()
+        return codecs.open(os.sep.join((self.path, file_name)), encoding='utf-8').read().strip()
 
     def __enter__(self):
         self.path = tempfile.mkdtemp()

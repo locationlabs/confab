@@ -15,7 +15,7 @@ def load_environment_from_dir(dir_name):
     """
     Load a Jinja2 Environment from a directory name.
     """
-    return Environment(loader=FileSystemLoader(dir_name),
+    return Environment(loader=FileSystemLoader(dir_name, encoding='utf-8'),
                        undefined=StrictUndefined)
 
 
@@ -23,5 +23,5 @@ def load_environment_from_package(package_name):
     """
     Load a Jinja2 Environment from a package name.
     """
-    return Environment(loader=PackageLoader(package_name),
+    return Environment(loader=PackageLoader(package_name, encoding='utf-8'),
                        undefined=StrictUndefined)

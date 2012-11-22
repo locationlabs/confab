@@ -98,7 +98,9 @@ class ConfFile(object):
         Write the configuration file as a template.
         """
         with open(generated_file_name, 'w') as generated_file:
-            generated_file.write(self.template.render(**self.data) + '\n')
+            rendered = self.template.render(**self.data).encode('utf-8')
+            generated_file.write(rendered)
+            generated_file.write(u'\n')
             shutil.copystat(self.template.filename, generated_file_name)
 
     def diff(self, generated_dir, remotes_dir, output=False):
@@ -108,7 +110,7 @@ class ConfFile(object):
         If output is enabled, show the diffs nicely.
         """
         generated_file_name = os.sep.join([generated_dir, self.name])
-        remote_file_name = os.sep.join([remotes_dir,self .name])
+        remote_file_name = os.sep.join([remotes_dir, self .name])
 
         puts('Computing diff for {file_name}'.format(file_name=self.remote))
 

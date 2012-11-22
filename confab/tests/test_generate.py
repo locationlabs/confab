@@ -31,6 +31,23 @@ class TestGenerate(TestCase):
                 # bar.txt is populated with 'bar' and path is substituted
                 self.assertEquals('bar', tmp_dir.read('localhost/bar/bar.txt'))
 
+    def test_unicode(self):
+        """
+        Generated templates with unicode data.
+        """
+        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
+                              {'bar': 'bar', 'foo': u'\xc5\xae'})
+        with settings(hide('user'),
+                      host_string='localhost'):
+            with TempDir() as tmp_dir:
+                conffiles.generate(tmp_dir.path)
+
+                # foo.txt is populated with u'\xc5\xae'
+                self.assertEquals(u'\xc5\xae', tmp_dir.read('localhost/foo.txt'))
+
+                # bar.txt is populated with 'bar' and path is substituted
+                self.assertEquals('bar', tmp_dir.read('localhost/bar/bar.txt'))
+
     def test_undefined(self):
         """
         An exception is raised if a template value is undefined.
