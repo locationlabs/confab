@@ -36,13 +36,12 @@ def import_configuration(module_name, data_dir):
     """
     Load configuration from file as python module.
 
-    Treats module's __all__ value as the configuration dictionary.
+    Returns publicly names values in module's __dict__.
     """
 
-    # use __all__ as the module's dictionary
     def as_dict(module):
         try:
-            return module.__all__
+            return {k: v for k, v in module.__dict__.iteritems() if not k[0:1] == '_'}
         except AttributeError:
             return None
 

@@ -108,9 +108,14 @@ the default confab console script:
     so that given an environment named "foo" and a role named "bar", configuration data would be
     merged between **default.py**, **foo.py**, and **bar.py**.
     
-    Confab uses the convention that each module's *__all__* value defines  its data, e.g.:
+    Confab uses the *__dict__*, but filters out any entries starting with '_' e.g.:
 
-        __all__ = {'foo': 'bar'}
+        foo = 'bar'
+		_ignore = this'
+		
+	Results in:
+	
+	    {'foo': 'bar'}
 
  -  Generated and remote configuration files will always be saved to a directory named after
     the fully qualified domain name (FQDN) of the target host.
