@@ -2,11 +2,12 @@
 
 Configuration management with Fabric and Jinja2.
 
+
 ## Overview
 
 Confab provides four basic functions:
 
- 1. It assumes a data model where *hosts* belong to one or more *environments*
+ 1. It defines a data model where *hosts* belong to one or more *environments*
     and are assigned to one or more *roles*.
 
  2. It defines a mechanism for loading configuration data based on a set of
@@ -21,6 +22,20 @@ Confab provides four basic functions:
 It is suggested that Confab be used with configuration data and templates that
 are checked in to version control so that publication is tied to versioning
 and release process.
+
+
+## Definitions
+
+ -  *hosts* are physical or virtual machines accessible via ssh; Confab will normally 
+    identify hosts by their fully qualified domain name (FQDN), so hostnames matter.
+
+ -  *environments* are groups of hosts that work together for a single purpose; it's
+    common to have one environment for development, one for staging, one for production
+	and so forth.
+	
+ -  *roles* are slices of configuration files; the configuration files that Confab 
+    manages are controlled by which roles are selected.
+
 
 ## Usage
 
@@ -50,7 +65,7 @@ Confab may be used in several ways:
 
         fab <task>:<arguments>
 
-    When invoking confab tasks from *fab*, configuration directories must be provided
+    When invoking Confab tasks from *fab*, configuration directories must be provided
     as task arguments.
     
     To specify *roles* and *environments* to customize configuration data, the fabfile
@@ -78,11 +93,9 @@ Confab may be used in several ways:
                               data)
 
 
-## Roles, Environments, and Hosts
+## Loading Roles, Environments, and Hosts
 
-Confab assumes the existence of host groups that constitute different *environments* (e.g. production).
-Likewise, confab assumes that each host has one or more *roles* that define how it is used. Within 
-the default confab console script:
+Within the default *confab* console script:
 
  -  Environment and host definitions are loaded from a **settings.py** file in the main input
     directory. This module should define the environment-to-host and role-to-host mappings as follows:
@@ -96,8 +109,8 @@ the default confab console script:
         }
 
  -  Templates are loaded from a directory tree based on role. For example, in the following 
-    directory structure, the **foo** and **bar** roles each manage a different set of 
-    configuration files:
+    directory structure, the **foo** role manages two configuration files and the **bar** 
+	role only one:
 
         /path/to/templates/foo/etc/motd.tail
         /path/to/templates/foo/etc/hostname
@@ -108,12 +121,13 @@ the default confab console script:
     so that given an environment named "foo" and a role named "bar", configuration data would be
     merged between **default.py**, **foo.py**, and **bar.py**.
     
-    Confab uses the *__dict__*, but filters out any entries starting with '_' e.g.:
+    Confab uses the *__dict__* property of the loaded module, but filters out any entries 
+	starting with '_'. In other words, this module:
 
         foo = 'bar'
-		_ignore = this'
+		_ignore = 'this'
 		
-	Results in:
+	results in this dictionary:
 	
 	    {'foo': 'bar'}
 
@@ -131,11 +145,12 @@ require that the current host be defined in Fabric's *env.host_string*.
 By default, Confab recursively merges configuration dictionaries from various sources,
 using a three level hierarchy: 
 
- -  Default values are overridden by per-environment values
- -  Per-environment values are overridden by per-host values
+ -  Host-specific values are used first.
+ -  Environment-specific values are used next. 
+ -  Default values are used last.
 
 Confab's recursive merge operation can be futher customized by using callable wrappers
-around configuration values; confab will always delegate to a callable to define
+around configuration values; Confab will always delegate to a callable to define
 how values are overriden, e.g. allowing lists values to be appended/prepended to
 default values.
 
