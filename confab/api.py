@@ -15,6 +15,9 @@ from confab.loaders import load_environment_from_dir, \
 # data loading
 from confab.data import load_data_from_dir
 
+# options
+from confab.options import Options
+
 # fabric tasks
 from confab.diff import diff
 from confab.generate import generate
@@ -30,5 +33,6 @@ __ignore__ = [
     diff,
     generate,
     pull,
-    push
+    push,
+    Options
 ]

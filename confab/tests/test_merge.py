@@ -84,3 +84,31 @@ class TestMerge(TestCase):
         merged = merge(default, override1, override2)
 
         self.assertEquals(merged['list'], ['one', 'two', 'three', 'four'])
+
+    def test_boolean_overrides(self):
+        """
+        Override with boolean values
+        """
+
+        self.check_override({'bool': False}, {})
+        self.check_override({}, {'bool': False}, {'bool': False})
+        self.check_override({'bool': True}, {})
+        self.check_override({}, {'bool': True}, {'bool': True})
+        self.check_override({'bool': True}, {'bool': False}, {'bool': False})
+        self.check_override({'bool': False}, {'bool': True}, {'bool': True})
+
+    def test_special_overrides(self):
+        """
+        Override with special values ('', None, ...)
+        """
+
+        self.check_override({'key': ''}, {})
+        self.check_override({'key': None}, {})
+        self.check_override({}, {'key': ''}, {'key': ''})
+        self.check_override({}, {'key': None}, {'key': None})
+
+    def check_override(self, default, override, expected=None):
+
+        merged = merge(default, override)
+
+        self.assertEqual(merged, expected or default)

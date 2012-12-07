@@ -17,21 +17,21 @@ something else, such as append a new host to the default list.
 """
 
 
-def _best(default_value, override_value):
+def _best(default_value, has_override, override_value):
     """
-    Return the best value according the merge rules.
+    Return the best value according to the merge rules.
     """
-    if callable(override_value):
+    if not has_override:
+        return default_value
+    elif callable(override_value):
         # custom callable
         return override_value(default_value)
     elif isinstance(default_value, dict) and isinstance(override_value, dict):
         # merge recursively
         return _merge(default_value, override_value)
-    elif override_value:
+    else:
         # replace with override
         return override_value
-    else:
-        return default_value
 
 
 def _iterkeys(default, override):
@@ -46,7 +46,7 @@ def _entry(default, override, key):
     Return a dictionary entry with the best value from the default and
     override dictionaries.
     """
-    return (key, _best(default.get(key), override.get(key)))
+    return key, _best(default.get(key), key in override, override.get(key))
 
 
 def _merge(default, override):
