@@ -6,8 +6,10 @@ import imp
 import os
 import shutil
 import sys
+from fabric.api import runs_once
 
 
+@runs_once
 def _clear_dir(dir_name):
     """
     Remove an entire directory tree.
