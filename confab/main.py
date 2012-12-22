@@ -12,17 +12,19 @@ tasks:
 
 For more complex invocation, a custom fabfile may be more appropriate.
 """
-
-from confab.api import pull, push, diff, generate
-from confab.model import load_model_from_dir, \
-    get_hosts_for_environment, has_roles, has_same_roles
-
 from fabric.api import hide, settings
 from fabric.network import disconnect_all
 from optparse import OptionParser
 import getpass
 import os
 import sys
+
+from confab.api import pull, push, diff, generate
+from confab.options import Options
+from confab.model import (load_model_from_dir,
+                          get_hosts_for_environment,
+                          has_roles,
+                          has_same_roles)
 
 _tasks = {'diff':     (diff,     True,  True),
           'generate': (generate, True,  False),
@@ -61,6 +63,11 @@ def parse_options():
                       default=getpass.getuser(),
                       help='username to use when connecting to remote hosts')
 
+    parser.add_option('-y', '--yes', dest='assume_yes',
+                      action='store_true',
+                      default=False,
+                      help='automatically answer yes to prompts')
+
     opts, args = parser.parse_args()
     return parser, opts, args
 
@@ -96,7 +103,8 @@ def resolve_model(parser, options):
 
         # Ensure that all specified hosts are part of this environment
         if not set(options.hosts).issubset(environment_hosts):
-            parser.error('All hosts are not part of specified environment.')
+            parser.error('All hosts are not part of environment: {environment}'.
+                         format(environment=options.environment))
 
     # Validate roles
     if not options.roles:
@@ -164,7 +172,8 @@ def main():
                               host_string=host,
                               role=role,
                               user=options.user):
-                    task(**kwargs)
+                    with Options(assume_yes=options.assume_yes):
+                        task(**kwargs)
 
     except SystemExit:
         raise

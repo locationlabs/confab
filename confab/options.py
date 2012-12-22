@@ -94,6 +94,9 @@ def _diff(a, b, fromfile=None, tofile=None):
 # between different runs of confab, such as directories,
 # environments, roles, hosts, etc.
 options = _AttributeDict({
+    # Should yes be assumed for interactive prompts?
+    'assume_yes': False,
+
     # Should sudo be used with put and in lieu of run?
     'use_sudo': False,
 

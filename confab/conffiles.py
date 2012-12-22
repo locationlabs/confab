@@ -258,7 +258,7 @@ class ConfFiles(object):
         for conffile in with_diffs:
             print(magenta('\t' + conffile.remote))
 
-        if confirm('Push configuration files to {host}?'.format(host=options.get_hostname()),
-                   default=False):
+        if options.assume_yes or confirm('Push configuration files to {host}?'.format(host=options.get_hostname()),
+                                         default=False):
             for conffile in with_diffs:
                 conffile.push(host_generated_dir)
