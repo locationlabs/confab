@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '0.2' + os.environ.get('BUILD_SUFFIX', '')
+version = '1.0' + os.environ.get('BUILD_SUFFIX', '')
 
 setup(name='confab',
       version=version,
