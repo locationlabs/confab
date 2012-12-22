@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-import os
 
-version = '1.1' + os.environ.get('BUILD_SUFFIX', '')
+__version__ = '1.1'
+
+# Jenkins will replace __build__ with a unique value.
+__build__ = ''
 
 setup(name='confab',
-      version=version,
+      version=__version__ + __build__,
       description='Configuration management with Fabric and Jinja2.',
       author='Location Labs',
       author_email='info@locationlabs.com',
