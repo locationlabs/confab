@@ -2,7 +2,7 @@
 Options for managing Confab.
 """
 
-from fabric.api import env
+from fabric.api import env, task
 from fabric.utils import _AttributeDict
 
 from difflib import unified_diff
@@ -144,3 +144,11 @@ class Options(object):
     def __exit__(self, exc_type, value, traceback):
         for k in self.kwargs.keys():
             options[k] = self.previous[k]
+
+
+@task
+def assume_yes():
+    """
+    Set the option to assume_yes in other tasks.
+    """
+    options.assume_yes = True

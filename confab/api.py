@@ -16,7 +16,7 @@ from confab.loaders import load_environment_from_dir, \
 from confab.data import load_data_from_dir
 
 # options
-from confab.options import Options
+from confab.options import assume_yes, Options
 
 # fabric tasks
 from confab.diff import diff
@@ -25,6 +25,7 @@ from confab.pull import pull
 from confab.push import push
 
 __ignore__ = [
+    assume_yes,
     ConfFiles,
     load_model_from_dir,
     load_environment_from_dir,
