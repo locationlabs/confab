@@ -159,7 +159,7 @@ default values.
 
 Confab uses Jinja2's environment to enumerate configuration file templates. Any 
 valid Jinja2 environment may be provided as long as it uses a Loader that supports
-list_templates(). By default, Confab uses a FileSystemLoader.
+list\_templates(). By default, Confab uses a FileSystemLoader.
 
 Configuration file names and paths may also be templates.
 
@@ -186,9 +186,41 @@ The default tasks all expect a series of directories as inputs:
  -  **generated_dir** is the root directory where generated configuration files
     will be written.
 
- -  **remotes_dir** is the root directory where remote configuration files are
+ -  **remotes\_dir** is the root directory where remote configuration files are
     saved.
 
 When run from within a *fabfile*, these directories must be specified on the command line;
 the *confab* console script assumes that all directories are defined relative to another
 root directory specified on the command line.
+
+
+## Future Work
+
+1. Confab needs a better **push** command line interface, and the following is a possible 
+   option. 
+
+<code>
+The following configuration files have changed for localhost:
+
+   no  |    filename                                              |  changed
+       |                                                          |
+   1   |    /etc/iptables.rules                                   |  new
+   2   |    /etc/iptables.rules.services                          |  yes
+   3   |    /opt/wm/etc/sprint_sms_gateway/gateway.properties     |  no
+
+Select files to push? [all/None/..1,2..] 1,3
+</code>
+
+2. Similarly **diff** should offer a similar option to select files to show diffs.
+
+<code>
+The following configuration files have changed for localhost:
+
+   no  |    filename                                              |  changed
+       |                                                          |
+   1   |    /etc/iptables.rules                                   |  new
+   2   |    /etc/iptables.rules.services                          |  yes
+   3   |    /opt/wm/etc/sprint_sms_gateway/gateway.properties     |  no
+
+See changes for file(s)? [all/..1,2..] 1,3
+</code>
