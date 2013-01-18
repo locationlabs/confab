@@ -199,7 +199,7 @@ root directory specified on the command line.
 1. Confab needs a better **push** command line interface, and the following is a possible 
    option. 
 
-<code>
+```
 The following configuration files have changed for localhost:
 
    no  |    filename                                              |  changed
@@ -209,11 +209,11 @@ The following configuration files have changed for localhost:
    3   |    /opt/wm/etc/sprint_sms_gateway/gateway.properties     |  no
 
 Select files to push? [all/None/..1,2..] 1,3
-</code>
+```
 
 2. Similarly **diff** should offer a similar option to select files to show diffs.
 
-<code>
+```
 The following configuration files have changed for localhost:
 
    no  |    filename                                              |  changed
@@ -223,4 +223,4 @@ The following configuration files have changed for localhost:
    3   |    /opt/wm/etc/sprint_sms_gateway/gateway.properties     |  no
 
 See changes for file(s)? [all/..1,2..] 1,3
-</code>
+```
