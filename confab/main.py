@@ -104,14 +104,14 @@ def resolve_model(parser, options):
     options.roles = options.roles.split(",") if options.roles else []
 
     if options.hosts and options.roles:
-        # Explicitly defines hosts and roles must match
+        # Explicitly defined hosts and roles must match
         if common_roles(options.hosts) != set(options.roles):
             parser.error("Specified hosts do not match specified roles")
     elif options.hosts and not options.roles:
         # Use the common roles across all explicitly defined hosts
         options.roles = list(common_roles(options.hosts))
         if not options.roles:
-            parser.error("Could not identify any roles that are shareed by all specified hosts")
+            parser.error("Could not identify any roles that are shared by all specified hosts")
     elif not options.hosts and options.roles:
         # Subselect environment hosts that have all specified roles
         options.hosts = [host for host in environment_hosts if has_roles([host], options.roles)]
