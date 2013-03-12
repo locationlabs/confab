@@ -25,7 +25,7 @@ def resolve_hosts_and_roles(environment, hosts=None, roles=None):
         elif not hosts:
             raise Exception("Environment '{}' does not have any hosts configured.".format(environment))
 
-    restricted_roles = set(roles)
+    restricted_roles = set(roles) if roles else None
 
     if restricted_roles:
         # If roles were specified, restrict mapping to those roles
