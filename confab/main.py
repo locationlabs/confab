@@ -80,9 +80,10 @@ def main():
 
         try:
             load_model_from_dir(options.directory)
-        except ImportError:
-            parser.error('Could not find {settings}'.format(settings=os.path.join(options.directory,
-                                                                                  'settings.py')))
+        except ImportError as e:
+            parser.error('Unable to load {settings}: {error}'.format(settings=os.path.join(options.directory,
+                                                                                           'settings.py'),
+                                                                     error=e))
 
         # Normalize and resolve hosts to roles mapping
         try:
