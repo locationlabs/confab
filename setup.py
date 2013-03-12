@@ -2,6 +2,8 @@
 
 from setuptools import setup, find_packages
 
+# Workaround for running "setup.py test"
+# See: http://bugs.python.org/issue15881
 try:
     import multiprocessing # flake8: NOQA
 except ImportError:
