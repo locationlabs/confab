@@ -20,20 +20,26 @@ def resolve_hosts_and_roles(environment, hosts=None, roles=None):
         if not environment:
             raise Exception("Environment was not specified")
         hosts = get_hosts_for_environment(environment)
-        if not hosts:
-            raise Exception("Unrecognized or mis-configured environment: {}; no hosts found.".format(environment))
+        if hosts is None:
+            raise Exception("Environment '{}' is not recognized.".format(environment))
+        elif not hosts:
+            raise Exception("Environment '{}' does not have any hosts configured.".format(environment))
 
-    if roles:
+    restricted_roles = set(roles)
+
+    if restricted_roles:
         # If roles were specified, restrict mapping to those roles
-        restricted_roles = set(roles)
         mapping = dict([(host, set(get_roles_for_host(host)) & restricted_roles) for host in hosts])
     else:
         # Otherwise, use all roles
         mapping = dict([(host, set(get_roles_for_host(host))) for host in hosts])
 
     # Validate that all hosts have at least one role
-    for host, roles in mapping.iteritems():
-        if not roles:
-            raise Exception("No roles applicable for host: {}".format(host))
+    for host, applicable_roles in mapping.iteritems():
+        if not applicable_roles:
+            if restricted_roles:
+                raise Exception("Host '{}' does not have any of the specified roles".format(host))
+            else:
+                raise Exception("Host '{}' does not have any configured roles".format(host))
 
     return mapping

@@ -90,12 +90,14 @@ def main():
                                                      options.hosts.split(",") if options.hosts else [],
                                                      options.roles.split(",") if options.roles else [])
         except Exception as e:
-            parser.error(str(e))
+            parser.error(e)
 
         # Determine task
-        task_name = arguments[0]
         try:
+            task_name = arguments[0]
             (task, needs_templates, needs_remotes) = _tasks[task_name]
+        except IndexError:
+            parser.error("Please specify a task")
         except KeyError:
             parser.error('Specified task must be one of: {tasks}'.format(tasks=', '.join(_tasks.keys())))
 
