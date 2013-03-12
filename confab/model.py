@@ -51,33 +51,3 @@ def get_hosts_for_environment(environment):
         return []
 
     return env.environmentdefs.get(environment, [])
-
-
-def has_same_roles(hosts):
-    """
-    Determine whether all provided hosts have the same roles.
-
-    Returns the intersection of roles for all provided hosts.
-    """
-    if not hosts:
-        return set()
-
-    def to_role_set(host):
-        return set(get_roles_for_host(host))
-
-    return reduce(lambda a, b: a if a == b else set(), map(to_role_set, hosts))
-
-
-def has_roles(hosts, roles):
-    """
-    Determine whether all provided hosts have the provided roles.
-    """
-    if not hosts:
-        return False
-
-    for host in hosts:
-        roles_for_host = get_roles_for_host(host)
-        if not set(roles_for_host).issuperset(roles):
-            return False
-
-    return True

@@ -2,7 +2,7 @@
 Test model functions.
 """
 
-from confab.model import get_roles_for_host, get_hosts_for_environment, has_same_roles, has_roles
+from confab.model import get_roles_for_host, get_hosts_for_environment
 
 from fabric.api import settings
 from unittest import TestCase
@@ -39,27 +39,3 @@ class TestModel(TestCase):
             self.assertFalse('baz' in get_hosts_for_environment('bar'))
             self.assertFalse('foo' in get_hosts_for_environment('baz'))
             self.assertFalse('bar' in get_hosts_for_environment('baz'))
-
-    def test_has_same_roles(self):
-        """
-        Test role set intersection.
-        """
-
-        with settings(roledefs={'foo': ['bar', 'baz', 'foo'],
-                                'bar': ['baz', 'foo']}):
-            self.assertTrue(has_same_roles(['baz', 'foo']))
-            self.assertFalse(has_same_roles(['bar', 'foo']))
-            self.assertFalse(has_same_roles(['bar', 'baz']))
-
-    def test_has_roles(self):
-        """
-        Test role superset check.
-        """
-
-        with settings(roledefs={'foo': ['bar', 'baz', 'foo'],
-                                'bar': ['baz', 'foo']}):
-            self.assertTrue(has_roles(['baz', 'foo'], ['foo', 'bar']))
-            self.assertTrue(has_roles(['baz', 'foo'], ['foo']))
-            self.assertFalse(has_roles(['baz', 'foo'], ['baz']))
-            self.assertTrue(has_roles(['baz', 'bar'], ['foo']))
-            self.assertFalse(has_roles(['baz', 'bar'], ['bar']))
