@@ -23,8 +23,8 @@ from confab.api import pull, push, diff, generate
 from confab.options import Options
 from confab.model import (load_model_from_dir,
                           get_hosts_for_environment,
-                          has_roles,
-                          has_same_roles)
+                          get_roles_for_host,
+                          has_roles)
 
 _tasks = {'diff':     (diff,     True,  True),
           'generate': (generate, True,  False),
@@ -72,6 +72,16 @@ def parse_options():
     return parser, opts, args
 
 
+def common_roles(hosts):
+    """
+    Determine the intersection of roles for all hosts.
+    """
+    roles = set(get_roles_for_host(hosts[0]))
+    for host in hosts[1:]:
+        roles = roles & set(get_roles_for_host(host))
+    return roles
+
+
 def resolve_model(parser, options):
     """
     Ensure that a valid environment, host, and model have been defined.
@@ -84,43 +94,36 @@ def resolve_model(parser, options):
     """
     environment_hosts = get_hosts_for_environment(options.environment)
 
-    # Validate hosts
-    if not options.hosts:
-        # Try using all hosts for the environment
+    # We must have an environmnt
+    if not environment_hosts:
+        parser.error("Unrecognized or missing environment definition: {environment}".
+                     format(environment=options.environment))
 
-        if not environment_hosts:
-            parser.error('Unrecognized or missing environment definition: {environment}'.
-                         format(environment=options.environment))
+    # Normalize
+    options.hosts = options.hosts.split(",") if options.hosts else []
+    options.roles = options.roles.split(",") if options.roles else []
 
-        elif not has_same_roles(environment_hosts):
-            # Cannot use all hosts for the enviroment; roles don't match
-            parser.error('All hosts for environment do not have the same role; ' +
-                         'please specify a host list.')
-
+    if options.hosts and options.roles:
+        # Explicitly defines hosts and roles must match
+        if common_roles(options.hosts) != set(options.roles):
+            parser.error("Specified hosts do not match specified roles")
+    elif options.hosts and not options.roles:
+        # Use the common roles across all explicitly defined hosts
+        options.roles = list(common_roles(options.hosts))
+        if not options.roles:
+            parser.error("Could not identify any roles that are shareed by all specified hosts")
+    elif not options.hosts and options.roles:
+        # Subselect environment hosts that have all specified roles
+        options.hosts = [host for host in environment_hosts if has_roles([host], options.roles)]
+        # We must have some hosts
+        if not options.hosts:
+            parser.error("Could not identify any hosts that share all specified roles")
+    else:
+        # Use the common roles across all enviroment hosts
         options.hosts = environment_hosts
-    else:
-        options.hosts = options.hosts.split(',')
-
-        # Ensure that all specified hosts are part of this environment
-        if not set(options.hosts).issubset(environment_hosts):
-            parser.error('All hosts are not part of environment: {environment}'.
-                         format(environment=options.environment))
-
-    # Validate roles
-    if not options.roles:
-        # Try using all roles for hosts
-
-        hosts_roles = has_same_roles(options.hosts)
-        if not hosts_roles:
-            parser.error('All hosts do not have the same role; please specify a role list.')
-
-        options.roles = hosts_roles
-    else:
-        options.roles = options.roles.split(',')
-
-        if not has_roles(options.hosts, options.roles):
-            # Ensure that specified roles are valid
-            parser.error('All hosts do not have all specified roles; please specify different roles.')
+        options.roles = list(common_roles(options.hosts))
+        if not options.roles:
+            parser.error("Could not identify any roles that are shared by all environment hosts")
 
 
 def main():

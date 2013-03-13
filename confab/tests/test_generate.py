@@ -1,14 +1,14 @@
 """
 Tests for template generation.
 """
+from unittest import TestCase
+from fabric.api import hide, settings
+from jinja2 import UndefinedError
+
 from confab.conffiles import ConfFiles
 from confab.loaders import load_environment_from_package
 from confab.options import Options
 from confab.tests.utils import TempDir
-from fabric.api import hide, settings
-
-from jinja2 import UndefinedError
-from unittest import TestCase
 
 
 class TestGenerate(TestCase):
