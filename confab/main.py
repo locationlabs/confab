@@ -12,19 +12,17 @@ tasks:
 
 For more complex invocation, a custom fabfile may be more appropriate.
 """
-from fabric.api import hide, settings
-from fabric.network import disconnect_all
-from optparse import OptionParser
 import getpass
 import os
 import sys
+from optparse import OptionParser
+from fabric.api import hide, settings
+from fabric.network import disconnect_all
 
 from confab.api import pull, push, diff, generate
 from confab.options import Options
-from confab.model import (load_model_from_dir,
-                          get_hosts_for_environment,
-                          get_roles_for_host,
-                          has_roles)
+from confab.resolve import resolve_hosts_and_roles
+from confab.model import load_model_from_dir
 
 _tasks = {'diff':     (diff,     True,  True),
           'generate': (generate, True,  False),
@@ -72,60 +70,6 @@ def parse_options():
     return parser, opts, args
 
 
-def common_roles(hosts):
-    """
-    Determine the intersection of roles for all hosts.
-    """
-    roles = set(get_roles_for_host(hosts[0]))
-    for host in hosts[1:]:
-        roles = roles & set(get_roles_for_host(host))
-    return roles
-
-
-def resolve_model(parser, options):
-    """
-    Ensure that a valid environment, host, and model have been defined.
-
-    If no hosts are defined, attempt to derive these from the current environment.
-    If hosts are defined, validate that these are members of the current environment.
-
-    If no roles are defined, attempt to derive these from the current hosts.
-    If roles are defined, validate that hosts have these roles.
-    """
-    environment_hosts = get_hosts_for_environment(options.environment)
-
-    # We must have an environmnt
-    if not environment_hosts:
-        parser.error("Unrecognized or missing environment definition: {environment}".
-                     format(environment=options.environment))
-
-    # Normalize
-    options.hosts = options.hosts.split(",") if options.hosts else []
-    options.roles = options.roles.split(",") if options.roles else []
-
-    if options.hosts and options.roles:
-        # Explicitly defines hosts and roles must match
-        if common_roles(options.hosts) != set(options.roles):
-            parser.error("Specified hosts do not match specified roles")
-    elif options.hosts and not options.roles:
-        # Use the common roles across all explicitly defined hosts
-        options.roles = list(common_roles(options.hosts))
-        if not options.roles:
-            parser.error("Could not identify any roles that are shareed by all specified hosts")
-    elif not options.hosts and options.roles:
-        # Subselect environment hosts that have all specified roles
-        options.hosts = [host for host in environment_hosts if has_roles([host], options.roles)]
-        # We must have some hosts
-        if not options.hosts:
-            parser.error("Could not identify any hosts that share all specified roles")
-    else:
-        # Use the common roles across all enviroment hosts
-        options.hosts = environment_hosts
-        options.roles = list(common_roles(options.hosts))
-        if not options.roles:
-            parser.error("Could not identify any roles that are shared by all environment hosts")
-
-
 def main():
     """
     Main command line entry point.
@@ -136,18 +80,25 @@ def main():
 
         try:
             load_model_from_dir(options.directory)
-        except ImportError:
-            parser.error('Could not find {settings}'.format(settings=os.path.join(options.directory,
-                                                                                  'settings.py')))
+        except ImportError as e:
+            parser.error('Unable to load {settings}: {error}'.format(settings=os.path.join(options.directory,
+                                                                                           'settings.py'),
+                                                                     error=e))
 
-        resolve_model(parser, options)
-
-        if not arguments or len(arguments) != 1:
-            parser.error('Exactly one task must be specified')
-
-        task_name = arguments[0]
+        # Normalize and resolve hosts to roles mapping
         try:
+            hosts_to_roles = resolve_hosts_and_roles(options.environment,
+                                                     options.hosts.split(",") if options.hosts else [],
+                                                     options.roles.split(",") if options.roles else [])
+        except Exception as e:
+            parser.error(e)
+
+        # Determine task
+        try:
+            task_name = arguments[0]
             (task, needs_templates, needs_remotes) = _tasks[task_name]
+        except IndexError:
+            parser.error("Please specify a task")
         except KeyError:
             parser.error('Specified task must be one of: {tasks}'.format(tasks=', '.join(_tasks.keys())))
 
@@ -160,8 +111,8 @@ def main():
             kwargs['remotes_dir'] = os.path.join(options.directory, 'remotes')
 
         # Invoke task once per host/role
-        for host in options.hosts:
-            for role in options.roles:
+        for host, roles in hosts_to_roles.iteritems():
+            for role in roles:
 
                 # Scope templates dir by role
                 kwargs['templates_dir'] = os.path.join(options.directory, 'templates', role)
