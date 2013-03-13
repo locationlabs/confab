@@ -30,6 +30,10 @@ class TestModel(TestCase):
         Test dictionary lookup within environmentdefs.
         """
 
+        # no environmentdefs
+        with self.assertRaises(Exception):
+            get_hosts_for_environment('foo')
+
         with settings(environmentdefs={'foo': ['bar', 'baz'],
                                        'bar': ['foo']}):
 
@@ -37,4 +41,7 @@ class TestModel(TestCase):
             self.assertTrue('baz' in get_hosts_for_environment('foo'))
             self.assertTrue('foo' in get_hosts_for_environment('bar'))
             self.assertFalse('baz' in get_hosts_for_environment('bar'))
-            self.assertEquals(None, get_hosts_for_environment('baz'))
+
+            # no environmentdef
+            with self.assertRaises(Exception):
+                get_hosts_for_environment('baz')

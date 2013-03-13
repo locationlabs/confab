@@ -48,6 +48,9 @@ def get_hosts_for_environment(environment):
     try:
         env.environmentdefs
     except AttributeError:
-        return []
+        raise Exception("No environments are defined")
 
-    return env.environmentdefs.get(environment, None)
+    try:
+        return env.environmentdefs[environment]
+    except KeyError:
+        raise Exception("Environment '{}' is not defined".format(environment))
