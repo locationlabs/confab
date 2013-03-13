@@ -5,28 +5,37 @@ If a user specifies only an environment, confab should target all hosts
 and roles in that environment. If one or more roles -- or one or more hosts --
 are specified explicilty, confab should target a subset.
 """
+from warnings import warn
 from confab.model import get_roles_for_host, get_hosts_for_environment
 
 
 def resolve_hosts_and_roles(environment, hosts=None, roles=None):
     """
     Given an environment, (possibly empty) list of hosts, and a (possibly empty)
-    list of hosts, return a mapping from host to roles to target.
+    list of roles, return a mapping from host to roles to target.
 
     Raises an exception if any targeted host would have no roles after resolution.
     """
+    if not environment:
+        raise Exception("Environment was not specified")
+
+    # Determine hosts in environment
+    environment_hosts = get_hosts_for_environment(environment)
+    if environment_hosts is None:
+        raise Exception("Environment '{}' is not recognized.".format(environment))
+    elif not environment_hosts:
+        warn("Environment '{}' does not have any hosts configured.".format(environment))
+
     # Either use configured hosts or all hosts in environment
-    if not hosts:
-        if not environment:
-            raise Exception("Environment was not specified")
-        hosts = get_hosts_for_environment(environment)
-        if hosts is None:
-            raise Exception("Environment '{}' is not recognized.".format(environment))
-        elif not hosts:
-            raise Exception("Environment '{}' does not have any hosts configured.".format(environment))
+    hosts = hosts or environment_hosts
+
+    # Forbid any hosts not in environment
+    for host in hosts:
+        if host not in environment_hosts:
+            raise Exception("Host '{host}' is not a member of the environment '{env}'".format(host=host,
+                                                                                              env=environment))
 
     restricted_roles = set(roles) if roles else None
-
     if restricted_roles:
         # If roles were specified, restrict mapping to those roles
         mapping = dict([(host, set(get_roles_for_host(host)) & restricted_roles) for host in hosts])

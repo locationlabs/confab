@@ -50,4 +50,4 @@ def get_hosts_for_environment(environment):
     except AttributeError:
         return []
 
-    return env.environmentdefs.get(environment, [])
+    return env.environmentdefs.get(environment, None)

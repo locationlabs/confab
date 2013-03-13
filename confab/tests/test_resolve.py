@@ -2,6 +2,7 @@
 Tests for host and role resolution.
 """
 from unittest import TestCase
+from warnings import catch_warnings
 from fabric.api import env
 from nose.tools import eq_
 from confab.resolve import resolve_hosts_and_roles
@@ -33,10 +34,12 @@ class TestResolve(TestCase):
 
     def test_only_empty_environment(self):
         """
-        Specifying only an empty environment raises an exception.
+        Specifying an empty environment generates a warning.
         """
-        with self.assertRaises(Exception):
-            resolve_hosts_and_roles("test3")
+        with catch_warnings(record=True) as caught_warnings:
+            eq_({},
+                resolve_hosts_and_roles("test3"))
+            eq_(1, len(caught_warnings))
 
     def test_only_unknown_environment(self):
         """
@@ -44,6 +47,10 @@ class TestResolve(TestCase):
         """
         with self.assertRaises(Exception):
             resolve_hosts_and_roles("test4")
+        with self.assertRaises(Exception):
+            resolve_hosts_and_roles("test4", [], ["role1"])
+        with self.assertRaises(Exception):
+            resolve_hosts_and_roles("test4", ["host1"], ["role1"])
 
     def test_host_without_roles(self):
         """
@@ -61,9 +68,10 @@ class TestResolve(TestCase):
 
     def test_host_without_roles_in_wrong_environment(self):
         """
-        Explicit hosts don't have to be in the specified environment.
+        Explicit hosts have to be in the specified environment.
         """
-        eq_({"host1": set(["role1"])}, resolve_hosts_and_roles("test2", ["host1"]))
+        with self.assertRaises(Exception):
+            resolve_hosts_and_roles("test2", ["host1"])
 
     def test_hosts_without_roles(self):
         """
@@ -102,12 +110,12 @@ class TestResolve(TestCase):
         with self.assertRaises(Exception):
             resolve_hosts_and_roles("test1", [], ["role4"])
 
-    def test_unknown_environment_with_role_without_hosts(self):
+    def test_host_with_role_not_in_environment(self):
         """
-        Explicit role returns all hosts in environment with that role.
+        Explicit host with a role not in the specified environment raises error.
         """
         with self.assertRaises(Exception):
-            resolve_hosts_and_roles("test4", [], ["role1"])
+            resolve_hosts_and_roles("test2", ["host1"], ["role1"])
 
     def test_host_with_role(self):
         """
@@ -115,15 +123,14 @@ class TestResolve(TestCase):
         """
         eq_({"host1": set(["role1"])},
             resolve_hosts_and_roles("test1", ["host1"], ["role1"]))
+
+    def test_host_not_in_environment(self):
+        """
+        Explicit host not in specified environemnt raises error.
+        """
         # Doesn't matter if host is in environment
-        eq_({"host1": set(["role1"])},
-            resolve_hosts_and_roles("test2", ["host1"], ["role1"]))
-        # Or if environment is empty
-        eq_({"host1": set(["role1"])},
-            resolve_hosts_and_roles("test3", ["host1"], ["role1"]))
-        # Or if environment exists
-        eq_({"host1": set(["role1"])},
-            resolve_hosts_and_roles("test4", ["host1"], ["role1"]))
+        with self.assertRaises(Exception):
+            resolve_hosts_and_roles("test2", ["host1"], ["role1"])
 
     def test_hosts_with_role(self):
         """

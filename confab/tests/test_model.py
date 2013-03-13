@@ -37,5 +37,4 @@ class TestModel(TestCase):
             self.assertTrue('baz' in get_hosts_for_environment('foo'))
             self.assertTrue('foo' in get_hosts_for_environment('bar'))
             self.assertFalse('baz' in get_hosts_for_environment('bar'))
-            self.assertFalse('foo' in get_hosts_for_environment('baz'))
-            self.assertFalse('bar' in get_hosts_for_environment('baz'))
+            self.assertEquals(None, get_hosts_for_environment('baz'))
