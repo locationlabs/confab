@@ -18,7 +18,8 @@ def _should_render(mime_type):
     Some files may need to be excluded from template rendering;
     such files will be copied verbatim.
     """
-    return next(match(pattern, mime_type) for pattern in ['text/', 'application/xml']) is not None
+    return next((True for pattern in ['text/', 'application/xml'] if match(pattern, mime_type)),
+                False)
 
 
 def _is_empty(mime_type):
