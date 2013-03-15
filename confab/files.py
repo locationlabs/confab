@@ -58,8 +58,6 @@ def _import(module_name, dir_name):
 def _import_string(module_name, content):
     """
     Load python module from an in-memory string without reloading.
-
-    Raises ImportError if not found.
     """
 
     # assign module a name that's not likely to conflict

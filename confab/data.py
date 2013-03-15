@@ -50,11 +50,11 @@ def import_configuration(module_name, data_dir):
     try:
         env = Environment(loader=FileSystemLoader(data_dir))
         rendered_module = env.get_template(module_name + '.py').render({})
-
-        module = _import_string(module_name, rendered_module)
-        return as_dict(module)
-    except (ImportError, TemplateNotFound):
+    except TemplateNotFound:
         return None
+
+    module = _import_string(module_name, rendered_module)
+    return as_dict(module)
 
 
 def load_data_from_dir(data_dir):
