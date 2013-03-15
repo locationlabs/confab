@@ -4,9 +4,11 @@ Tests for template generation.
 from unittest import TestCase
 from fabric.api import hide, settings
 from jinja2 import UndefinedError
+from os.path import join, dirname
+import filecmp
 
 from confab.conffiles import ConfFiles
-from confab.loaders import load_environment_from_package
+from confab.loaders import load_environment_from_package, load_environment_from_dir
 from confab.options import Options
 from confab.tests.utils import TempDir
 
@@ -77,3 +79,18 @@ class TestGenerate(TestCase):
                     # templates not rendered (though paths are)
                     self.assertEquals('{{foo}}', tmp_dir.read('localhost/foo.txt'))
                     self.assertEquals('{{bar}}', tmp_dir.read('localhost/bar/bar.txt'))
+
+    def test_binary_template(self):
+        """
+        Confab copies binary config files verbatim to generated folder.
+        """
+        templates_dir = join(dirname(__file__), 'binary_templates')
+        conffiles = ConfFiles(load_environment_from_dir(templates_dir), {})
+
+        with settings(hide('user'),
+                      host_string='localhost'):
+            with TempDir() as tmp_dir:
+                conffiles.generate(tmp_dir.path)
+
+                self.assertTrue(filecmp.cmp(join(tmp_dir.path, 'localhost/test.png'),
+                                            join(templates_dir, 'test.png')))
