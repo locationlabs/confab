@@ -6,6 +6,7 @@ from confab.files import _import_string
 from confab.merge import merge
 from confab.options import options
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+from fabric.api import env as fabric_env
 
 
 def _get_environment_module():
@@ -61,8 +62,11 @@ def load_data_from_dir(data_dir):
     Load and merge configuration data.
 
     Configuration data is loaded from python files by type,
-    where type is defined to include defaults, per-environment values,
-    per-role values and per-host values.
+    where type is defined to include defaults, per-role values,
+    per-environment values and per-host values.
+
+    Configuration data also includes the current environment
+    and host string values under a 'confab' key.
     """
 
     is_not_none = lambda x: x is not None
@@ -77,4 +81,6 @@ def load_data_from_dir(data_dir):
 
     module_dicts = filter(is_not_none, map(load_module, module_names))
 
-    return merge(*module_dicts)
+    confab_data = dict(confab=dict(environment=fabric_env.environment, host=fabric_env.host_string))
+
+    return merge(confab_data, *module_dicts)
