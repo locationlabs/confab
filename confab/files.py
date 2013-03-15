@@ -36,7 +36,7 @@ def _ensure_dir(dir_name):
 
 def _import(module_name, dir_name):
     """
-    Load python module without reloading.
+    Load python module from file system without reloading.
 
     Raises ImportError if not found.
     """
@@ -52,4 +52,25 @@ def _import(module_name, dir_name):
     # try to load module
     module_info = imp.find_module(module_name, [dir_name])
     module = imp.load_module(safe_name, *module_info)
+    return module
+
+
+def _import_string(module_name, content):
+    """
+    Load python module from an in-memory string without reloading.
+
+    Raises ImportError if not found.
+    """
+
+    # assign module a name that's not likely to conflict
+    safe_name = 'confab.data.' + module_name
+
+    # check if module is already loaded
+    existing = sys.modules.get(safe_name)
+    if existing:
+        return existing
+
+    # try to load module
+    module = imp.new_module(safe_name)
+    exec content in module.__dict__
     return module

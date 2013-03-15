@@ -18,7 +18,7 @@ def _should_render(mime_type):
     Some files may need to be excluded from template rendering;
     such files will be copied verbatim.
     """
-    return mime_type.split('/')[0] == 'text'
+    return mime_type.split('/')[0] == 'text' or mime_type == 'application/xml'
 
 
 def _is_empty(mime_type):
@@ -51,7 +51,7 @@ def _get_hostname():
     """
     Return the current target hostname.
     """
-    return getfqdn(env.host_string)
+    return env.host_string
 
 
 def _get_rolename():
