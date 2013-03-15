@@ -1,0 +1,2 @@
+include confab/tests/data_templates/*
+include confab/tests/binary_templates/*
