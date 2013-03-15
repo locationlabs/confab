@@ -7,7 +7,7 @@ from fabric.utils import _AttributeDict
 
 from difflib import unified_diff
 from magic import Magic
-from socket import getfqdn
+from re import match
 
 
 def _should_render(mime_type):
@@ -18,7 +18,7 @@ def _should_render(mime_type):
     Some files may need to be excluded from template rendering;
     such files will be copied verbatim.
     """
-    return mime_type.split('/')[0] == 'text' or mime_type == 'application/xml'
+    return next(match(pattern, mime_type) for pattern in ['text/', 'application/xml']) is not None
 
 
 def _is_empty(mime_type):

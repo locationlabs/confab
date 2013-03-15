@@ -31,7 +31,7 @@ class ConfabFileSystemLoader(FileSystemLoader):
     """Adds support for binary templates when loading an environment from the file system.
 
     Binary config files cannot be loaded as Jinja templates by default, but since confab's
-    model is built around Jinja environemnts we need to make sure we can still represent
+    model is built around Jinja environments we need to make sure we can still represent
     them as jinja Templates.
 
     Since confab only renders templates from text config files (see

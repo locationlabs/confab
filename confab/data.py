@@ -2,7 +2,7 @@
 Functions for loading configuration data.
 """
 
-from confab.files import _import_string
+from confab.files import _import, _import_string
 from confab.merge import merge
 from confab.options import options
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
@@ -48,12 +48,17 @@ def import_configuration(module_name, data_dir):
             return None
 
     try:
-        env = Environment(loader=FileSystemLoader(data_dir))
-        rendered_module = env.get_template(module_name + '.py').render({})
-    except TemplateNotFound:
-        return None
+        module = _import(module_name, data_dir)
+    except ImportError:
+        # try to load as a template
+        try:
+            env = Environment(loader=FileSystemLoader(data_dir))
+            rendered_module = env.get_template(module_name + '.py_tmpl').render({})
+        except TemplateNotFound:
+            return None
 
-    module = _import_string(module_name, rendered_module)
+        module = _import_string(module_name, rendered_module)
+
     return as_dict(module)
 
 
