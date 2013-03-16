@@ -1,33 +1,26 @@
 """
 Functions for interacting with the defined hosts, environments, and roles.
 """
-from confab.files import _import
-
 from fabric.api import env
 
+from confab.files import _import
 
-def load_model_from_dir(dir_name):
+
+def _keys():
     """
-    Load model data (environments, roles, hosts) from settings.py.
+    Get the model's environment keys.
+    """
+    return ["environmentdefs", "roledefs"]
+
+
+def load_model_from_dir(dir_name, module_name='settings'):
+    """
+    Load model data (environments, roles, hosts) from settings module.
     """
 
-    settings = _import('settings', dir_name)
-    try:
-        env['environmentdefs'] = getattr(settings, 'environmentdefs')
-    except AttributeError:
-        env['environmentdefs'] = {}
-
-    try:
-        env['roledefs'] = getattr(settings, 'roledefs')
-    except AttributeError:
-        env['roledefs'] = {}
-
-
-def _matching_keys(dct, value):
-    """
-    Return all keys in 'dct' whose value list contains 'value'.
-    """
-    return map(lambda (k, v): k, filter(lambda (k, v): value in v, dct.iteritems()))
+    settings = _import(module_name, dir_name)
+    for key in _keys():
+        env[key] = getattr(settings, key, {})
 
 
 def get_roles_for_host(host):
@@ -36,7 +29,7 @@ def get_roles_for_host(host):
 
     Delegates to Fabric's env roledefs.
     """
-    return _matching_keys(env.roledefs, host)
+    return [role for (role, hosts) in env.roledefs.iteritems() if host in hosts]
 
 
 def get_hosts_for_environment(environment):
