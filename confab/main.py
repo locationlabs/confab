@@ -16,6 +16,7 @@ import getpass
 import os
 import sys
 from optparse import OptionParser
+from warnings import simplefilter
 from fabric.api import hide, settings
 from fabric.network import disconnect_all
 
@@ -53,6 +54,11 @@ def parse_options():
                       default="",
                       help='comma-separated list of hosts to operate on')
 
+    parser.add_option('-q', '--quiet', dest='quiet',
+                      action="store_true",
+                      default=False,
+                      help='enable quiet mode; suppress warnings')
+
     parser.add_option('-R', '--roles', dest='roles',
                       default="",
                       help='comma-separated list of roles to operate on')
@@ -77,6 +83,9 @@ def main():
     try:
         # Parse and validate arguments
         parser, options, arguments = parse_options()
+
+        if options.quiet:
+            simplefilter("ignore")
 
         try:
             load_model_from_dir(options.directory)
