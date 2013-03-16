@@ -69,7 +69,11 @@ class Append(list):
         super(Append, self).__init__(args)
 
     def __call__(self, default):
-        return default + self
+        return (default or []) + self
+
+
+def append(*args):
+    return Append(*args)
 
 
 class Prepend(list):
@@ -81,12 +85,25 @@ class Prepend(list):
         super(Prepend, self).__init__(args)
 
     def __call__(self, default):
-        return self + default
-
-
-def append(*args):
-    return Append(*args)
+        return self + (default or [])
 
 
 def prepend(*args):
     return Prepend(*args)
+
+
+class UniqueUnion(list):
+    """
+    Customized callable list that adds its values to the default list
+    preserving unique values.
+    """
+
+    def __init__(self, *args):
+        super(UniqueUnion, self).__init__(args)
+
+    def __call__(self, default):
+        return list(set(default or []) | set(*self))
+
+
+def unique_union(*args):
+    return UniqueUnion(*args)
