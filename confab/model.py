@@ -1,6 +1,8 @@
 """
 Functions for interacting with the defined hosts, environments, and roles.
 """
+from functools import partial
+from operator import add
 from fabric.api import env
 
 from confab.files import _import
@@ -23,13 +25,25 @@ def load_model_from_dir(dir_name, module_name='settings'):
         env[key] = getattr(settings, key, {})
 
 
+def _uniq(value, values):
+    """
+    Return whether a value is unique relative to the input values set.
+
+    Designed for use in a filter() operation.
+    """
+    found = value in values
+    values.add(value)
+    return not found
+
+
 def get_roles_for_host(host):
     """
     Get all roles that a host belongs to.
 
     Delegates to Fabric's env roledefs.
     """
-    return [role for (role, hosts) in env.roledefs.iteritems() if host in hosts]
+    roles = [role for (role, hosts) in env.roledefs.iteritems() if host in hosts]
+    return filter(partial(_uniq, values=set()), roles)
 
 
 def get_hosts_for_environment(environment):
