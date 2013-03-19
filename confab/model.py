@@ -2,7 +2,6 @@
 Functions for interacting with the defined hosts, environments, and roles.
 """
 from functools import partial
-from operator import add
 from fabric.api import env
 
 from confab.files import _import
@@ -53,11 +52,8 @@ def get_hosts_for_environment(environment):
     Assumes an environmentsdef structure in Fabric's env.
     """
     try:
-        env.environmentdefs
+        return env.environmentdefs[environment]
     except AttributeError:
         raise Exception("No environments are defined")
-
-    try:
-        return env.environmentdefs[environment]
     except KeyError:
         raise Exception("Environment '{}' is not defined".format(environment))
