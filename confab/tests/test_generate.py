@@ -6,7 +6,7 @@ from fabric.api import hide, settings
 from jinja2 import UndefinedError
 
 from confab.conffiles import ConfFiles
-from confab.loaders import load_environment_from_package
+from confab.loaders import PackageEnvironmentLoader
 from confab.options import Options
 from confab.tests.utils import TempDir
 
@@ -17,11 +17,12 @@ class TestGenerate(TestCase):
         """
         Generated templates have the correct values.
         """
-        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
-                              {'bar': 'bar', 'foo': 'foo'})
-
         with settings(hide('user'),
-                      host_string='localhost'):
+                      host_string='localhost',
+                      role='role'):
+            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+                                  lambda _: {'bar': 'bar', 'foo': 'foo'})
+
             with TempDir() as tmp_dir:
                 conffiles.generate(tmp_dir.path)
 
@@ -35,10 +36,11 @@ class TestGenerate(TestCase):
         """
         Generated templates with unicode data.
         """
-        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
-                              {'bar': 'bar', 'foo': u'\xc5\xae'})
         with settings(hide('user'),
-                      host_string='localhost'):
+                      host_string='localhost',
+                      role='role'):
+            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+                                  lambda _: {'bar': 'bar', 'foo': u'\xc5\xae'})
             with TempDir() as tmp_dir:
                 conffiles.generate(tmp_dir.path)
 
@@ -52,11 +54,12 @@ class TestGenerate(TestCase):
         """
         An exception is raised if a template value is undefined.
         """
-        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
-                              {'bar': 'bar'})
-
         with settings(hide('user'),
-                      host_string='localhost'):
+                      host_string='localhost',
+                      role='role'):
+            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+                                  lambda _: {'bar': 'bar'})
+
             with TempDir() as tmp_dir:
                 with self.assertRaises(UndefinedError):
                     conffiles.generate(tmp_dir.path)
@@ -65,12 +68,13 @@ class TestGenerate(TestCase):
         """
         Passing a mime_type_func controls whether templates are rendered.
         """
-        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
-                              {'bar': 'bar', 'foo': 'foo'})
-
         with Options(should_render=lambda mime_type: False):
             with settings(hide('user'),
-                          host_string='localhost'):
+                          host_string='localhost',
+                          role='role'):
+                conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+                                      lambda _: {'bar': 'bar', 'foo': 'foo'})
+
                 with TempDir() as tmp_dir:
                     conffiles.generate(tmp_dir.path)
 

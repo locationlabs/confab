@@ -7,7 +7,6 @@ from fabric.utils import _AttributeDict
 
 from difflib import unified_diff
 from magic import Magic
-from socket import getfqdn
 
 
 def _should_render(mime_type):
@@ -51,7 +50,7 @@ def _get_hostname():
     """
     Return the current target hostname.
     """
-    return getfqdn(env.host_string)
+    return env.host_string
 
 
 def _get_rolename():

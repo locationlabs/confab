@@ -119,12 +119,11 @@ def main():
         if needs_remotes:
             kwargs['remotes_dir'] = os.path.join(options.directory, 'remotes')
 
+        kwargs['templates_dir'] = os.path.join(options.directory, 'templates')
+
         # Invoke task once per host/role
         for host, roles in hosts_to_roles.iteritems():
             for role in roles:
-
-                # Scope templates dir by role
-                kwargs['templates_dir'] = os.path.join(options.directory, 'templates', role)
 
                 print "Running {task} on '{host}' for '{env}' and '{role}'".format(task=task_name,
                                                                                    host=host,

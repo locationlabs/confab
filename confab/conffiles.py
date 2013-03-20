@@ -4,6 +4,7 @@ Configuration file template object model.
 
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.options import options
+from confab.model import get_components_for_role
 
 from fabric.api import get, put, puts, run, settings, sudo
 from fabric.colors import blue, red, green, magenta
@@ -182,19 +183,26 @@ class ConfFiles(object):
     """
 
     def __init__(self,
-                 environment,
-                 data):
+                 environment_loader,
+                 data_loader):
         """
-        On init, load a list of configuration files using the provide Jinja2 Environment
-        and an optional filter function.
+        On init, load a list of configuration files using the provided environment
+        and data loaders.
 
-        The Environment must use a Loader that supports list_templates().
+        The environment loader must return a Jinja2 environment that uses a
+        loader that supports list_templates().
         """
-        self.environment = environment
-        self.data = data
+        self.conffiles = []
+        for component in get_components_for_role(options.get_rolename()):
 
-        self.conffiles = map(lambda template_name: ConfFile(environment.get_template(template_name), data),
-                             environment.list_templates(filter_func=options.filter_func))
+            data = data_loader(component)
+            environment = environment_loader(component)
+
+            conffiles = map(lambda template_name: ConfFile(environment.get_template(template_name),
+                                                           data),
+                            environment.list_templates(filter_func=options.filter_func))
+
+            self.conffiles += conffiles
 
     def generate(self, generated_dir):
         """

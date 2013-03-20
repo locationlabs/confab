@@ -2,11 +2,12 @@
 Test configuration file listing.
 """
 from confab.conffiles import ConfFiles
-from confab.loaders import load_environment_from_package
+from confab.loaders import PackageEnvironmentLoader
 from confab.options import Options
 
 from jinja2 import UndefinedError
 from unittest import TestCase
+from fabric.api import settings
 
 
 class TestListing(TestCase):
@@ -16,15 +17,16 @@ class TestListing(TestCase):
         Generating conf files finds all templates in the package
         and generates their names properly.
         """
-        conffiles = ConfFiles(load_environment_from_package('confab.tests'),
-                              {'bar': 'bar'})
+        with settings(role='role'):
+            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+                                  lambda _: {'bar': 'bar'})
 
-        self.assertEquals(2, len(conffiles.conffiles))
+            self.assertEquals(2, len(conffiles.conffiles))
 
-        names = map(lambda x: x.name, conffiles.conffiles)
+            names = map(lambda x: x.name, conffiles.conffiles)
 
-        self.assertTrue('foo.txt' in names)
-        self.assertTrue('bar/bar.txt' in names)
+            self.assertTrue('foo.txt' in names)
+            self.assertTrue('bar/bar.txt' in names)
 
     def test_undefined(self):
         """
@@ -32,7 +34,8 @@ class TestListing(TestCase):
         """
 
         with self.assertRaises(UndefinedError):
-            ConfFiles(load_environment_from_package('confab.tests'), {})
+            with settings(role='role'):
+                ConfFiles(PackageEnvironmentLoader('confab.tests'), lambda _: {})
 
     def test_filter_func(self):
         """
@@ -40,11 +43,13 @@ class TestListing(TestCase):
         """
 
         with Options(filter_func=lambda file_name: file_name != 'foo.txt'):
-            conffiles = ConfFiles(load_environment_from_package('confab.tests'),
-                                  {'bar': 'bar'})
+            with settings(role='role'):
 
-            self.assertEquals(1, len(conffiles.conffiles))
+                conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+                                      lambda _: {'bar': 'bar'})
 
-            names = map(lambda x: x.name, conffiles.conffiles)
+                self.assertEquals(1, len(conffiles.conffiles))
 
-            self.assertTrue('bar/bar.txt' in names)
+                names = map(lambda x: x.name, conffiles.conffiles)
+
+                self.assertTrue('bar/bar.txt' in names)

@@ -9,11 +9,11 @@ from confab.conffiles import ConfFiles
 from confab.model import load_model_from_dir
 
 # jinja2 environment loading
-from confab.loaders import load_environment_from_dir, \
-    load_environment_from_package
+from confab.loaders import FileSystemEnvironmentLoader, \
+    PackageEnvironmentLoader
 
 # data loading
-from confab.data import load_data_from_dir
+from confab.data import DataLoader
 
 # options
 from confab.options import assume_yes, Options
@@ -28,9 +28,9 @@ __ignore__ = [
     assume_yes,
     ConfFiles,
     load_model_from_dir,
-    load_environment_from_dir,
-    load_environment_from_package,
-    load_data_from_dir,
+    FileSystemEnvironmentLoader,
+    PackageEnvironmentLoader,
+    DataLoader,
     diff,
     generate,
     pull,

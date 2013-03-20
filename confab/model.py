@@ -57,3 +57,10 @@ def get_hosts_for_environment(environment):
         raise Exception("No environments are defined")
     except KeyError:
         raise Exception("Environment '{}' is not defined".format(environment))
+
+
+def get_components_for_role(role):
+    """
+    Get all component paths for the given role.
+    """
+    return [role]

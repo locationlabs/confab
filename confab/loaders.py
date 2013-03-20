@@ -9,19 +9,34 @@ which means it will take special effort to handle binary data.
 """
 
 from jinja2 import Environment, FileSystemLoader, PackageLoader, StrictUndefined
+from os.path import join
 
 
-def load_environment_from_dir(dir_name):
-    """
-    Load a Jinja2 Environment from a directory name.
-    """
-    return Environment(loader=FileSystemLoader(dir_name, encoding='utf-8'),
-                       undefined=StrictUndefined)
+class FileSystemEnvironmentLoader(object):
+    """Loads Jinja2 environments from directories."""
+
+    def __init__(self, dir_name):
+        self.dir_name = dir_name
+
+    def __call__(self, component):
+        """
+        Load a Jinja2 Environment for a component.
+        """
+        return Environment(loader=FileSystemLoader(join(self.dir_name, component)),
+                           undefined=StrictUndefined)
 
 
-def load_environment_from_package(package_name):
-    """
-    Load a Jinja2 Environment from a package name.
-    """
-    return Environment(loader=PackageLoader(package_name, encoding='utf-8'),
-                       undefined=StrictUndefined)
+class PackageEnvironmentLoader(object):
+    """Loads Jinja2 environments from python packages."""
+
+    def __init__(self, package_name, templates_path='templates'):
+        self.package_name = package_name
+        self.templates_path = templates_path
+
+    def __call__(self, component):
+        """
+        Load a Jinja2 Environment for a component.
+        """
+        return Environment(loader=PackageLoader(self.package_name,
+                                                package_path=join(self.templates_path, component)),
+                           undefined=StrictUndefined)
