@@ -13,13 +13,17 @@ from confab.tests.utils import TempDir
 
 class TestGenerate(TestCase):
 
+    def setUp(self):
+        self.settings = dict(roledefs={'role': ['localhost']},
+                             componentdefs={},
+                             host_string='localhost',
+                             role='role')
+
     def test_generate(self):
         """
         Generated templates have the correct values.
         """
-        with settings(hide('user'),
-                      host_string='localhost',
-                      role='role'):
+        with settings(**self.settings):
             conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
                                   lambda _: {'bar': 'bar', 'foo': 'foo'})
 
@@ -36,9 +40,7 @@ class TestGenerate(TestCase):
         """
         Generated templates with unicode data.
         """
-        with settings(hide('user'),
-                      host_string='localhost',
-                      role='role'):
+        with settings(**self.settings):
             conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
                                   lambda _: {'bar': 'bar', 'foo': u'\xc5\xae'})
             with TempDir() as tmp_dir:
@@ -54,9 +56,7 @@ class TestGenerate(TestCase):
         """
         An exception is raised if a template value is undefined.
         """
-        with settings(hide('user'),
-                      host_string='localhost',
-                      role='role'):
+        with settings(**self.settings):
             conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
                                   lambda _: {'bar': 'bar'})
 
@@ -69,9 +69,7 @@ class TestGenerate(TestCase):
         Passing a mime_type_func controls whether templates are rendered.
         """
         with Options(should_render=lambda mime_type: False):
-            with settings(hide('user'),
-                          host_string='localhost',
-                          role='role'):
+            with settings(**self.settings):
                 conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
                                       lambda _: {'bar': 'bar', 'foo': 'foo'})
 

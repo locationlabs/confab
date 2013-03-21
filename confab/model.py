@@ -1,17 +1,16 @@
 """
 Functions for interacting with the defined hosts, environments, and roles.
 """
-from functools import partial
 from fabric.api import env
-
 from confab.files import _import
+from os.path import join
 
 
 def _keys():
     """
     Get the model's environment keys.
     """
-    return ["environmentdefs", "roledefs"]
+    return ["environmentdefs", "roledefs", "componentdefs"]
 
 
 def load_model_from_dir(dir_name, module_name='settings'):
@@ -24,15 +23,13 @@ def load_model_from_dir(dir_name, module_name='settings'):
         env[key] = getattr(settings, key, {})
 
 
-def _uniq(value, values):
+def load_model_from_dict(settings):
     """
-    Return whether a value is unique relative to the input values set.
+    Load model data (environments, roles, hosts) from settings dictionary.
+    """
 
-    Designed for use in a filter() operation.
-    """
-    found = value in values
-    values.add(value)
-    return not found
+    for key in _keys():
+        env[key] = settings.get(key, {})
 
 
 def get_roles_for_host(host):
@@ -41,8 +38,7 @@ def get_roles_for_host(host):
 
     Delegates to Fabric's env roledefs.
     """
-    roles = [role for (role, hosts) in env.roledefs.iteritems() if host in hosts]
-    return filter(partial(_uniq, values=set()), roles)
+    return [role for (role, hosts) in env.roledefs.iteritems() if host in hosts]
 
 
 def get_hosts_for_environment(environment):
@@ -63,4 +59,35 @@ def get_components_for_role(role):
     """
     Get all component paths for the given role.
     """
-    return [role]
+    if role not in env.roledefs:
+        raise Exception("Role '{}' is not defined".format(role))
+
+    components = []
+    _expand_components(role, '', components, [])
+    return components
+
+
+def _expand_components(component, path, components, seen):
+    """
+    Recusively expand a list of roles based on componentdefs.
+
+    Preserves the both the role group name and the declaration order of roles
+    while eliminating duplicates.
+
+    Raises an exception if a cycle is discovered in role group definitions
+    or if a component leaf exists in multiple paths.
+
+    :param component: A component name.
+    :param path: The component path being built.
+    :param components: The resulting component paths.
+    """
+    if component in seen:
+        raise Exception("Detected cycle or multiple paths with component '{}'".format(component))
+    seen.append(component)
+
+    if component not in env.componentdefs:
+        components.append(join(path, component))
+        return
+
+    for c in env.componentdefs.get(component):
+        _expand_components(c, join(path, component), components, seen)

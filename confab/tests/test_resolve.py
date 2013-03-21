@@ -17,7 +17,7 @@ class TestResolve(TestCase):
             "test2": ["host2", "host3"],
             "test3": []
         }
-        # define hosts
+        # define roles
         env.roledefs = {
             "role1": ["host1", "host2", "host3"],
             "role2": ["host2", "host3"]

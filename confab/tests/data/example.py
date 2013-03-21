@@ -7,3 +7,7 @@ environmentdefs = {
 roledefs = {
     "role1": ["host1"],
 }
+
+componentdefs = {
+    "role1": ["component1"],
+}

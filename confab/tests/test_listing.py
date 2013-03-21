@@ -12,12 +12,18 @@ from fabric.api import settings
 
 class TestListing(TestCase):
 
+    def setUp(self):
+        self.settings = dict(roledefs={'role': ['host']},
+                             componentdefs={},
+                             role='role')
+
     def test_get_conf_files(self):
         """
         Generating conf files finds all templates in the package
         and generates their names properly.
         """
-        with settings(role='role'):
+
+        with settings(**self.settings):
             conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
                                   lambda _: {'bar': 'bar'})
 
@@ -34,7 +40,7 @@ class TestListing(TestCase):
         """
 
         with self.assertRaises(UndefinedError):
-            with settings(role='role'):
+            with settings(**self.settings):
                 ConfFiles(PackageEnvironmentLoader('confab.tests'), lambda _: {})
 
     def test_filter_func(self):
@@ -43,7 +49,7 @@ class TestListing(TestCase):
         """
 
         with Options(filter_func=lambda file_name: file_name != 'foo.txt'):
-            with settings(role='role'):
+            with settings(**self.settings):
 
                 conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
                                       lambda _: {'bar': 'bar'})
