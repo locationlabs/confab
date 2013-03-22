@@ -9,7 +9,7 @@ from jinja2 import UndefinedError
 from unittest import TestCase
 from fabric.api import settings
 from os.path import dirname
-from mock import patch
+from warnings import catch_warnings
 
 
 class TestListing(TestCase):
@@ -110,12 +110,11 @@ class TestListing(TestCase):
         Warn when a role doesn't have any configuration files.
         """
         with settings(**self.settings):
-
             with Options(filter_func=lambda _: False):
-                with patch('confab.conffiles.warn') as warn_mock:
+                with catch_warnings(record=True) as captured_warnings:
                     conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests',
                                                                    'templates/default'),
                                           lambda _: {})
 
                     self.assertEquals(0, len(conffiles.conffiles))
-                    self.assertTrue(warn_mock.called)
+                    self.assertEquals(1, len(captured_warnings))
