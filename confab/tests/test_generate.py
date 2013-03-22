@@ -79,3 +79,27 @@ class TestGenerate(TestCase):
                     # templates not rendered (though paths are)
                     self.assertEquals('{{foo}}', tmp_dir.read('localhost/foo.txt'))
                     self.assertEquals('{{bar}}', tmp_dir.read('localhost/bar/bar.txt'))
+
+    def test_components(self):
+        """
+        Generate templates for roles with components.
+        """
+        with settings(roledefs={'role1': ['host1'],
+                                'role2': ['host1']},
+                      componentdefs={'role1': ['comp1'],
+                                     'role2': ['compgroup'],
+                                     'compgroup': ['comp2', 'comp3']},
+                      host_string='host1'):
+
+            with TempDir() as tmp_dir:
+                for role in ['role1', 'role2']:
+                    with settings(role=role):
+                        conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests',
+                                                                       'templates/components'),
+                                              lambda _: {'bar': 'bar', 'foo': 'foo', 'baz': 'baz'})
+
+                        conffiles.generate(tmp_dir.path)
+
+                self.assertEquals('foo', tmp_dir.read('host1/foo.txt'))
+                self.assertEquals('bar', tmp_dir.read('host1/bar/bar.txt'))
+                self.assertEquals('baz', tmp_dir.read('host1/baz.conf'))

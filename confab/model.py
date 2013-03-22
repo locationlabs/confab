@@ -62,7 +62,7 @@ def get_components_for_role(role):
     if role not in env.roledefs:
         raise Exception("Role '{}' is not defined".format(role))
 
-    return _expand_components(role, '', [])
+    return _expand_components(role, '', {})
 
 
 def _expand_components(component, path, seen):
@@ -75,17 +75,22 @@ def _expand_components(component, path, seen):
 
     :param component: A component name.
     :param path: The component path being built.
-    :param seen: The list of visited components.
+    :param seen: Dictionary of visited components and their paths.
     """
+    component_path = join(path, component)
+
     if component in seen:
-        raise Exception("Detected cycle or multiple paths with component '{}'".format(component))
-    seen.append(component)
+        raise Exception("Detected cycle or multiple paths with role/component '{}'"
+                        " ('{}' and '{}')".format(component,
+                                                  seen[component],
+                                                  component_path))
+    seen[component] = component_path
 
     if component not in env.componentdefs:
-        return [join(path, component)]
+        return [component_path]
 
     components = []
     for c in env.componentdefs.get(component):
-        components += _expand_components(c, join(path, component), seen)
+        components += _expand_components(c, component_path, seen)
 
     return components

@@ -9,6 +9,7 @@ from jinja2 import UndefinedError
 from unittest import TestCase
 from fabric.api import settings
 from os.path import dirname
+from mock import patch
 
 
 class TestListing(TestCase):
@@ -74,8 +75,7 @@ class TestListing(TestCase):
                                      'role2': ['comp']},
                       host_string='host'):
 
-            environment_loader = PackageEnvironmentLoader('confab.tests',
-                                                          templates_path='templates/validate')
+            environment_loader = PackageEnvironmentLoader('confab.tests', 'templates/validate')
 
             # use data that will create different conffiles for the same
             # component in the two roles.
@@ -104,3 +104,18 @@ class TestListing(TestCase):
             with settings(role='role2'):
                 with self.assertRaises(Exception):
                     conffiles = ConfFiles(environment_loader, data_loader)
+
+    def test_warn_no_conffiles(self):
+        """
+        Warn when a role doesn't have any configuration files.
+        """
+        with settings(**self.settings):
+
+            with Options(filter_func=lambda _: False):
+                with patch('confab.conffiles.warn') as warn_mock:
+                    conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests',
+                                                                   'templates/default'),
+                                          lambda _: {})
+
+                    self.assertEquals(0, len(conffiles.conffiles))
+                    self.assertTrue(warn_mock.called)

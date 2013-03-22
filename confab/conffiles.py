@@ -11,6 +11,8 @@ from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists
 from fabric.contrib.console import confirm
 
+from warnings import warn
+
 import os
 import shutil
 
@@ -223,7 +225,10 @@ class ConfFiles(object):
                         self.conffiles.append(conffile)
 
         if not self.conffiles:
-            raise Exception("No conffiles found")
+            warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"
+                 .format(role=options.get_rolename(),
+                         host=options.get_hostname(),
+                         environment=options.get_environmentname()))
 
     def generate(self, generated_dir):
         """
