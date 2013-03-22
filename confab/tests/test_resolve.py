@@ -17,7 +17,7 @@ class TestResolve(TestCase):
             "test2": ["host2", "host3"],
             "test3": []
         }
-        # define hosts
+        # define roles
         env.roledefs = {
             "role1": ["host1", "host2", "host3"],
             "role2": ["host2", "host3"]
@@ -27,9 +27,9 @@ class TestResolve(TestCase):
         """
         Specifying only an environment, returns all of its hosts and roles.
         """
-        eq_({"host1": set(["role1"]),
-             "host2": set(["role1", "role2"]),
-             "host3": set(["role1", "role2"])},
+        eq_({"host1": ["role1"],
+             "host2": ["role1", "role2"],
+             "host3": ["role1", "role2"]},
             resolve_hosts_and_roles("test1"))
 
     def test_only_empty_environment(self):
@@ -56,8 +56,8 @@ class TestResolve(TestCase):
         """
         Explicit hosts return all of their roles.
         """
-        eq_({"host1": set(["role1"])}, resolve_hosts_and_roles("test1", ["host1"]))
-        eq_({"host2": set(["role1", "role2"])}, resolve_hosts_and_roles("test1", ["host2"]))
+        eq_({"host1": ["role1"]}, resolve_hosts_and_roles("test1", ["host1"]))
+        eq_({"host2": ["role1", "role2"]}, resolve_hosts_and_roles("test1", ["host2"]))
 
     def test_unknown_host_without_roles(self):
         """
@@ -77,30 +77,30 @@ class TestResolve(TestCase):
         """
         Explicit host list returns all hosts and all of their roles.
         """
-        eq_({"host1": set(["role1"]),
-             "host2": set(["role1", "role2"])},
+        eq_({"host1": ["role1"],
+             "host2": ["role1", "role2"]},
             resolve_hosts_and_roles("test1", ["host1", "host2"]))
 
     def test_role_without_hosts(self):
         """
         Explicit role returns all hosts in environment with that role.
         """
-        eq_({"host1": set(["role1"]),
-             "host2": set(["role1"]),
-             "host3": set(["role1"])},
+        eq_({"host1": ["role1"],
+             "host2": ["role1"],
+             "host3": ["role1"]},
             resolve_hosts_and_roles("test1", [], ["role1"]))
 
     def test_roles_without_hosts(self):
         """
         Explicit role list returns all hosts in environment with any of those roles.
         """
-        eq_({"host1": set(["role1"]),
-             "host2": set(["role1", "role2"]),
-             "host3": set(["role1", "role2"])},
+        eq_({"host1": ["role1"],
+             "host2": ["role1", "role2"],
+             "host3": ["role1", "role2"]},
             resolve_hosts_and_roles("test1", [], ["role1", "role2"]))
 
-        eq_({"host2": set(["role1", "role2"]),
-             "host3": set(["role1", "role2"])},
+        eq_({"host2": ["role1", "role2"],
+             "host3": ["role1", "role2"]},
             resolve_hosts_and_roles("test2", [], ["role1", "role2"]))
 
     def test_unknown_role_without_hosts(self):
@@ -121,7 +121,7 @@ class TestResolve(TestCase):
         """
         Explicit host and role mappings return host and role.
         """
-        eq_({"host1": set(["role1"])},
+        eq_({"host1": ["role1"]},
             resolve_hosts_and_roles("test1", ["host1"], ["role1"]))
 
     def test_host_not_in_environment(self):
@@ -136,23 +136,23 @@ class TestResolve(TestCase):
         """
         Explicit hosts and role mappings return role for all hosts.
         """
-        eq_({"host1": set(["role1"]),
-             "host2": set(["role1"])},
+        eq_({"host1": ["role1"],
+             "host2": ["role1"]},
             resolve_hosts_and_roles("test1", ["host1", "host2"], ["role1"]))
 
     def test_host_with_roles(self):
         """
         Explicit host and roles mappings return all roles applicable for host.
         """
-        eq_({"host1": set(["role1"])},
+        eq_({"host1": ["role1"]},
             resolve_hosts_and_roles("test1", ["host1"], ["role1", "role2"]))
-        eq_({"host2": set(["role1", "role2"])},
+        eq_({"host2": ["role1", "role2"]},
             resolve_hosts_and_roles("test1", ["host2"], ["role1", "role2"]))
 
     def test_hosts_with_roles(self):
         """
         Explicit hosts and roles mappings return all roles applicable for hosts.
         """
-        eq_({"host1": set(["role1"]),
-             "host2": set(["role1", "role2"])},
+        eq_({"host1": ["role1"],
+             "host2": ["role1", "role2"]},
             resolve_hosts_and_roles("test1", ["host1", "host2"], ["role1", "role2"]))

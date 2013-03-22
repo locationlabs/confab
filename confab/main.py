@@ -16,6 +16,7 @@ import getpass
 import os
 import sys
 from optparse import OptionParser
+from warnings import simplefilter
 from fabric.api import hide, settings
 from fabric.network import disconnect_all
 
@@ -53,6 +54,11 @@ def parse_options():
                       default="",
                       help='comma-separated list of hosts to operate on')
 
+    parser.add_option('-q', '--quiet', dest='quiet',
+                      action="store_true",
+                      default=False,
+                      help='enable quiet mode; suppress warnings')
+
     parser.add_option('-R', '--roles', dest='roles',
                       default="",
                       help='comma-separated list of roles to operate on')
@@ -78,12 +84,15 @@ def main():
         # Parse and validate arguments
         parser, options, arguments = parse_options()
 
+        if options.quiet:
+            simplefilter("ignore")
+
         try:
             load_model_from_dir(options.directory)
         except ImportError as e:
-            parser.error('Unable to load {settings}: {error}'.format(settings=os.path.join(options.directory,
-                                                                                           'settings.py'),
-                                                                     error=e))
+            parser.error('Unable to load {settings}: {error}'
+                         .format(settings=os.path.join(options.directory, 'settings.py'),
+                                 error=e))
 
         # Normalize and resolve hosts to roles mapping
         try:
@@ -100,7 +109,8 @@ def main():
         except IndexError:
             parser.error("Please specify a task")
         except KeyError:
-            parser.error('Specified task must be one of: {tasks}'.format(tasks=', '.join(_tasks.keys())))
+            parser.error('Specified task must be one of: {tasks}'
+                         .format(tasks=', '.join(_tasks.keys())))
 
         # Construct task arguments
         kwargs = {'data_dir': os.path.join(options.directory, 'data')}
@@ -110,17 +120,17 @@ def main():
         if needs_remotes:
             kwargs['remotes_dir'] = os.path.join(options.directory, 'remotes')
 
+        kwargs['templates_dir'] = os.path.join(options.directory, 'templates')
+
         # Invoke task once per host/role
         for host, roles in hosts_to_roles.iteritems():
             for role in roles:
 
-                # Scope templates dir by role
-                kwargs['templates_dir'] = os.path.join(options.directory, 'templates', role)
-
-                print "Running {task} on '{host}' for '{env}' and '{role}'".format(task=task_name,
-                                                                                   host=host,
-                                                                                   env=options.environment,
-                                                                                   role=role)
+                print "Running {task} on '{host}' for '{env}' and '{role}'"\
+                      .format(task=task_name,
+                              host=host,
+                              env=options.environment,
+                              role=role)
                 with settings(hide('user'),
                               environment=options.environment,
                               host_string=host,

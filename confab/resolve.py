@@ -16,39 +16,42 @@ def resolve_hosts_and_roles(environment, hosts=None, roles=None):
 
     Raises an exception if any targeted host would have no roles after resolution.
     """
+    # Validate environment
     if not environment:
         raise Exception("Environment was not specified")
 
-    # Determine hosts in environment
+    # Determine hosts for the environment
     environment_hosts = get_hosts_for_environment(environment)
     if environment_hosts is None:
         raise Exception("Environment '{}' is not recognized.".format(environment))
     elif not environment_hosts:
         warn("Environment '{}' does not have any hosts configured.".format(environment))
 
-    # Either use configured hosts or all hosts in environment
+    # Use all environment hosts if none are specified
     hosts = hosts or environment_hosts
 
     # Forbid any hosts not in environment
     for host in hosts:
         if host not in environment_hosts:
-            raise Exception("Host '{host}' is not a member of the environment '{env}'".format(host=host,
-                                                                                              env=environment))
+            raise Exception("Host '{host}' is not a member of the environment '{env}'"
+                            .format(host=host, env=environment))
 
-    restricted_roles = set(roles) if roles else None
-    if restricted_roles:
+    # Determine roles for hosts
+    if roles:
         # If roles were specified, restrict mapping to those roles
-        mapping = dict([(host, set(get_roles_for_host(host)) & restricted_roles) for host in hosts])
+        valid_roles = lambda role: role in roles
+        hosts_to_roles = dict([(host, filter(valid_roles, get_roles_for_host(host)))
+                               for host in hosts])
     else:
         # Otherwise, use all roles
-        mapping = dict([(host, set(get_roles_for_host(host))) for host in hosts])
+        hosts_to_roles = dict([(host, get_roles_for_host(host)) for host in hosts])
 
     # Validate that all hosts have at least one role
-    for host, applicable_roles in mapping.iteritems():
-        if not applicable_roles:
-            if restricted_roles:
+    for host, host_roles in hosts_to_roles.iteritems():
+        if not host_roles:
+            if roles:
                 raise Exception("Host '{}' does not have any of the specified roles".format(host))
             else:
                 raise Exception("Host '{}' does not have any configured roles".format(host))
 
-    return mapping
+    return hosts_to_roles
