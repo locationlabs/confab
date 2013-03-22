@@ -40,8 +40,11 @@ def resolve_hosts_and_roles(environment, hosts=None, roles=None):
     if roles:
         # If roles were specified, restrict mapping to those roles
         valid_roles = lambda role: role in roles
-        hosts_to_roles = dict([(host, filter(valid_roles, get_roles_for_host(host)))
-                               for host in hosts])
+        hosts_to_roles = {}
+        for host in hosts:
+            host_roles = filter(valid_roles, get_roles_for_host(host))
+            if host_roles:
+                hosts_to_roles[host] = host_roles
     else:
         # Otherwise, use all roles
         hosts_to_roles = dict([(host, get_roles_for_host(host)) for host in hosts])
