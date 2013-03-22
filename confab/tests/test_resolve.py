@@ -105,10 +105,9 @@ class TestResolve(TestCase):
 
     def test_unknown_role_without_hosts(self):
         """
-        Explicit role returns all hosts in environment with that role.
+        Explicit role matching no hosts returns empty mapping.
         """
-        with self.assertRaises(Exception):
-            resolve_hosts_and_roles("test1", [], ["role4"])
+        eq_({}, resolve_hosts_and_roles("test1", [], ["role4"]))
 
     def test_host_with_role_not_in_environment(self):
         """
