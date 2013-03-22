@@ -17,7 +17,7 @@ from contextlib import contextmanager
 @contextmanager
 def empty_defs():
     """
-    Make sure fabriv env changes are local.
+    Make sure fabric env changes are local.
 
     Using confab.model.load_model_from_dir will change env settings.
     Use this context manager to make the changes local to the test.
@@ -25,7 +25,7 @@ def empty_defs():
     with settings(environmentdefs={},
                   roledefs={},
                   componentdefs={}):
-        # Any chnages to the settings above will be reverted
+        # Any changes to the settings above will be reverted
         # once the with block closes.
         yield
 

@@ -90,9 +90,9 @@ def main():
         try:
             load_model_from_dir(options.directory)
         except ImportError as e:
-            parser.error('Unable to load {settings}: {error}'.format(settings=os.path.join(options.directory,
-                                                                                           'settings.py'),
-                                                                     error=e))
+            parser.error('Unable to load {settings}: {error}'
+                         .format(settings=os.path.join(options.directory, 'settings.py'),
+                                 error=e))
 
         # Normalize and resolve hosts to roles mapping
         try:
@@ -109,7 +109,8 @@ def main():
         except IndexError:
             parser.error("Please specify a task")
         except KeyError:
-            parser.error('Specified task must be one of: {tasks}'.format(tasks=', '.join(_tasks.keys())))
+            parser.error('Specified task must be one of: {tasks}'
+                         .format(tasks=', '.join(_tasks.keys())))
 
         # Construct task arguments
         kwargs = {'data_dir': os.path.join(options.directory, 'data')}
@@ -125,10 +126,11 @@ def main():
         for host, roles in hosts_to_roles.iteritems():
             for role in roles:
 
-                print "Running {task} on '{host}' for '{env}' and '{role}'".format(task=task_name,
-                                                                                   host=host,
-                                                                                   env=options.environment,
-                                                                                   role=role)
+                print "Running {task} on '{host}' for '{env}' and '{role}'"\
+                      .format(task=task_name,
+                              host=host,
+                              env=options.environment,
+                              role=role)
                 with settings(hide('user'),
                               environment=options.environment,
                               host_string=host,

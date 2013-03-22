@@ -2,7 +2,7 @@
 Tests for template generation.
 """
 from unittest import TestCase
-from fabric.api import hide, settings
+from fabric.api import settings
 from jinja2 import UndefinedError
 
 from confab.conffiles import ConfFiles
@@ -24,7 +24,7 @@ class TestGenerate(TestCase):
         Generated templates have the correct values.
         """
         with settings(**self.settings):
-            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests', 'templates/default'),
                                   lambda _: {'bar': 'bar', 'foo': 'foo'})
 
             with TempDir() as tmp_dir:
@@ -41,7 +41,7 @@ class TestGenerate(TestCase):
         Generated templates with unicode data.
         """
         with settings(**self.settings):
-            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests', 'templates/default'),
                                   lambda _: {'bar': 'bar', 'foo': u'\xc5\xae'})
             with TempDir() as tmp_dir:
                 conffiles.generate(tmp_dir.path)
@@ -57,7 +57,7 @@ class TestGenerate(TestCase):
         An exception is raised if a template value is undefined.
         """
         with settings(**self.settings):
-            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+            conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests', 'templates/default'),
                                   lambda _: {'bar': 'bar'})
 
             with TempDir() as tmp_dir:
@@ -70,7 +70,7 @@ class TestGenerate(TestCase):
         """
         with Options(should_render=lambda mime_type: False):
             with settings(**self.settings):
-                conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests'),
+                conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests', 'templates/default'),
                                       lambda _: {'bar': 'bar', 'foo': 'foo'})
 
                 with TempDir() as tmp_dir:

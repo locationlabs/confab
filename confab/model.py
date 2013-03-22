@@ -62,32 +62,30 @@ def get_components_for_role(role):
     if role not in env.roledefs:
         raise Exception("Role '{}' is not defined".format(role))
 
-    components = []
-    _expand_components(role, '', components, [])
-    return components
+    return _expand_components(role, '', [])
 
 
-def _expand_components(component, path, components, seen):
+def _expand_components(component, path, seen):
     """
-    Recusively expand a list of roles based on componentdefs.
+    Recursively expand component paths rooted at the given component
+    based on componentdefs.
 
-    Preserves the both the role group name and the declaration order of roles
-    while eliminating duplicates.
-
-    Raises an exception if a cycle is discovered in role group definitions
+    Raises an exception if a cycle is discovered in component definitions
     or if a component leaf exists in multiple paths.
 
     :param component: A component name.
     :param path: The component path being built.
-    :param components: The resulting component paths.
+    :param seen: The list of visited components.
     """
     if component in seen:
         raise Exception("Detected cycle or multiple paths with component '{}'".format(component))
     seen.append(component)
 
     if component not in env.componentdefs:
-        components.append(join(path, component))
-        return
+        return [join(path, component)]
 
+    components = []
     for c in env.componentdefs.get(component):
-        _expand_components(c, join(path, component), components, seen)
+        components += _expand_components(c, join(path, component), seen)
+
+    return components

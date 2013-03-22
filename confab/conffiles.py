@@ -4,7 +4,7 @@ Configuration file template object model.
 
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.options import options
-from confab.model import get_components_for_role
+from confab.model import get_components_for_role, get_roles_for_host
 
 from fabric.api import get, put, puts, run, settings, sudo
 from fabric.colors import blue, red, green, magenta
@@ -182,27 +182,48 @@ class ConfFiles(object):
     Encapsulation of a set of configuration files.
     """
 
-    def __init__(self,
-                 environment_loader,
-                 data_loader):
+    def __init__(self, environment_loader, data_loader):
         """
-        On init, load a list of configuration files using the provided environment
-        and data loaders.
+        On init, load a list of configuration files using the provided Jinja2
+        environment loader and data loader.
 
         The environment loader must return a Jinja2 environment that uses a
         loader that supports list_templates().
         """
         self.conffiles = []
-        for component in get_components_for_role(options.get_rolename()):
 
-            data = data_loader(component)
-            environment = environment_loader(component)
+        # Make sure we can generate all templates for the current host.
+        # This will go over all roles for the host.
 
-            conffiles = map(lambda template_name: ConfFile(environment.get_template(template_name),
-                                                           data),
-                            environment.list_templates(filter_func=options.filter_func))
+        # A mapping between a conffile name
+        # and the component it is generated for.
+        conffile_names = {}
 
-            self.conffiles += conffiles
+        for role in get_roles_for_host(options.get_hostname()):
+            for component in get_components_for_role(role):
+
+                data = data_loader(component)
+                environment = environment_loader(os.path.basename(component))
+
+                for conffile in map(lambda template_name:
+                                    ConfFile(environment.get_template(template_name), data),
+                                    environment.list_templates(filter_func=options.filter_func)):
+
+                    other_component = conffile_names.get(conffile.name)
+                    if other_component:
+                        raise Exception("Found two configuration templates with the same file path."
+                                        " File: {}, Components: {}"
+                                        .format(conffile.remote,
+                                                ",".join(component, other_component)))
+
+                    conffile_names[conffile.name] = component
+
+                    # store the conffiles for the current role
+                    if role == options.get_rolename():
+                        self.conffiles.append(conffile)
+
+        if not self.conffiles:
+            raise Exception("No conffiles found")
 
     def generate(self, generated_dir):
         """
@@ -258,15 +279,18 @@ class ConfFiles(object):
         with_diffs = filter(has_diff, self.conffiles)
 
         if not with_diffs:
-            print(magenta('No configuration files to push for {host}'.format(host=options.get_hostname())))
+            print(magenta('No configuration files to push for {host}'
+                          .format(host=options.get_hostname())))
             return
 
-        print(magenta('The following configuration files have changed for {host}:'.format(host=options.get_hostname())))
+        print(magenta('The following configuration files have changed for {host}:'
+                      .format(host=options.get_hostname())))
         print
         for conffile in with_diffs:
             print(magenta('\t' + conffile.remote))
 
-        if options.assume_yes or confirm('Push configuration files to {host}?'.format(host=options.get_hostname()),
+        if options.assume_yes or confirm('Push configuration files to {host}?'
+                                         .format(host=options.get_hostname()),
                                          default=False):
             for conffile in with_diffs:
                 conffile.push(host_generated_dir)
