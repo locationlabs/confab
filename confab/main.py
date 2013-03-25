@@ -98,12 +98,12 @@ def configure_verbosity(options):
     output_levels = {
         "status": 0,
         "aborts": 0,
+        "user": 0,
         "warnings": 1,
         "running": 1,
         "stdout": 2,
         "stderr": 2,
-        "user": 0,
-        "debug": 3
+        "debug": 2
     }
 
     verbosity = options.verbosity if not options.quiet else -1
