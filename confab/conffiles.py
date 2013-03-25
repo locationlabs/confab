@@ -1,17 +1,15 @@
 """
 Configuration file template object model.
 """
-
-from confab.files import _clear_dir, _clear_file, _ensure_dir
-from confab.options import options
-from confab.model import get_components_for_role, get_roles_for_host
-
+from warnings import warn
 from fabric.api import get, put, puts, run, settings, sudo
 from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists
 from fabric.contrib.console import confirm
 
-from warnings import warn
+from confab.files import _clear_dir, _clear_file, _ensure_dir
+from confab.options import options
+from confab.model import get_components_for_role, get_roles_for_host
 
 import os
 import shutil
