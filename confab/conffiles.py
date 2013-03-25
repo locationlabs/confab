@@ -192,20 +192,12 @@ class ConfFiles(object):
         The environment loader must return a Jinja2 environment that uses a
         loader that supports list_templates().
         """
-        self.conffiles = []
-
-        # Make sure we can generate all templates for the current host.
-        # This will go over all roles for the host.
-
-        # A mapping between a conffile name
-        # and the component it is generated for.
-        conffile_names = {}
-
         def load_templates(component):
 
             data = data_loader(component)
             environment = environment_loader(os.path.basename(component))
 
+            conffiles = []
             for conffile in map(lambda template_name:
                                 ConfFile(environment.get_template(template_name), data),
                                 environment.list_templates(filter_func=options.filter_func)):
@@ -221,12 +213,23 @@ class ConfFiles(object):
 
                 # store the conffiles for the current role
                 if role == options.get_rolename():
-                    self.conffiles.append(conffile)
+                    conffiles.append(conffile)
+
+            return conffiles
+
+        self.conffiles = []
+
+        # Make sure we can generate all templates for the current host.
+        # This will go over all roles for the host.
+
+        # A mapping between a conffile name
+        # and the component it is generated for.
+        conffile_names = {}
 
         for role in get_roles_for_host(options.get_hostname()):
-            load_templates(role)
+            self.conffiles.extend(load_templates(role))
             for component in get_components_for_role(role):
-                load_templates(component)
+                self.conffiles.extend(load_templates(component))
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"
