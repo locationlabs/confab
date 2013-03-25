@@ -106,7 +106,7 @@ class TestModel(TestCase):
         # no componentdefs is ok
         with settings(roledefs={'role1': ['host1']},
                       componentdefs={}):
-            eq_(['role1'], get_components_for_role('role1'))
+            eq_([], get_components_for_role('role1'))
 
         with settings(roledefs={'role1': ['host1'],
                                 'role2': ['host2'],
@@ -124,7 +124,7 @@ class TestModel(TestCase):
                  'role2/comp3'],
                 get_components_for_role('role2'))
 
-            eq_(['role3'], get_components_for_role('role3'))
+            eq_([], get_components_for_role('role3'))
 
             with self.assertRaises(Exception):
                 get_components_for_role('foo')
