@@ -2,7 +2,7 @@
 Configuration file template object model.
 """
 from warnings import warn
-from fabric.api import get, put, puts, run, settings, sudo
+from fabric.api import get, put, run, settings, sudo
 from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists
 from fabric.contrib.console import confirm
@@ -10,6 +10,7 @@ from fabric.contrib.console import confirm
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.options import options
 from confab.model import get_components_for_role, get_roles_for_host
+from confab.output import status
 
 import os
 import shutil
@@ -113,7 +114,7 @@ class ConfFile(object):
         generated_file_name = os.sep.join([generated_dir, self.name])
         remote_file_name = os.sep.join([remotes_dir, self .name])
 
-        puts('Computing diff for {file_name}'.format(file_name=self.remote))
+        status('Computing diff for {file_name}', file_name=self.remote)
 
         return ConfFileDiff(remote_file_name, generated_file_name, self.remote)
 
@@ -129,7 +130,7 @@ class ConfFile(object):
         """
         generated_file_name = os.sep.join([generated_dir, self.name])
 
-        puts('Generating {file_name}'.format(file_name=self.remote))
+        status('Generating {file_name}', file_name=self.remote)
 
         # ensure that destination directory exists
         _ensure_dir(os.path.dirname(generated_file_name))
@@ -145,8 +146,9 @@ class ConfFile(object):
         """
         local_file_name = os.sep.join([remotes_dir, self.name])
 
-        puts('Pulling {file_name} from {host}'.format(file_name=self.remote,
-                                                      host=options.get_hostname()))
+        status('Pulling {file_name} from {host}',
+               file_name=self.remote,
+               host=options.get_hostname())
 
         _ensure_dir(os.path.dirname(local_file_name))
         _clear_file(local_file_name)
@@ -155,7 +157,8 @@ class ConfFile(object):
             if exists(self.remote, use_sudo=options.use_sudo):
                 get(self.remote, local_file_name)
             else:
-                puts('Not found: {file_name}'.format(file_name=self.remote))
+                status('Not found: {file_name}',
+                       file_name=self.remote)
 
     def push(self, generated_dir):
         """
@@ -164,8 +167,9 @@ class ConfFile(object):
         generated_file_name = os.sep.join([generated_dir, self.name])
         remote_dir = os.path.dirname(self.remote)
 
-        puts('Pushing {file_name} to {host}'.format(file_name=self.remote,
-                                                    host=options.get_hostname()))
+        status('Pushing {file_name} to {host}',
+               file_name=self.remote,
+               host=options.get_hostname())
 
         with settings(use_ssh_config=True):
             mkdir_cmd = sudo if options.use_sudo else run

@@ -15,17 +15,16 @@ For more complex invocation, a custom fabfile may be more appropriate.
 import getpass
 import os
 import sys
-import warnings
 from optparse import OptionParser
-from fabric.api import hide, puts, settings
+from fabric.api import settings
 from fabric.network import disconnect_all
-from fabric.state import output
-from fabric.utils import warn
 
 from confab.api import pull, push, diff, generate
-from confab.options import Options
 from confab.resolve import resolve_hosts_and_roles
 from confab.model import load_model_from_dir
+from confab.options import Options
+from confab.output import configure_output, status
+
 
 _tasks = {"diff":     (diff,     True,  True),
           "generate": (generate, True,  False),
@@ -84,39 +83,6 @@ def parse_options():
     return parser, opts, args
 
 
-def warn_via_fabric(message, category, filename, lineno=None, line=None):
-    """
-    Adapt Python warnings to Fabric's warning output manager.
-    """
-    warn(message.message)
-
-
-def configure_verbosity(options):
-    """
-    Configure verbosity level through Fabric's output managers.
-    """
-    output_levels = {
-        "status": 0,
-        "aborts": 0,
-        "user": 0,
-        "warnings": 1,
-        "running": 1,
-        "stdout": 2,
-        "stderr": 2,
-        "debug": 2
-    }
-
-    verbosity = options.verbosity if not options.quiet else -1
-
-    # configure output manager levels via verbosity
-    for manager, level in output_levels.iteritems():
-        output[manager] = level <= verbosity
-
-    # Hook up Python warnings to warning output manager
-    warnings.showwarning = warn_via_fabric
-    warnings.simplefilter("always", UserWarning)
-
-
 def main():
     """
     Main command line entry point.
@@ -125,7 +91,8 @@ def main():
         # Parse and validate arguments
         parser, options, arguments = parse_options()
 
-        configure_verbosity(options)
+        configure_output(options.verbosity,
+                         options.quiet)
 
         try:
             load_model_from_dir(options.directory)
@@ -165,16 +132,14 @@ def main():
         # Invoke task once per host/role
         for host, roles in hosts_to_roles.iteritems():
             for role in roles:
-                puts("Running {task} on '{host}' for '{env}' and '{role}'".format(
-                    task=task_name,
-                    host=host,
-                    env=options.environment,
-                    role=role))
-                with settings(hide("user"),
-                              environment=options.environment,
+                with settings(environment=options.environment,
                               host_string=host,
                               role=role,
                               user=options.user):
+                    status("Running {task} for '{env}' and '{role}'",
+                           task=task_name,
+                           env=options.environment,
+                           role=role)
                     with Options(assume_yes=options.assume_yes):
                         task(**kwargs)
 

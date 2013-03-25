@@ -1,12 +1,14 @@
 """
 Functions for loading configuration data.
 """
+from itertools import chain
+from fabric.api import puts
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from confab.files import _import, _import_string
 from confab.merge import merge
 from confab.options import options
-from itertools import chain
-from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+from confab.output import debug
 
 
 def _get_environment_module():
@@ -46,16 +48,30 @@ def import_configuration(module_name, data_dir):
             return None
 
     try:
+        debug("Attempting to loading {module_name}.py from {data_dir}",
+              module_name=module_name,
+              data_dir=data_dir)
+
         module = _import(module_name, data_dir)
+        puts("Loaded {module_name}.py from {data_dir}".format(module_name=module_name,
+                                                              data_dir=data_dir))
     except ImportError:
+        debug("Attempting to loading {module_name}.py_tmpl from {data_dir}",
+              module_name=module_name,
+              data_dir=data_dir)
         # try to load as a template
         try:
             env = Environment(loader=FileSystemLoader(data_dir))
             rendered_module = env.get_template(module_name + '.py_tmpl').render({})
         except TemplateNotFound:
+            debug("Could not load {module_name} from {data_dir}",
+                  module_name=module_name,
+                  data_dir=data_dir)
             return None
 
         module = _import_string(module_name, rendered_module)
+        puts("Loaded {module_name}.py_tmpl from {data_dir}".format(module_name=module_name,
+                                                                   data_dir=data_dir))
 
     return as_dict(module)
 
