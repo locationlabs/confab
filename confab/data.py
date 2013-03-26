@@ -48,7 +48,7 @@ def import_configuration(module_name, data_dir):
             return None
 
     try:
-        debug("Attempting to loading {module_name}.py from {data_dir}",
+        debug("Attempting to load {module_name}.py from {data_dir}",
               module_name=module_name,
               data_dir=data_dir)
 
@@ -56,7 +56,7 @@ def import_configuration(module_name, data_dir):
         puts("Loaded {module_name}.py from {data_dir}".format(module_name=module_name,
                                                               data_dir=data_dir))
     except ImportError:
-        debug("Attempting to loading {module_name}.py_tmpl from {data_dir}",
+        debug("Attempting to load {module_name}.py_tmpl from {data_dir}",
               module_name=module_name,
               data_dir=data_dir)
         # try to load as a template
