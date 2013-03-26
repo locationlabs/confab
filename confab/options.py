@@ -99,7 +99,7 @@ options = _AttributeDict({
     'assume_yes': False,
 
     # Should sudo be used with put and in lieu of run?
-    'use_sudo': False,
+    'use_sudo': True,
 
     # How do compute a file's mime_type?
     'get_mime_type': _get_mime_type,
