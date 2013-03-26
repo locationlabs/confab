@@ -116,6 +116,7 @@ class TestGenerate(TestCase):
 
                         conffiles.generate(tmp_dir.path)
 
+                self.assertEquals('foo', tmp_dir.read('host1/role1.txt'))
                 self.assertEquals('foo', tmp_dir.read('host1/foo.txt'))
                 self.assertEquals('bar', tmp_dir.read('host1/bar/bar.txt'))
                 self.assertEquals('baz', tmp_dir.read('host1/baz.conf'))

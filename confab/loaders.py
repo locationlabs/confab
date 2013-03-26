@@ -7,8 +7,10 @@ template location from rendering and synchronization.
 Note that the default Jinja2 Loaders assume a charset (default: utf-8).
 """
 
-from jinja2 import Environment, FileSystemLoader, PackageLoader, StrictUndefined, TemplateNotFound
+from jinja2 import (Environment, FileSystemLoader, PackageLoader, BaseLoader,
+                    StrictUndefined, TemplateNotFound)
 from os.path import join, exists
+from pkg_resources import get_provider
 
 
 class FileSystemEnvironmentLoader(object):
@@ -21,7 +23,12 @@ class FileSystemEnvironmentLoader(object):
         """
         Load a Jinja2 Environment for a component.
         """
-        return Environment(loader=ConfabFileSystemLoader(join(self.dir_name, component)),
+        component_path = join(self.dir_name, component)
+
+        if not exists(component_path):
+            return Environment(loader=EmptyLoader())
+
+        return Environment(loader=ConfabFileSystemLoader(component_path),
                            undefined=StrictUndefined)
 
 
@@ -36,8 +43,13 @@ class PackageEnvironmentLoader(object):
         """
         Load a Jinja2 Environment for a component.
         """
-        return Environment(loader=PackageLoader(self.package_name,
-                                                package_path=join(self.templates_path, component)),
+        package_path = join(self.templates_path, component)
+
+        provider = get_provider(self.package_name)
+        if not provider.resource_isdir(package_path):
+            return Environment(loader=EmptyLoader())
+
+        return Environment(loader=PackageLoader(self.package_name, package_path),
                            undefined=StrictUndefined)
 
 
@@ -69,3 +81,10 @@ class ConfabFileSystemLoader(FileSystemLoader):
                 return "", filename, True
 
         raise TemplateNotFound(template)
+
+
+class EmptyLoader(BaseLoader):
+    """Jinja template loader with no templates."""
+
+    def list_templates(self):
+        return []
