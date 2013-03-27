@@ -154,7 +154,7 @@ class ConfFile(object):
         _clear_file(local_file_name)
 
         with settings(use_ssh_config=True):
-            if exists(self.remote, use_sudo=options.use_sudo):
+            if exists(self.remote, use_sudo=True):
                 get(self.remote, local_file_name)
             else:
                 status('Not found: {file_name}',
