@@ -2,7 +2,7 @@
 Configuration file template object model.
 """
 from warnings import warn
-from fabric.api import get, put, run, settings, sudo
+from fabric.api import get, put, settings, sudo
 from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists
 from fabric.contrib.console import confirm
@@ -154,7 +154,7 @@ class ConfFile(object):
         _clear_file(local_file_name)
 
         with settings(use_ssh_config=True):
-            if exists(self.remote, use_sudo=options.use_sudo):
+            if exists(self.remote, use_sudo=True):
                 get(self.remote, local_file_name)
             else:
                 status('Not found: {file_name}',
@@ -172,8 +172,7 @@ class ConfFile(object):
                host=options.get_hostname())
 
         with settings(use_ssh_config=True):
-            mkdir_cmd = sudo if options.use_sudo else run
-            mkdir_cmd('mkdir -p {dir_name}'.format(dir_name=remote_dir))
+            sudo('mkdir -p {dir_name}'.format(dir_name=remote_dir))
 
             put(generated_file_name,
                 self.remote,

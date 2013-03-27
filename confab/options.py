@@ -98,10 +98,7 @@ options = _AttributeDict({
     # Should yes be assumed for interactive prompts?
     'assume_yes': False,
 
-    # Should sudo be used with put and in lieu of run?
-    'use_sudo': False,
-
-    # How do compute a file's mime_type?
+    # How to compute a file's mime_type?
     'get_mime_type': _get_mime_type,
 
     # How to determine if a template should be rendered?
