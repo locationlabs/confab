@@ -176,7 +176,7 @@ class ConfFile(object):
 
             put(generated_file_name,
                 self.remote,
-                use_sudo=options.use_sudo,
+                use_sudo=True,
                 mirror_local_mode=True)
 
 
