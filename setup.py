@@ -9,7 +9,7 @@ try:
 except ImportError:
     pass
 
-__version__ = '1.3'
+__version__ = '1.2'
 
 # Jenkins will replace __build__ with a unique value.
 __build__ = ''
