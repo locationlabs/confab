@@ -19,16 +19,16 @@ class FileSystemEnvironmentLoader(object):
     def __init__(self, dir_name):
         self.dir_name = dir_name
 
-    def __call__(self, component):
+    def __call__(self, subdir):
         """
-        Load a Jinja2 Environment for a component.
+        Load a Jinja2 Environment for a template sub-directory.
         """
-        component_path = join(self.dir_name, component)
+        template_path = join(self.dir_name, subdir)
 
-        if not exists(component_path):
+        if not exists(template_path):
             return Environment(loader=EmptyLoader())
 
-        return Environment(loader=ConfabFileSystemLoader(component_path),
+        return Environment(loader=ConfabFileSystemLoader(template_path),
                            undefined=StrictUndefined)
 
 
@@ -39,11 +39,11 @@ class PackageEnvironmentLoader(object):
         self.package_name = package_name
         self.templates_path = templates_path
 
-    def __call__(self, component):
+    def __call__(self, subdir):
         """
-        Load a Jinja2 Environment for a component.
+        Load a Jinja2 Environment for a template sub-directory.
         """
-        package_path = join(self.templates_path, component)
+        package_path = join(self.templates_path, subdir)
 
         provider = get_provider(self.package_name)
         if not provider.resource_isdir(package_path):

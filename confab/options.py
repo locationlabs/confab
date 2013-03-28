@@ -120,7 +120,10 @@ options = _AttributeDict({
     'filter_func': _is_not_temporary,
 
     # How to determine diffs?
-    'diff': _diff
+    'diff': _diff,
+
+    # How to manipulate module data?
+    'module_preprocess': lambda x: x
 })
 
 

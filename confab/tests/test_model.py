@@ -115,13 +115,10 @@ class TestModel(TestCase):
                                      'role2': ['comp2', 'comp3'],
                                      'compgroup': ['comp3', 'comp4']}):
 
-            eq_(['role1/comp1',
-                 'role1/compgroup/comp3',
-                 'role1/compgroup/comp4'],
+            eq_(['comp1', 'comp3', 'comp4'],
                 get_components_for_role('role1'))
 
-            eq_(['role2/comp2',
-                 'role2/comp3'],
+            eq_(['comp2', 'comp3'],
                 get_components_for_role('role2'))
 
             eq_([], get_components_for_role('role3'))

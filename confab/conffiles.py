@@ -193,10 +193,7 @@ class ConfFiles(object):
         The environment loader must return a Jinja2 environment that uses a
         loader that supports list_templates().
         """
-        def load_templates(component):
-
-            data = data_loader(component)
-            environment = environment_loader(os.path.basename(component))
+        def load_templates(data, environment, component, original_role):
 
             conffiles = []
             for conffile in map(lambda template_name:
@@ -206,14 +203,13 @@ class ConfFiles(object):
                 other_component = conffile_names.get(conffile.name)
                 if other_component:
                     raise Exception("Found two configuration templates with the same file path."
-                                    " File: {}, Components: {}"
-                                    .format(conffile.remote,
-                                            ",".join(component, other_component)))
+                                    " File: {}, Roles/Components: {}, {}"
+                                    .format(conffile.remote, component, other_component))
 
                 conffile_names[conffile.name] = component
 
-                # store the conffiles for the current role
-                if role == options.get_rolename():
+                # store the conffiles for the original role
+                if original_role == options.get_rolename():
                     conffiles.append(conffile)
 
             return conffiles
@@ -224,13 +220,21 @@ class ConfFiles(object):
         # This will go over all roles for the host.
 
         # A mapping between a conffile name
-        # and the component it is generated for.
+        # and the role or component it is generated for.
         conffile_names = {}
 
+        original_role = options.get_rolename()
         for role in get_roles_for_host(options.get_hostname()):
-            self.conffiles.extend(load_templates(role))
-            for component in get_components_for_role(role):
-                self.conffiles.extend(load_templates(component))
+            with settings(role=role):
+                self.conffiles.extend(load_templates(data_loader(None),
+                                                     environment_loader(role),
+                                                     role,
+                                                     original_role))
+                for component in get_components_for_role(role):
+                    self.conffiles.extend(load_templates(data_loader(component),
+                                                         environment_loader(component),
+                                                         component,
+                                                         original_role))
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"

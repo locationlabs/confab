@@ -3,12 +3,11 @@ Test configuration file listing.
 """
 from confab.conffiles import ConfFiles
 from confab.loaders import PackageEnvironmentLoader
-from confab.options import Options
+from confab.options import options, Options
 
 from jinja2 import UndefinedError
 from unittest import TestCase
 from fabric.api import settings
-from os.path import dirname
 from warnings import catch_warnings
 
 
@@ -79,7 +78,7 @@ class TestListing(TestCase):
 
             # use data that will create different conffiles for the same
             # component in the two roles.
-            data_loader = lambda comp: {'foo': dirname(comp)}
+            data_loader = lambda comp: {'foo': options.get_rolename()}
 
             with settings(role='role1'):
                 conffiles = ConfFiles(environment_loader, data_loader)

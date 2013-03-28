@@ -1,7 +1,6 @@
 """
 Functions for loading configuration data.
 """
-from itertools import chain
 from fabric.api import puts
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
@@ -20,11 +19,11 @@ def _get_environment_module():
     return options.get_environmentname()
 
 
-def _get_component_modules(component):
+def _get_role_module():
     """
-    Return the different modules in the component path.
+    Return the current configuration role.
     """
-    return component.split('/')
+    return options.get_rolename()
 
 
 def _get_host_module():
@@ -73,6 +72,7 @@ def import_configuration(module_name, data_dir):
         puts("Loaded {module_name}.py_tmpl from {data_dir}".format(module_name=module_name,
                                                                    data_dir=data_dir))
 
+    options.module_preprocess(module)
     return as_dict(module)
 
 
@@ -84,26 +84,30 @@ class DataLoader(object):
     where type is defined to include defaults, per-role values,
     per-component values, per-environment values and per-host values.
 
-    Configuration data also includes the current environment
+    Configuration data also includes the current environment, component
     and host string values under a 'confab' key.
     """
 
-    def __init__(self, data_dir):
+    ALL = ['default', 'role', 'component', 'environment', 'host']
+
+    def __init__(self, data_dir, data_modules=ALL):
+        """
+        Create a data loader for the given data directory.
+
+        :param data_modules: list of modules to load in the order to load them.
+        """
         self.data_dir = data_dir
+        self.data_modules = data_modules
 
     def __call__(self, component):
         """
-        Load the data for the given component.
+        Load the data for the current configuration.
 
-        :param component: a component path, i.e. `{role}/{sub-component}/{component}`.
+        :param component: a component name. can be None to load role data.
         """
         is_not_none = lambda x: x is not None
 
-        module_names = filter(is_not_none,
-                              chain(['default'],
-                                    _get_component_modules(component),
-                                    [_get_environment_module(),
-                                     _get_host_module()]))
+        module_names = filter(is_not_none, self._list_modules(component))
 
         load_module = lambda module_name: import_configuration(module_name, self.data_dir)
 
@@ -114,3 +118,17 @@ class DataLoader(object):
                                        component=component))
 
         return merge(confab_data, *module_dicts)
+
+    def _list_modules(self, component):
+        """
+        Get the list of modules to load.
+        """
+        module_names = {
+            'default': 'default',
+            'role': _get_role_module(),
+            'component': component,
+            'environment': _get_environment_module(),
+            'host': _get_host_module()
+        }
+
+        return map(lambda module: module_names[module], self.data_modules)
