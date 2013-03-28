@@ -89,6 +89,17 @@ def _diff(a, b, fromfile=None, tofile=None):
     """
     return unified_diff(a, b, fromfile=fromfile, tofile=tofile)
 
+
+def _as_dict(module):
+    """
+    Returns publicly names values in module's __dict__.
+    """
+    try:
+        return {k: v for k, v in module.__dict__.iteritems() if not k[0:1] == '_'}
+    except AttributeError:
+        return None
+
+
 # Options that control how confab runs.
 #
 # These are in opposition to options likely to changed
@@ -122,8 +133,8 @@ options = _AttributeDict({
     # How to determine diffs?
     'diff': _diff,
 
-    # How to manipulate module data?
-    'module_preprocess': lambda x: x
+    # How to get dictionary configuration from module data?
+    'module_as_dict': _as_dict
 })
 
 

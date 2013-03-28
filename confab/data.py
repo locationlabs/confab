@@ -36,15 +36,7 @@ def _get_host_module():
 def import_configuration(module_name, data_dir):
     """
     Load configuration from file as python module.
-
-    Returns publicly names values in module's __dict__.
     """
-
-    def as_dict(module):
-        try:
-            return {k: v for k, v in module.__dict__.iteritems() if not k[0:1] == '_'}
-        except AttributeError:
-            return None
 
     try:
         debug("Attempting to load {module_name}.py from {data_dir}",
@@ -72,8 +64,7 @@ def import_configuration(module_name, data_dir):
         puts("Loaded {module_name}.py_tmpl from {data_dir}".format(module_name=module_name,
                                                                    data_dir=data_dir))
 
-    options.module_preprocess(module)
-    return as_dict(module)
+    return options.module_as_dict(module)
 
 
 class DataLoader(object):
@@ -103,7 +94,7 @@ class DataLoader(object):
         """
         Load the data for the current configuration.
 
-        :param component: a component name. can be None to load role data.
+        :param component: a component name. can be `None` to load role data.
         """
         is_not_none = lambda x: x is not None
 
