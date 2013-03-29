@@ -33,7 +33,7 @@ def empty_defs():
 class TestModel(TestCase):
 
     def setUp(self):
-        self.dir_name = join(dirname(__file__), "data")
+        self.dir_name = join(dirname(__file__), "data/default")
 
     def test_get_roles_for_host(self):
         """

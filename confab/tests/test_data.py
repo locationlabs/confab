@@ -12,7 +12,7 @@ class TestData(TestCase):
 
     def test_data_templates(self):
 
-        data = import_configuration('bar', join(dirname(__file__), 'data_templates'))
+        data = import_configuration('bar', join(dirname(__file__), 'data/templates'))
 
         eq_(data,
             {'foo': 'foo',

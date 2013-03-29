@@ -1,2 +1,2 @@
-include confab/tests/data_templates/*
-include confab/tests/binary_templates/*
+recursive-include confab/tests/data *
+recursive-include confab/tests/templates *
