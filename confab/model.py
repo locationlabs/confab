@@ -57,7 +57,7 @@ def get_hosts_for_environment(environment):
 
 def get_components_for_role(role):
     """
-    Get all component paths for the given role.
+    Get all components for the given role.
     """
     if role not in env.roledefs:
         raise Exception("Role '{}' is not defined".format(role))
@@ -70,7 +70,7 @@ def get_components_for_role(role):
 
 def _expand_components(component, path, seen):
     """
-    Recursively expand component paths rooted at the given component
+    Recursively expand components rooted at the given component
     based on componentdefs.
 
     Raises an exception if a cycle is discovered in component definitions
@@ -90,7 +90,7 @@ def _expand_components(component, path, seen):
     seen[component] = component_path
 
     if component not in env.componentdefs:
-        return [component_path]
+        return [component]
 
     components = []
     for c in env.componentdefs.get(component):
