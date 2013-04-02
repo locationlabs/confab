@@ -79,7 +79,7 @@ class DataLoader(object):
     and host string values under a 'confab' key.
     """
 
-    ALL = ['default', 'role', 'component', 'environment', 'host']
+    ALL = ['default', 'component', 'role', 'environment', 'host']
 
     def __init__(self, data_dir, data_modules=ALL):
         """
