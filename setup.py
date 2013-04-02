@@ -2,7 +2,14 @@
 
 from setuptools import setup, find_packages
 
-__version__ = '1.0'
+# Workaround for running "setup.py test"
+# See: http://bugs.python.org/issue15881
+try:
+    import multiprocessing # flake8: NOQA
+except ImportError:
+    pass
+
+__version__ = '1.1'
 
 # Jenkins will replace __build__ with a unique value.
 __build__ = ''
@@ -22,6 +29,9 @@ setup(name='confab',
           'Fabric>=1.4',
           'Jinja2>=2.4',
           'python-magic'
+      ],
+      test_requires=[
+          'mock==1.0.1'
       ],
       test_suite='confab.tests',
       entry_points={

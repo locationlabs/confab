@@ -7,7 +7,7 @@ from fabric.utils import _AttributeDict
 
 from difflib import unified_diff
 from magic import Magic
-from socket import getfqdn
+from re import match
 
 
 def _should_render(mime_type):
@@ -18,7 +18,8 @@ def _should_render(mime_type):
     Some files may need to be excluded from template rendering;
     such files will be copied verbatim.
     """
-    return mime_type.split('/')[0] == 'text'
+    return next((True for pattern in ['text/', 'application/xml'] if match(pattern, mime_type)),
+                False)
 
 
 def _is_empty(mime_type):
@@ -51,7 +52,7 @@ def _get_hostname():
     """
     Return the current target hostname.
     """
-    return getfqdn(env.host_string)
+    return env.host_string
 
 
 def _get_rolename():
@@ -97,10 +98,7 @@ options = _AttributeDict({
     # Should yes be assumed for interactive prompts?
     'assume_yes': False,
 
-    # Should sudo be used with put and in lieu of run?
-    'use_sudo': False,
-
-    # How do compute a file's mime_type?
+    # How to compute a file's mime_type?
     'get_mime_type': _get_mime_type,
 
     # How to determine if a template should be rendered?

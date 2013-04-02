@@ -1,33 +1,35 @@
 """
 Functions for interacting with the defined hosts, environments, and roles.
 """
-from confab.files import _import
-
 from fabric.api import env
+from confab.files import _import
+from os.path import join
 
 
-def load_model_from_dir(dir_name):
+def _keys():
     """
-    Load model data (environments, roles, hosts) from settings.py.
+    Get the model's environment keys.
+    """
+    return ["environmentdefs", "roledefs", "componentdefs"]
+
+
+def load_model_from_dir(dir_name, module_name='settings'):
+    """
+    Load model data (environments, roles, hosts) from settings module.
     """
 
-    settings = _import('settings', dir_name)
-    try:
-        env['environmentdefs'] = getattr(settings, 'environmentdefs')
-    except AttributeError:
-        env['environmentdefs'] = {}
-
-    try:
-        env['roledefs'] = getattr(settings, 'roledefs')
-    except AttributeError:
-        env['roledefs'] = {}
+    settings = _import(module_name, dir_name)
+    for key in _keys():
+        env[key] = getattr(settings, key, {})
 
 
-def _matching_keys(dct, value):
+def load_model_from_dict(settings):
     """
-    Return all keys in 'dct' whose value list contains 'value'.
+    Load model data (environments, roles, hosts) from settings dictionary.
     """
-    return map(lambda (k, v): k, filter(lambda (k, v): value in v, dct.iteritems()))
+
+    for key in _keys():
+        env[key] = settings.get(key, {})
 
 
 def get_roles_for_host(host):
@@ -36,7 +38,7 @@ def get_roles_for_host(host):
 
     Delegates to Fabric's env roledefs.
     """
-    return _matching_keys(env.roledefs, host)
+    return [role for (role, hosts) in env.roledefs.iteritems() if host in hosts]
 
 
 def get_hosts_for_environment(environment):
@@ -46,38 +48,52 @@ def get_hosts_for_environment(environment):
     Assumes an environmentsdef structure in Fabric's env.
     """
     try:
-        env.environmentdefs
+        return env.environmentdefs[environment]
     except AttributeError:
+        raise Exception("No environments are defined")
+    except KeyError:
+        raise Exception("Environment '{}' is not defined".format(environment))
+
+
+def get_components_for_role(role):
+    """
+    Get all component paths for the given role.
+    """
+    if role not in env.roledefs:
+        raise Exception("Role '{}' is not defined".format(role))
+
+    if role not in env.componentdefs:
         return []
 
-    return env.environmentdefs.get(environment, [])
+    return _expand_components(role, '', {})
 
 
-def has_same_roles(hosts):
+def _expand_components(component, path, seen):
     """
-    Determine whether all provided hosts have the same roles.
+    Recursively expand component paths rooted at the given component
+    based on componentdefs.
 
-    Returns the intersection of roles for all provided hosts.
+    Raises an exception if a cycle is discovered in component definitions
+    or if a component leaf exists in multiple paths.
+
+    :param component: A component name.
+    :param path: The component path being built.
+    :param seen: Dictionary of visited components and their paths.
     """
-    if not hosts:
-        return set()
+    component_path = join(path, component)
 
-    def to_role_set(host):
-        return set(get_roles_for_host(host))
+    if component in seen:
+        raise Exception("Detected cycle or multiple paths with role/component '{}'"
+                        " ('{}' and '{}')".format(component,
+                                                  seen[component],
+                                                  component_path))
+    seen[component] = component_path
 
-    return reduce(lambda a, b: a if a == b else set(), map(to_role_set, hosts))
+    if component not in env.componentdefs:
+        return [component_path]
 
+    components = []
+    for c in env.componentdefs.get(component):
+        components += _expand_components(c, component_path, seen)
 
-def has_roles(hosts, roles):
-    """
-    Determine whether all provided hosts have the provided roles.
-    """
-    if not hosts:
-        return False
-
-    for host in hosts:
-        roles_for_host = get_roles_for_host(host)
-        if not set(roles_for_host).issuperset(roles):
-            return False
-
-    return True
+    return components

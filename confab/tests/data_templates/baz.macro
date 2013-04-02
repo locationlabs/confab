@@ -1,0 +1,5 @@
+{% macro baz(n) -%}
+baz = {
+    'n': {{ n }}
+}
+{%- endmacro %}
