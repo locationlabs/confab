@@ -8,19 +8,20 @@ Configuration management with Fabric and Jinja2.
 Confab provides four basic functions:
 
  1. It defines a data model where *hosts* belong to one or more *environments*
-    and are assigned to one or more *roles*.
+    and are assigned to one or more *roles*, which can be made up of *components*.
 
  2. It defines a mechanism for loading configuration data based on a set of
-    *defaults* and override values defined per *environment* or *host*.
+    *defaults* and override values defined per *environment*, *host*, *role*,
+    or *component*.
 
  3. It defines a mechanism for loading Jinja2 templates for configuration files
-    based on a *role*.
+    based on a *role* and/or *component*.
 
  4. It defines Fabric tasks to faciliate publishing configuration files generated
     from applying the configuration data to the Jinja2 templates to *hosts*.
 
 It is suggested that Confab be used with configuration data and templates that
-are checked in to version control so that publication is tied to versioning
+are checked in to version control so that publication is tied to the versioning
 and release process.
 
 
@@ -32,10 +33,13 @@ and release process.
  -  *environments* are groups of hosts that work together for a single purpose; it's
     common to have one environment for development, one for staging, one for production
 	and so forth.
-	
- -  *roles* are slices of configuration files; the configuration files that Confab 
-    manages are controlled by which roles are selected.
 
+ -  *components* are slices of configuration files; the configuration files that Confab 
+    manages are controlled by which components are selected.
+
+ -  *roles* are groups of zero or more components that achieve a common purpose; in the
+    degenerate case where a role has no components, the role itself is taken to be
+    a component.
 
 ## Usage
 
@@ -49,13 +53,15 @@ Confab may be used in several ways:
     Confab then loads its definitions, configuration data, and templates
     from within the provided directory as follows:
 
-        /path/to/directory/settings.py           # definitions
-        /path/to/directory/templates/{role}/     # templates for {role}
-        /path/to/directory/data/default.py       # default configuration data
-        /path/to/directory/data/{environment}.py # per-environment configuration data
-        /path/to/directory/data/{role}.py        # per-role configuration data
-        /path/to/directory/generated/{hostname}/ # generated configuration files for hostname
-        /path/to/directory/remotes/{hostname}/   # copies of remote configuration files from hostname
+        /path/to/directory/settings.py            # definitions
+        /path/to/directory/templates/{component}/ # templates for {component}
+        /path/to/directory/data/default.py        # default configuration data
+        /path/to/directory/data/{environment}.py  # per-environment configuration data
+        /path/to/directory/data/{role}.py         # per-role configuration data
+        /path/to/directory/data/{component}.py    # per-component configuration data
+        /path/to/directory/data/{host}.py         # per-host configuration data
+        /path/to/directory/generated/{hostname}/  # generated configuration files for hostname
+        /path/to/directory/remotes/{hostname}/    # copies of remote configuration files from hostname
 
  -  Confab's tasks may be included in another fabfile simply by adding:
     
@@ -89,8 +95,8 @@ Confab may be used in several ways:
 
         from confab.api import ConfFiles
         
-        conffiles = ConfFiles(jinja2_environment,
-                              data)
+        conffiles = ConfFiles(jinja2_environment_loader,
+                              data_loader)
 
 
 ## Loading Roles, Environments, and Hosts
@@ -108,18 +114,29 @@ Within the default *confab* console script:
             'foo': ['localhost']
         }
 
- -  Templates are loaded from a directory tree based on role. For example, in the following 
-    directory structure, the **foo** role manages two configuration files and the **bar** 
-	role only one:
+ -  The **settings.py** file may also define a role-to-components mapping:
+
+        componentdefs = {
+            'foo': ['bar']
+        }
+
+    If no component defs are defined or a role is absent from this mapping, the role is assumed
+    to be its own component.
+
+ -  Templates are loaded from a directory tree based on component. For example, in the following 
+    directory structure, the **foo** compoment manages two configuration files and the **bar** 
+	component only one:
 
         /path/to/templates/foo/etc/motd.tail
         /path/to/templates/foo/etc/hostname
         /path/to/templates/bar/etc/cron.d/baz
 
- -  Configuration data is loaded from python modules named after the environment or role names
-    (or default). The dictionaries from these modules (if any) are recursively merged (see below), 
-    so that given an environment named "foo" and a role named "bar", configuration data would be
-    merged between **default.py**, **foo.py**, and **bar.py**.
+ -  Configuration data is loaded from python modules named after the names of the selected
+    environment, role, component, and host, plus a standard set of defaults. The dictionaries
+    from these modules (if any) are recursively merged (see below), so that given an environment
+    named "foo", a role named "bar", a component named "baz", and a host named "host", the
+    configuration data would be merged between **default.py**, **foo.py**, **bar.py**, **baz.py**,
+    and **host.py**.
     
     Confab uses the *__dict__* property of the loaded module, but filters out any entries 
 	starting with '_'. In other words, this module:
@@ -130,9 +147,10 @@ Within the default *confab* console script:
 	results in this dictionary:
 	
 	    {'foo': 'bar'}
-
- -  Generated and remote configuration files will always be saved to a directory named after
-    the fully qualified domain name (FQDN) of the target host.
+        
+ -  If a configuration data module is not found, Confab will also look for a file with a `.py_tmpl`
+    suffix and treat it as a Jinja2 template for the same module, allowing configuration data to
+    use Jinja2 template syntax (including includes).
 
 Confab expects roles, environments, and definitions thereof to be saved in the Fabric environment. 
 The *confab* console script requires these definitions, although the lower level API is designed
@@ -147,6 +165,7 @@ using a three level hierarchy:
 
  -  Host-specific values are used first.
  -  Environment-specific values are used next. 
+ -  Role or component-specific values are used next.
  -  Default values are used last.
 
 Confab's recursive merge operation can be futher customized by using callable wrappers
