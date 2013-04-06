@@ -116,8 +116,8 @@ class DataLoader(object):
         """
         module_names = [
             ('default', 'default'),
-            ('role', _get_role_module()),
             ('component', component),
+            ('role', _get_role_module()),
             ('environment', _get_environment_module()),
             ('host', _get_host_module())
         ]

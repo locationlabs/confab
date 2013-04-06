@@ -76,6 +76,7 @@ class TestData(TestCase):
                                               'host'])
 
             eq_(loader('component')['data'],
-                {'component': 'component',
+                {'role': 'component',
+                 'component': 'component',
                  'environment': 'component',
                  'host': 'host'})
