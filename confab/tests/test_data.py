@@ -58,7 +58,6 @@ class TestData(TestCase):
             loader = DataLoader(join(dirname(__file__), 'data/order'),
                                 data_modules=reversed(DataLoader.ALL))
 
-            print loader('component')
             eq_(loader('component')['data'],
                 {'default': 'default',
                  'component': 'component',
