@@ -226,19 +226,20 @@ class ConfFiles(object):
         original_role = options.get_rolename()
         for role in get_roles_for_host(options.get_hostname()):
             with settings(role=role):
+                include_results = original_role == role
                 self.conffiles.extend(load_templates(data_loader(None),
                                                      environment_loader(role),
                                                      role,
-                                                     original_role == role))
+                                                     include_results))
                 for component in get_components_for_role(role):
                     self.conffiles.extend(load_templates(data_loader(component),
                                                          environment_loader(component),
                                                          component,
-                                                         original_role == role))
+                                                         include_results))
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"
-                 .format(role=options.get_rolename(),
+                 .format(role=original_role,
                          host=options.get_hostname(),
                          environment=options.get_environmentname()))
 
