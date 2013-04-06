@@ -1,4 +1,4 @@
 data = {
-    'role': 'environment',
-    'environment': 'environment'
+    'environment': 'environment',
+    'host': 'environment',
 }

@@ -1,3 +1,7 @@
 data = {
-    'default': 'default'
+    'default': 'default',
+    'component': 'default',
+    'role': 'default',
+    'environment': 'default',
+    'host': 'default',
 }

@@ -1,4 +1,3 @@
 data = {
-    'environment': 'host',
-    'host': 'host'
+    'host': 'host',
 }

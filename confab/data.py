@@ -88,7 +88,7 @@ class DataLoader(object):
         :param data_modules: list of modules to load in the order to load them.
         """
         self.data_dir = data_dir
-        self.data_modules = data_modules
+        self.data_modules = set(data_modules)
 
     def __call__(self, component):
         """
@@ -114,12 +114,12 @@ class DataLoader(object):
         """
         Get the list of modules to load.
         """
-        module_names = {
-            'default': 'default',
-            'role': _get_role_module(),
-            'component': component,
-            'environment': _get_environment_module(),
-            'host': _get_host_module()
-        }
+        module_names = [
+            ('default', 'default'),
+            ('role', _get_role_module()),
+            ('component', component),
+            ('environment', _get_environment_module()),
+            ('host', _get_host_module())
+        ]
 
-        return map(lambda module: module_names[module], self.data_modules)
+        return [name for key, name in module_names if key in self.data_modules]
