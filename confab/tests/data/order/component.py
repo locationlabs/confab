@@ -1,4 +1,5 @@
 data = {
-    'default': 'component',
-    'component': 'component'
+    'component': 'component',
+    'environment': 'component',
+    'host': 'component',
 }

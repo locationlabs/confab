@@ -1,4 +1,6 @@
 data = {
+    'role': 'role',
     'component': 'role',
-    'role': 'role'
+    'environment': 'role',
+    'host': 'role'
 }
