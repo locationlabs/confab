@@ -5,8 +5,8 @@ Non-init module for doing convenient * imports from.
 # core
 from confab.conffiles import ConfFiles
 
-# model lading
-from confab.model import load_model_from_dir, load_model_from_dict
+# settings
+from confab.definitions import Settings
 
 # jinja2 environment loading
 from confab.loaders import FileSystemEnvironmentLoader, PackageEnvironmentLoader
@@ -26,8 +26,6 @@ from confab.push import push
 __ignore__ = [
     assume_yes,
     ConfFiles,
-    load_model_from_dir,
-    load_model_from_dict,
     FileSystemEnvironmentLoader,
     PackageEnvironmentLoader,
     DataLoader,
@@ -35,5 +33,6 @@ __ignore__ = [
     generate,
     pull,
     push,
-    Options
+    Options,
+    Settings,
 ]

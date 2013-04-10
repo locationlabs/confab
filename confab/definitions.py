@@ -26,6 +26,7 @@ class Settings(object):
         settings = _import(module_name, dir_name)
         for key in Settings.KEYS:
             setattr(self, key, getattr(settings, key, {}))
+        return self
 
     def load_from_dict(self, dct):
         """
@@ -33,6 +34,7 @@ class Settings(object):
         """
         for key in Settings.KEYS:
             setattr(self, key, dct.get(key, {}))
+        return self
 
     def roles_for_host(self, host):
         """

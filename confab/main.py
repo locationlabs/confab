@@ -20,8 +20,7 @@ from fabric.api import settings
 from fabric.network import disconnect_all
 
 from confab.api import pull, push, diff, generate
-from confab.resolve import resolve_hosts_and_roles
-from confab.model import load_model_from_dir
+from confab.definitions import Settings
 from confab.options import Options
 from confab.output import configure_output, status
 
@@ -83,6 +82,49 @@ def parse_options():
     return parser, opts, args
 
 
+def get_environmentdef(parser, options):
+    try:
+        settings_ = Settings().load_from_module(options.directory)
+    except ImportError as e:
+        parser.error("Unable to load {settings}: {error}"
+                     .format(settings=os.path.join(options.directory, "settings.py"),
+                             error=e))
+
+    # Normalize and resolve hosts to roles mapping
+    try:
+        selected_hosts = options.hosts.split(",") if options.hosts else []
+        selected_roles = options.roles.split(",") if options.roles else []
+        environmentdef = settings_.with_env(options.environment)
+        environmentdef = environmentdef.with_hosts(selected_hosts)
+        environmentdef = environmentdef.with_roles(selected_roles)
+        return environmentdef
+    except Exception as e:
+        parser.error(e)
+
+
+def get_task(parser, options, arguments):
+    # Determine task
+    try:
+        task_name = arguments[0]
+        (task, needs_templates, needs_remotes) = _tasks[task_name]
+    except IndexError:
+        parser.error("Please specify a task")
+    except KeyError:
+        parser.error("Specified task must be one of: {tasks}"
+                     .format(tasks=", ".join(_tasks.keys())))
+
+    # Construct task arguments
+    kwargs = {"data_dir": os.path.join(options.directory, "data")}
+
+    if needs_templates:
+        kwargs["generated_dir"] = os.path.join(options.directory, "generated")
+    if needs_remotes:
+        kwargs["remotes_dir"] = os.path.join(options.directory, "remotes")
+
+    kwargs["templates_dir"] = os.path.join(options.directory, "templates")
+    return task_name, task, kwargs
+
+
 def main():
     """
     Main command line entry point.
@@ -94,52 +136,18 @@ def main():
         configure_output(options.verbosity,
                          options.quiet)
 
-        try:
-            load_model_from_dir(options.directory)
-        except ImportError as e:
-            parser.error("Unable to load {settings}: {error}"
-                         .format(settings=os.path.join(options.directory, "settings.py"),
-                                 error=e))
-
-        # Normalize and resolve hosts to roles mapping
-        try:
-            hosts_to_roles = resolve_hosts_and_roles(options.environment,
-                                                     options.hosts.split(",") if options.hosts else [],
-                                                     options.roles.split(",") if options.roles else [])
-        except Exception as e:
-            parser.error(e)
-
-        # Determine task
-        try:
-            task_name = arguments[0]
-            (task, needs_templates, needs_remotes) = _tasks[task_name]
-        except IndexError:
-            parser.error("Please specify a task")
-        except KeyError:
-            parser.error("Specified task must be one of: {tasks}"
-                         .format(tasks=", ".join(_tasks.keys())))
-
-        # Construct task arguments
-        kwargs = {"data_dir": os.path.join(options.directory, "data")}
-
-        if needs_templates:
-            kwargs["generated_dir"] = os.path.join(options.directory, "generated")
-        if needs_remotes:
-            kwargs["remotes_dir"] = os.path.join(options.directory, "remotes")
-
-        kwargs["templates_dir"] = os.path.join(options.directory, "templates")
+        environmentdef = get_environmentdef(parser, options)
+        task_name, task, kwargs = get_task(parser, options, arguments)
 
         # Invoke task once per host/role
-        for host, roles in hosts_to_roles.iteritems():
-            for role in roles:
-                with settings(environment=options.environment,
-                              host_string=host,
-                              role=role,
-                              user=options.user):
+        with settings(environmentdef=environmentdef,
+                      user=options.user):
+            for host_and_role in environmentdef.iterall():
+                with settings(host_string=host_and_role.host):
                     status("Running {task} for '{env}' and '{role}'",
                            task=task_name,
                            env=options.environment,
-                           role=role)
+                           role=host_and_role.role)
                     with Options(assume_yes=options.assume_yes):
                         task(**kwargs)
 

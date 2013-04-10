@@ -9,7 +9,7 @@ from fabric.contrib.console import confirm
 
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.options import options
-from confab.model import get_components_for_role, get_roles_for_host
+from confab.definitions import Settings
 from confab.output import status
 
 import os
@@ -148,7 +148,7 @@ class ConfFile(object):
 
         status('Pulling {file_name} from {host}',
                file_name=self.remote,
-               host=options.get_hostname())
+               host=self.host)
 
         _ensure_dir(os.path.dirname(local_file_name))
         _clear_file(local_file_name)
@@ -169,7 +169,7 @@ class ConfFile(object):
 
         status('Pushing {file_name} to {host}',
                file_name=self.remote,
-               host=options.get_hostname())
+               host=self.host)
 
         with settings(use_ssh_config=True):
             sudo('mkdir -p {dir_name}'.format(dir_name=remote_dir))
@@ -185,7 +185,7 @@ class ConfFiles(object):
     Encapsulation of a set of configuration files.
     """
 
-    def __init__(self, environment_loader, data_loader):
+    def __init__(self, host_and_role, environment_loader, data_loader):
         """
         On init, load a list of configuration files using the provided Jinja2
         environment loader and data loader.
@@ -193,61 +193,32 @@ class ConfFiles(object):
         The environment loader must return a Jinja2 environment that uses a
         loader that supports list_templates().
         """
-        def load_templates(data, environment, component, include_results=False):
-
-            conffiles = []
-            for conffile in map(lambda template_name:
-                                ConfFile(environment.get_template(template_name), data),
-                                environment.list_templates(filter_func=options.filter_func)):
-
-                other_component = conffile_names.get(conffile.name)
-                if other_component:
-                    raise Exception("Found two configuration templates with the same file path."
-                                    " File: {}, Roles/Components: {}, {}"
-                                    .format(conffile.remote, component, other_component))
-
-                conffile_names[conffile.name] = component
-
-                # store the conffiles for the original role
-                if include_results:
-                    conffiles.append(conffile)
-
-            return conffiles
-
         self.conffiles = []
+        self.host = host_and_role.host
+        # XXX need an abstraction for multiple roles for host
 
-        # Make sure we can generate all templates for the current host.
-        # This will go over all roles for the host.
+        def make_conffiles(role, component=None):
+            environment = environment_loader(role)
+            data = data_loader(component)
+            template_names = environment.list_templates(filter_func=options.filter_func)
+            make_conffile = lambda template_name: ConfFile(environment.get_template(template_name), data)
+            return map(make_conffile, template_names)
 
-        # A mapping between a conffile name
-        # and the role or component it is generated for.
-        conffile_names = {}
-
-        original_role = options.get_rolename()
-        for role in get_roles_for_host(options.get_hostname()):
-            with settings(role=role):
-                include_results = original_role == role
-                self.conffiles.extend(load_templates(data_loader(None),
-                                                     environment_loader(role),
-                                                     role,
-                                                     include_results))
-                for component in get_components_for_role(role):
-                    self.conffiles.extend(load_templates(data_loader(component),
-                                                         environment_loader(component),
-                                                         component,
-                                                         include_results))
+        self.conffiles.extend(make_conffiles(host_and_role.role))
+        for component in host_and_role.itercomponents():
+            self.conffiles.extend(make_conffiles(component.name, component.name))
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"
-                 .format(role=original_role,
-                         host=options.get_hostname(),
-                         environment=options.get_environmentname()))
+                 .format(role=host_and_role.role,
+                         host=host_and_role.host,
+                         environment=host_and_role.environment.name))
 
     def generate(self, generated_dir):
         """
         Write all configuration files to generated_dir.
         """
-        host_generated_dir = os.sep.join([generated_dir, options.get_hostname()])
+        host_generated_dir = os.sep.join([generated_dir, self.host])
 
         _clear_dir(host_generated_dir)
         _ensure_dir(host_generated_dir)
@@ -259,7 +230,7 @@ class ConfFiles(object):
         """
         Pull remote versions of files into remotes_dir.
         """
-        host_remotes_dir = os.sep.join([remotes_dir, options.get_hostname()])
+        host_remotes_dir = os.sep.join([remotes_dir, self.host])
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -268,8 +239,8 @@ class ConfFiles(object):
         """
         Show diffs for all configuration files.
         """
-        host_generated_dir = os.sep.join([generated_dir, options.get_hostname()])
-        host_remotes_dir = os.sep.join([remotes_dir, options.get_hostname()])
+        host_generated_dir = os.sep.join([generated_dir, self.host])
+        host_remotes_dir = os.sep.join([remotes_dir, self.host])
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -284,8 +255,8 @@ class ConfFiles(object):
         """
         Push configuration files that have changes, given user confirmation.
         """
-        host_generated_dir = os.sep.join([generated_dir, options.get_hostname()])
-        host_remotes_dir = os.sep.join([remotes_dir, options.get_hostname()])
+        host_generated_dir = os.sep.join([generated_dir, self.host])
+        host_remotes_dir = os.sep.join([remotes_dir, self.host])
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -298,17 +269,17 @@ class ConfFiles(object):
 
         if not with_diffs:
             print(magenta('No configuration files to push for {host}'
-                          .format(host=options.get_hostname())))
+                          .format(host=self.host)))
             return
 
         print(magenta('The following configuration files have changed for {host}:'
-                      .format(host=options.get_hostname())))
+                      .format(host=self.host)))
         print
         for conffile in with_diffs:
             print(magenta('\t' + conffile.remote))
 
         if options.assume_yes or confirm('Push configuration files to {host}?'
-                                         .format(host=options.get_hostname()),
+                                         .format(host=self.host),
                                          default=False):
             for conffile in with_diffs:
                 conffile.push(host_generated_dir)

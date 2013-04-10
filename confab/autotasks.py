@@ -8,8 +8,10 @@ to customize configuration data.
 
 These tasks are somewhat experimental.
 """
-from fabric.api import env
+from fabric.api import abort, env
 from fabric.state import commands
+
+from confab.definitions import Settings
 
 
 def _add_task(name, task, doc):
@@ -29,16 +31,25 @@ def autogenerate_tasks():
     Normally the roledefs and environment defs will be configured
     using 'load_model_from_dir' or similar.
     """
-    for role in env.roledefs.iterkeys():
-        _add_task('role_' + role,
-                  lambda: setattr(env, 'role', role),
-                  "Set role to '{role}'".format(role=role))
+    settings = Settings()
+    # XXX where do we load settings from?
 
-    try:
-        for environment in env.environmentdefs.iterkeys():
-            _add_task('env_' + environment,
-                      lambda: setattr(env, 'environment', environment),
-                      "Set environment to '{environment}'".format(environment=environment))
-    except AttributeError:
-        # environment defs not configured
-        pass
+    for environment in settings.environmentdefs.iterkeys():
+        def select_environment():
+            if hasattr(env, "environmentdef"):
+                abort("Environment already defined as '{}'".format(env.environmentdef.name))
+            env.environmentdef = settings.with_env(environment)
+
+        _add_task('env_' + environment,
+                  select_environment,
+                  "Set environment to '{environment}'".format(environment=environment))
+
+    for role in settings.roledefs.iterkeys():
+        def select_role():
+            if not hasattr(env, "environmentdef"):
+                abort("Environment must be defined before role")
+            env.environmentdef = env.environmentdef.with_roles(role)
+
+        _add_task('role_' + role,
+                  select_role,
+                  "Select role '{}'".format(role))
