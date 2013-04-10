@@ -6,6 +6,7 @@ import imp
 import os
 import shutil
 import sys
+from hashlib import md5
 from fabric.api import runs_once
 
 
@@ -42,7 +43,7 @@ def _import(module_name, dir_name):
     """
 
     # assign module a name that's not likely to conflict
-    safe_name = 'confab.data.' + module_name
+    safe_name = 'confab.data.' + _hash(module_name, dir_name)
 
     # check if module is already loaded
     existing = sys.modules.get(safe_name)
@@ -61,7 +62,7 @@ def _import_string(module_name, content):
     """
 
     # assign module a name that's not likely to conflict
-    safe_name = 'confab.data.' + module_name
+    safe_name = 'confab.data.' + _hash(module_name, content)
 
     # check if module is already loaded
     existing = sys.modules.get(safe_name)
@@ -72,3 +73,10 @@ def _import_string(module_name, content):
     module = imp.new_module(safe_name)
     exec content in module.__dict__
     return module
+
+
+def _hash(*args):
+    """
+    Create a hash out of a list of strings.
+    """
+    return md5(''.join(args)).digest().encode("base64")

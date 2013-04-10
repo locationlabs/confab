@@ -10,7 +10,7 @@ from fabric.contrib.console import confirm
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.options import options
 from confab.model import get_components_for_role, get_roles_for_host
-from confab.output import status
+from confab.output import status, debug
 
 import os
 import shutil
@@ -153,12 +153,11 @@ class ConfFile(object):
         _ensure_dir(os.path.dirname(local_file_name))
         _clear_file(local_file_name)
 
-        with settings(use_ssh_config=True):
-            if exists(self.remote, use_sudo=True):
-                get(self.remote, local_file_name)
-            else:
-                status('Not found: {file_name}',
-                       file_name=self.remote)
+        if exists(self.remote, use_sudo=True):
+            get(self.remote, local_file_name)
+        else:
+            status('Not found: {file_name}',
+                   file_name=self.remote)
 
     def push(self, generated_dir):
         """
@@ -171,13 +170,12 @@ class ConfFile(object):
                file_name=self.remote,
                host=options.get_hostname())
 
-        with settings(use_ssh_config=True):
-            sudo('mkdir -p {dir_name}'.format(dir_name=remote_dir))
+        sudo('mkdir -p {dir_name}'.format(dir_name=remote_dir))
 
-            put(generated_file_name,
-                self.remote,
-                use_sudo=True,
-                mirror_local_mode=True)
+        put(generated_file_name,
+            self.remote,
+            use_sudo=True,
+            mirror_local_mode=True)
 
 
 class ConfFiles(object):
@@ -210,6 +208,10 @@ class ConfFiles(object):
 
                 # store the conffiles for the original role
                 if include_results:
+                    debug("Found {conffile} for component '{component}' and role '{role}'",
+                          conffile=conffile.remote,
+                          component=component,
+                          role=original_role)
                     conffiles.append(conffile)
 
             return conffiles
