@@ -53,7 +53,7 @@ class PackageEnvironmentLoader(object):
             debug("Using EmptyLoader for {}; no such directory".format(package_path))
             return Environment(loader=EmptyLoader())
 
-        debug("Creating PacksgeLoader for {}".format(package_path))
+        debug("Creating PackageLoader for {}".format(package_path))
         return Environment(loader=PackageLoader(self.package_name, package_path),
                            undefined=StrictUndefined)
 
