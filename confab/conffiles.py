@@ -189,11 +189,16 @@ class ConfFiles(object):
 
     def __init__(self, host_and_role, environment_loader, data_loader):
         """
-        On init, load a list of configuration files using the provided Jinja2
-        environment loader and data loader.
+        A set of templates configuration files.
 
-        The environment loader must return a Jinja2 environment that uses a
-        loader that supports list_templates().
+        :param host_and_role: An instance of HostAndRoleDefinition
+        :param environment_loader: An environment loader (e.g. FileSystemEnvironmentLoader)
+        :param data_load: An instance DataLoader
+
+        The environment loader must return a Jinja2 environment with an underlying
+        loader that supports list_templates(). On init, ConfFiles will load all
+        templates in the environment for the specified host and role (including any
+        role components).
         """
         self.conffiles = []
         self.host = host_and_role.host
