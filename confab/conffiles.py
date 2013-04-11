@@ -34,7 +34,6 @@ class ConfFileDiff(object):
         self.diff_lines = []
 
         if not os.path.exists(generated_file_name):
-            # Unexpected
             self.missing_generated = True
 
         if not os.path.exists(remote_file_name):
@@ -56,7 +55,6 @@ class ConfFileDiff(object):
         If confab is used on binary files, diffs are likely to render poorly.
         """
         if self.missing_generated:
-            # Unexpected
             if not self.missing_remote:
                 print(red('Only in remote: {file_name}'.format(file_name=self.conffile_name)))
         elif self.missing_remote:
@@ -205,21 +203,16 @@ class ConfFiles(object):
         self.host = host_and_role.host
         self.role = host_and_role.role
 
-        def make_conffiles(role, component):
-            environment = environment_loader(component)
-            template_names = environment.list_templates(filter_func=options.filter_func)
-            debug("Found templates: {}".format(", ".join(template_names)))
-
-            data = data_loader(component)
-
-            make_conffile = lambda template_name: ConfFile(environment.get_template(template_name),
-                                                           data,
-                                                           self.host)
-            return map(make_conffile, template_names)
-
         for component in host_and_role.itercomponents():
-            debug("Including templates for: {}".format(component.name))
-            self.conffiles.extend(make_conffiles(host_and_role.role, component.name))
+            debug("Processing: {}".format(component.name))
+
+            data = data_loader(component.name)
+            environment = environment_loader(component.name)
+
+            for template_name in environment.list_templates(filter_func=options.filter_func):
+                debug("Adding template: {}".format(template_name))
+
+                self.conffiles.append(ConfFile(environment.get_template(template_name), data, self.host))
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"
