@@ -84,7 +84,7 @@ def parse_options():
 
 def get_environmentdef(parser, options):
     try:
-        settings_ = Settings().load_from_module(options.directory)
+        settings_ = Settings.load_from_module(options.directory)
     except ImportError as e:
         parser.error("Unable to load {settings}: {error}"
                      .format(settings=os.path.join(options.directory, "settings.py"),
