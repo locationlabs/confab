@@ -9,8 +9,7 @@ from fabric.contrib.console import confirm
 
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.options import options
-from confab.definitions import Settings
-from confab.output import status
+from confab.output import debug, status
 
 import os
 import shutil
@@ -195,18 +194,20 @@ class ConfFiles(object):
         """
         self.conffiles = []
         self.host = host_and_role.host
-        # XXX need an abstraction for multiple roles for host
 
         def make_conffiles(role, component=None):
-            environment = environment_loader(role)
-            data = data_loader(component)
+            environment = environment_loader(component or role)
             template_names = environment.list_templates(filter_func=options.filter_func)
+            debug("Found templates: {}".format(", ".join(template_names)))
+            data = data_loader(component)
             make_conffile = lambda template_name: ConfFile(environment.get_template(template_name), data)
             return map(make_conffile, template_names)
 
+        debug("Including templates for: {}".format(host_and_role.role))
         self.conffiles.extend(make_conffiles(host_and_role.role))
         for component in host_and_role.itercomponents():
-            self.conffiles.extend(make_conffiles(component.name, component.name))
+            debug("Including templates for: {}".format(component.name))
+            self.conffiles.extend(make_conffiles(host_and_role.role, component.name))
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"
