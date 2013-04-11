@@ -15,12 +15,12 @@ def pull(templates_dir=None, data_dir=None, remotes_dir=None):
     """
     validate_pull(templates_dir, data_dir, remotes_dir)
 
-    if not env.environmentdef:
-        abort("No environment defined")
+    if not env.confab:
+        abort("Confab needs to be configured")
 
-    for conffiles in iterconffiles(env.environmentdef, templates_dir, data_dir):
+    for conffiles in iterconffiles(env.confab, templates_dir, data_dir):
         status("Pulling remote templates for '{environment}' and '{role}'",
-               environment=env.environmentdef.name,
+               environment=env.confab.name,
                role=conffiles.role)
 
         conffiles.pull(remotes_dir)

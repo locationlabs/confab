@@ -144,12 +144,12 @@ def confab(environment="local", settings=None, *roles):
             dir_name, module_name = settings, None
     else:
         dir_name, module_name = os.getcwd(), None
-    print dir_name, module_name
+
     try:
-        env.environmentdef = get_environmentdef(environment=environment,
-                                                dir_name=dir_name,
-                                                module_name=module_name,
-                                                roles=roles)
+        env.confab = get_environmentdef(environment=environment,
+                                        dir_name=dir_name,
+                                        module_name=module_name,
+                                        roles=",".join(roles))
     except ImportError as e:
         abort("Unable to load {settings}: {error}"
               .format(settings=os.path.join(dir_name, module_name or "settings.py"),
@@ -183,7 +183,7 @@ def main():
 
         task_func, kwargs = get_task(parser, options, arguments)
 
-        with settings(environmentdef=environmentdef,
+        with settings(confab=environmentdef,
                       user=options.user):
             with Options(assume_yes=options.assume_yes):
                 task_func(**kwargs)
