@@ -16,13 +16,13 @@ class TestSettings(TestCase):
 
     def setUp(self):
         self.dir_name = join(dirname(__file__), "data/default")
-        self.settings = Settings()
+        self.settings = None
 
     def test_load_from_empty_module(self):
         """
         Loading empty state results in empty dictionaries.
         """
-        self.settings.load_from_module(dir_name=self.dir_name, module_name="empty")
+        self.settings = Settings.load_from_module(dir_name=self.dir_name, module_name="empty")
         for key in Settings.KEYS:
             eq_({}, getattr(self.settings, key, {}))
 
@@ -30,7 +30,7 @@ class TestSettings(TestCase):
         """
         Loading empty state results in empty dictionaries.
         """
-        self.settings.load_from_dict({})
+        self.settings = Settings.load_from_dict({})
         for key in Settings.KEYS:
             eq_({}, getattr(self.settings, key, {}))
 
@@ -38,7 +38,7 @@ class TestSettings(TestCase):
         """
         Loading non-empty module results in expected dictionaries.
         """
-        self.settings.load_from_module(dir_name=self.dir_name, module_name="example")
+        self.settings = Settings.load_from_module(dir_name=self.dir_name, module_name="example")
         eq_(["host1", "host2"], self.settings.environmentdefs["environment1"])
         eq_(["host1"], self.settings.roledefs["role1"])
         eq_(["component1"], self.settings.componentdefs["role1"])
@@ -58,7 +58,7 @@ class TestSettings(TestCase):
                 "role1": ["component1"],
             }
         }
-        self.settings.load_from_dict(dct)
+        self.settings = Settings.load_from_dict(dct)
         eq_(["host1", "host2"], self.settings.environmentdefs["environment1"])
         eq_(["host1"], self.settings.roledefs["role1"])
         eq_(["component1"], self.settings.componentdefs["role1"])

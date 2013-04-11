@@ -10,6 +10,27 @@ from confab.files import _import
 class Settings(object):
     """
     Collection of environment, role, and component definitions.
+
+    Supports convenient iteration. For example:
+
+        # Iterate over all hosts and roles
+        for host_and_role in settings.for_env("env").iterall():
+            print host_and_role
+
+        # Iterate over selected hosts and/or roles
+        for host_and_role in settings.for_env("env").with_hosts("host1", "host2").with_roles("role1").iterall():
+            print host_and_role
+
+        # Iterate over all hosts and roles, then all components
+        for host_and_role in settings.for_env("dev").iterall():
+            environment, host, role = host_and_role
+            for component in host_and_role.itercomponents():
+                print component
+
+        # Iterate over components only
+        for component in settings.for_env("dev").itercomponents():
+            environment, host, role, name = component
+            print component
     """
 
     KEYS = ["environmentdefs", "roledefs", "componentdefs"]
@@ -19,28 +40,26 @@ class Settings(object):
         self.roledefs = {}
         self.componentdefs = {}
 
-    def load_from_module(self, dir_name, module_name='settings'):
+    @classmethod
+    def load_from_module(cls, dir_name, module_name='settings'):
         """
         Load settings from a Python module in the specified directory.
         """
-        settings = _import(module_name, dir_name)
+        settings = Settings()
+        module = _import(module_name, dir_name)
         for key in Settings.KEYS:
-            setattr(self, key, getattr(settings, key, {}))
-        return self
+            setattr(settings, key, getattr(module, key, {}))
+        return settings
 
-    def load_from_dict(self, dct):
+    @classmethod
+    def load_from_dict(cls, dct):
         """
         Load settings from a Python dictionary.
         """
+        settings = Settings()
         for key in Settings.KEYS:
-            setattr(self, key, dct.get(key, {}))
-        return self
-
-    def roles_for_host(self, host):
-        """
-        Compute complete list of roles for a host.
-        """
-        return [role for (role, hosts) in self.roledefs.iteritems() if host in hosts]
+            setattr(settings, key, dct.get(key, {}))
+        return settings
 
     def for_env(self, environment):
         """
@@ -55,9 +74,15 @@ class Settings(object):
         if not self.environmentdefs[environment]:
             warn("Environment '{}' does not have any hosts defined.".format(environment))
         for host in self.environmentdefs[environment]:
-            if not self.roles_for_host(host):
+            if not self._roles_for_host(host):
                 raise Exception("Host '{}' does not have any configured roles".format(host))
         return EnvironmentDefinition(self, environment)
+
+    def _roles_for_host(self, host):
+        """
+        Compute complete list of roles for a host.
+        """
+        return [role for (role, hosts) in self.roledefs.iteritems() if host in hosts]
 
 
 class EnvironmentDefinition(object):
@@ -75,7 +100,13 @@ class EnvironmentDefinition(object):
         self.name = name
         self.selected_hosts = selected_hosts or []
         self.selected_roles = selected_roles or []
-        self.host_roles = self._resolve_host_roles()
+
+    @property
+    def host_roles(self):
+        """
+        Return the host to roles mapping.
+        """
+        return self._resolve_host_roles()
 
     def with_hosts(self, *hosts):
         """
@@ -145,7 +176,7 @@ class EnvironmentDefinition(object):
         host_roles = {}
         hosts = self.selected_hosts or self.settings.environmentdefs[self.name]
         for host in hosts:
-            roles = self.settings.roles_for_host(host)
+            roles = self.settings._roles_for_host(host)
             # If no roles are selected
             if not self.selected_roles:
                 # Use all roles
@@ -229,46 +260,3 @@ class ComponentDefinition(object):
                     self.host_and_role.host,
                     self.host_and_role.role,
                     self.name))
-
-
-if __name__ == '__main__':
-    # Example usage
-    settings = Settings()
-
-    dct = {
-        "environmentdefs": {
-            "dev": ["webhost", "queuehost", "dbhost"]
-        },
-        "roledefs": {
-            "web": ["webhost"],
-            "queue": ["queuehost"],
-            "db": ["dbhost"]
-        },
-        "componentdefs": {
-            "common": ["sparkle", "smsrouter", "invitations"],
-            "web": ["gateway", "common"],
-            "queue": ["notifier", "common"]
-        }
-    }
-
-    settings.load_from_dict(dct)
-
-    # Use Case #1: Iterate over all hosts and roles
-    for host_and_role in settings.for_env("dev").iterall():
-        print host_and_role
-
-    # Use Case #2: Iterate over selected hosts and/or roles
-    for host_and_role in settings.for_env("dev").with_hosts("webhost", "dbhost").with_roles("web").iterall():
-        print host_and_role
-
-    # Use Case #3: Iterate over all hosts and roles, then all components:
-    for host_and_role in settings.for_env("dev").iterall():
-        environment, host, role = host_and_role
-        print host_and_role
-        for component in host_and_role.itercomponents():
-            print component
-
-    # Use Case 34: Iterate over components only:
-    for component in settings.for_env("dev").itercomponents():
-        environment, host, role, name = component
-        print component
