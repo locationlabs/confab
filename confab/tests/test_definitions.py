@@ -16,7 +16,6 @@ class TestSettings(TestCase):
 
     def setUp(self):
         self.dir_name = join(dirname(__file__), "data/default")
-        self.settings = None
 
     def test_load_from_empty_module(self):
         """
