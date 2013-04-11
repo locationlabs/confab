@@ -22,7 +22,7 @@ from fabric.network import disconnect_all
 from confab.api import pull, push, diff, generate
 from confab.definitions import Settings
 from confab.options import Options
-from confab.output import configure_output, status
+from confab.output import configure_output
 
 
 _tasks = {"diff":     (diff,     True,  True),
@@ -94,9 +94,9 @@ def get_environmentdef(parser, options):
     try:
         selected_hosts = options.hosts.split(",") if options.hosts else []
         selected_roles = options.roles.split(",") if options.roles else []
-        environmentdef = settings_.with_env(options.environment)
-        environmentdef = environmentdef.with_hosts(selected_hosts)
-        environmentdef = environmentdef.with_roles(selected_roles)
+        environmentdef = settings_.for_env(options.environment)
+        environmentdef = environmentdef.with_hosts(*selected_hosts)
+        environmentdef = environmentdef.with_roles(*selected_roles)
         return environmentdef
     except Exception as e:
         parser.error(e)
@@ -122,7 +122,7 @@ def get_task(parser, options, arguments):
         kwargs["remotes_dir"] = os.path.join(options.directory, "remotes")
 
     kwargs["templates_dir"] = os.path.join(options.directory, "templates")
-    return task_name, task, kwargs
+    return task, kwargs
 
 
 def main():
@@ -137,19 +137,12 @@ def main():
                          options.quiet)
 
         environmentdef = get_environmentdef(parser, options)
-        task_name, task, kwargs = get_task(parser, options, arguments)
+        task, kwargs = get_task(parser, options, arguments)
 
-        # Invoke task once per host/role
         with settings(environmentdef=environmentdef,
                       user=options.user):
-            for host_and_role in environmentdef.iterall():
-                with settings(host_string=host_and_role.host):
-                    status("Running {task} for '{env}' and '{role}'",
-                           task=task_name,
-                           env=options.environment,
-                           role=host_and_role.role)
-                    with Options(assume_yes=options.assume_yes):
-                        task(**kwargs)
+            with Options(assume_yes=options.assume_yes):
+                task(**kwargs)
 
     except SystemExit:
         raise

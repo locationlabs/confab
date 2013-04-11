@@ -7,7 +7,9 @@ from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists
 from fabric.contrib.console import confirm
 
+from confab.data import DataLoader
 from confab.files import _clear_dir, _clear_file, _ensure_dir
+from confab.loaders import FileSystemEnvironmentLoader
 from confab.options import options
 from confab.output import debug, status
 
@@ -81,9 +83,10 @@ class ConfFile(object):
     Encapsulation of a configuration file template.
     """
 
-    def __init__(self, template, data):
+    def __init__(self, template, data, host):
         self.template = template
         self.data = data
+        self.host = host
         self.mime_type = options.get_mime_type(template.filename)
         self.name = template.environment.from_string(template.name).render(**self.data)
         self.remote = os.sep + self.name
@@ -194,13 +197,14 @@ class ConfFiles(object):
         """
         self.conffiles = []
         self.host = host_and_role.host
+        self.role = host_and_role.role
 
         def make_conffiles(role, component=None):
             environment = environment_loader(component or role)
             template_names = environment.list_templates(filter_func=options.filter_func)
             debug("Found templates: {}".format(", ".join(template_names)))
             data = data_loader(component)
-            make_conffile = lambda template_name: ConfFile(environment.get_template(template_name), data)
+            make_conffile = lambda template_name: ConfFile(environment.get_template(template_name), data, self.host)
             return map(make_conffile, template_names)
 
         debug("Including templates for: {}".format(host_and_role.role))
@@ -284,3 +288,19 @@ class ConfFiles(object):
                                          default=False):
             for conffile in with_diffs:
                 conffile.push(host_generated_dir)
+
+
+def iterconffiles(environmentdef, templates_dir, data_dir):
+    """
+    Generate ConfFiles objects for each host_and_role in an environment.
+
+    Uses the default FileSystemEnvironmentLoader and DataLoader.
+    """
+    for host_and_role in environmentdef.iterall():
+        environment, host, role = host_and_role
+        with settings(environment=environment,
+                      host_string=host,
+                      role=role):
+            yield ConfFiles(host_and_role,
+                            FileSystemEnvironmentLoader(templates_dir),
+                            DataLoader(data_dir))
