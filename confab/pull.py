@@ -1,13 +1,11 @@
 """
 Pull configuration files from remote host into remotes_dir.
 """
+from fabric.api import abort, env, task
 
-from confab.conffiles import ConfFiles
-from confab.data import DataLoader
-from confab.loaders import FileSystemEnvironmentLoader
+from confab.conffiles import iterconffiles
+from confab.output import status
 from confab.validate import validate_pull
-
-from fabric.api import task
 
 
 @task
@@ -17,7 +15,12 @@ def pull(templates_dir=None, data_dir=None, remotes_dir=None):
     """
     validate_pull(templates_dir, data_dir, remotes_dir)
 
-    conffiles = ConfFiles(FileSystemEnvironmentLoader(templates_dir),
-                          DataLoader(data_dir))
+    if not env.environmentdef:
+        abort("No environment defined")
 
-    conffiles.pull(remotes_dir)
+    for conffiles in iterconffiles(env.environmentdef, templates_dir, data_dir):
+        status("Pulling remote templates for '{environment}' and '{role}'",
+               environment=env.environmentdef.name,
+               role=conffiles.role)
+
+        conffiles.pull(remotes_dir)

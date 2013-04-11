@@ -74,7 +74,8 @@ Confab may be used in several ways:
     When invoking Confab tasks from *fab*, configuration directories must be provided
     as task arguments.
     
-    To specify *roles* and *environments* to customize configuration data, the fabfile
+    These tasks require that a valid `EnvironmentDefinition` exist in the Fabric environment
+    as `env.environmentde`. To specify the environment definition, the fabfile
     can use the *autotasks*, for example:
 
         from confab.api import *
@@ -95,7 +96,8 @@ Confab may be used in several ways:
 
         from confab.api import ConfFiles
         
-        conffiles = ConfFiles(jinja2_environment_loader,
+        conffiles = ConfFiles(host_and_role,
+                              environment_loader,
                               data_loader)
 
 
@@ -107,17 +109,17 @@ Within the default *confab* console script:
     directory. This module should define the environment-to-host and role-to-host mappings as follows:
 
         environmentdefs = {
-            'local': ['localhost']
+            'local': ['localhost'],
         }
         
         roledefs = {
-            'foo': ['localhost']
+            'foo': ['localhost'],
         }
 
  -  The **settings.py** file may also define a role-to-components mapping:
 
         componentdefs = {
-            'foo': ['bar']
+            'foo': ['bar'],
         }
 
     If no component defs are defined or a role is absent from this mapping, the role is assumed
