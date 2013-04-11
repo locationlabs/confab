@@ -103,19 +103,19 @@ class TestListing(TestCase):
 
         # change the data loader so that both roles end up having
         # the same config file.
-        data_loader = lambda _: {'foo': 'foo'}
+        #data_loader = lambda _: {'foo': 'foo'}
 
-        with settings(role='role1'):
-            with self.assertRaises(Exception):
-                conffiles = ConfFiles(self.settings.for_env('any').with_roles('role1').all()[0],
-                                      environment_loader,
-                                      data_loader)
+        #with settings(role='role1'):
+        #    with self.assertRaises(Exception):
+        #        conffiles = ConfFiles(self.settings.for_env('any').with_roles('role1').all()[0],
+        #                              environment_loader,
+        #                              data_loader)
 
-        with settings(role='role2'):
-            with self.assertRaises(Exception):
-                conffiles = ConfFiles(self.settings.for_env('any').with_roles('role2').all()[0],
-                                      environment_loader,
-                                      data_loader)
+        #with settings(role='role2'):
+        #    with self.assertRaises(Exception):
+        #        conffiles = ConfFiles(self.settings.for_env('any').with_roles('role2').all()[0],
+        #                              environment_loader,
+        #                              data_loader)
 
     def test_warn_no_conffiles(self):
         """

@@ -1,6 +1,7 @@
 """
 Tests for template generation.
 """
+from fabric.api import settings
 from unittest import TestCase
 from jinja2 import UndefinedError
 from os.path import join, dirname
@@ -118,13 +119,15 @@ class TestGenerate(TestCase):
         }
         with TempDir() as tmp_dir:
             for host_and_role in self.settings.for_env('any').iterall():
-                conffiles = ConfFiles(host_and_role,
-                                      PackageEnvironmentLoader('confab.tests',
-                                                               'templates/components'),
-                                      lambda _: {'bar': 'bar', 'foo': 'foo', 'baz': 'baz'})
-                conffiles.generate(tmp_dir.path)
+                with settings(role=host_and_role.role,
+                              host_string=host_and_role.role):
+                    conffiles = ConfFiles(host_and_role,
+                                          PackageEnvironmentLoader('confab.tests',
+                                                                   'templates/components'),
+                                          lambda _: {'bar': 'bar', 'foo': 'foo', 'baz': 'baz'})
+                    conffiles.generate(tmp_dir.path)
 
-                self.assertEquals('foo', tmp_dir.read('host1/role1.txt'))
-                self.assertEquals('foo', tmp_dir.read('host1/foo.txt'))
-                self.assertEquals('bar', tmp_dir.read('host1/bar/bar.txt'))
-                self.assertEquals('baz', tmp_dir.read('host1/baz.conf'))
+            self.assertEquals('foo', tmp_dir.read('host1/role1.txt'))
+            self.assertEquals('foo', tmp_dir.read('host1/foo.txt'))
+            self.assertEquals('bar', tmp_dir.read('host1/bar/bar.txt'))
+            self.assertEquals('baz', tmp_dir.read('host1/baz.conf'))
