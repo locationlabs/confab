@@ -1,5 +1,6 @@
 Version 1.2
 
+ -  Replace "autotasks" with simpler `confab` task.
  -  Major refactor of underlying data model:
     -  `definitions.py` replaces `model.py` and `resolve.py`
     -  Provides a simpler object and iteration model for navigation confab settings.

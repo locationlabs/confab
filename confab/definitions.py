@@ -41,12 +41,12 @@ class Settings(object):
         self.componentdefs = {}
 
     @classmethod
-    def load_from_module(cls, dir_name, module_name='settings'):
+    def load_from_module(cls, dir_name, module_name=None):
         """
         Load settings from a Python module in the specified directory.
         """
         settings = Settings()
-        module = _import(module_name, dir_name)
+        module = _import(module_name or 'settings', dir_name)
         for key in Settings.KEYS:
             setattr(settings, key, getattr(module, key, {}))
         return settings

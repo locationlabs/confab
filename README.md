@@ -75,20 +75,16 @@ Confab may be used in several ways:
     as task arguments.
     
     These tasks require that a valid `EnvironmentDefinition` exist in the Fabric environment
-    as `env.environmentde`. To specify the environment definition, the fabfile
-    can use the *autotasks*, for example:
+    as `env.environmentdef`. To specify the environment definition, the custom `confab` task
+    can be used in your `fabfile.py`:
 
-        from confab.api import *
-        from confab.autotasks import autogenerate_tasks
-        
-        # load roledefs and environmentdefs from settings.py
-        load_model_from_dir('/path/to/directory')
-        # create tasks for each defined role and environment
-        autogenerate_tasks()
+        from confab.api import confab
 
-    Autotasks would then allow fab to run as:
+    Then run fab using:
 
-        fab role_{role} env_{environment} <task>:arguments
+        fab confab:{environment},/path/to/settings.py,{role1},{role2} <task>:arguments
+
+    Note that the settings path and roles list are optional.
 
  -  Confab's lower level API can be invoked using customized data loading 
     functions, either to create new tasks or to be called directly from 

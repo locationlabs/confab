@@ -16,13 +16,16 @@ import getpass
 import os
 import sys
 from optparse import OptionParser
-from fabric.api import settings
+from fabric.api import abort, env, settings, task
 from fabric.network import disconnect_all
 
-from confab.api import pull, push, diff, generate
 from confab.definitions import Settings
+from confab.diff import diff
+from confab.generate import generate
 from confab.options import Options
 from confab.output import configure_output
+from confab.pull import pull
+from confab.push import push
 
 
 _tasks = {"diff":     (diff,     True,  True),
@@ -82,31 +85,29 @@ def parse_options():
     return parser, opts, args
 
 
-def get_environmentdef(parser, options):
-    try:
-        settings_ = Settings.load_from_module(options.directory)
-    except ImportError as e:
-        parser.error("Unable to load {settings}: {error}"
-                     .format(settings=os.path.join(options.directory, "settings.py"),
-                             error=e))
+def get_environmentdef(environment,
+                       dir_name,
+                       module_name=None,
+                       hosts=None,
+                       roles=None):
+
+    settings_ = Settings.load_from_module(dir_name, module_name=module_name)
 
     # Normalize and resolve hosts to roles mapping
-    try:
-        selected_hosts = options.hosts.split(",") if options.hosts else []
-        selected_roles = options.roles.split(",") if options.roles else []
-        environmentdef = settings_.for_env(options.environment)
-        environmentdef = environmentdef.with_hosts(*selected_hosts)
-        environmentdef = environmentdef.with_roles(*selected_roles)
-        return environmentdef
-    except Exception as e:
-        parser.error(e)
+    selected_hosts = hosts.split(",") if hosts else []
+    selected_roles = roles.split(",") if roles else []
+
+    environmentdef = settings_.for_env(environment)
+    environmentdef = environmentdef.with_hosts(*selected_hosts)
+    environmentdef = environmentdef.with_roles(*selected_roles)
+    return environmentdef
 
 
 def get_task(parser, options, arguments):
     # Determine task
     try:
         task_name = arguments[0]
-        (task, needs_templates, needs_remotes) = _tasks[task_name]
+        (task_func, needs_templates, needs_remotes) = _tasks[task_name]
     except IndexError:
         parser.error("Please specify a task")
     except KeyError:
@@ -122,7 +123,39 @@ def get_task(parser, options, arguments):
         kwargs["remotes_dir"] = os.path.join(options.directory, "remotes")
 
     kwargs["templates_dir"] = os.path.join(options.directory, "templates")
-    return task, kwargs
+    return task_func, kwargs
+
+
+@task(alias="confab")
+def confab(environment="local", settings=None, *roles):
+    """
+    Fabric command line entry point for loading settings, selecting an
+    environment, and choosing roles.
+
+    :param environment: environment name
+    :param roles: specific role(s) to use
+    :param settings: path to settings module
+    """
+    if settings:
+        if settings.endswith(".py"):
+            dir_name, module = os.path.split(settings)
+            module_name, _ = os.path.splitext(module)
+        else:
+            dir_name, module_name = settings, None
+    else:
+        dir_name, module_name = os.getcwd(), None
+    print dir_name, module_name
+    try:
+        env.environmentdef = get_environmentdef(environment=environment,
+                                                dir_name=dir_name,
+                                                module_name=module_name,
+                                                roles=roles)
+    except ImportError as e:
+        abort("Unable to load {settings}: {error}"
+              .format(settings=os.path.join(dir_name, module_name or "settings.py"),
+                      error=e))
+    except Exception as e:
+        abort(e)
 
 
 def main():
@@ -136,13 +169,24 @@ def main():
         configure_output(options.verbosity,
                          options.quiet)
 
-        environmentdef = get_environmentdef(parser, options)
-        task, kwargs = get_task(parser, options, arguments)
+        try:
+            environmentdef = get_environmentdef(options.environment,
+                                                options.directory,
+                                                options.hosts,
+                                                options.roles)
+        except ImportError as e:
+            parser.error("Unable to load {settings}: {error}"
+                         .format(settings=os.path.join(options.directory, "settings.py"),
+                                 error=e))
+        except Exception as e:
+            parser.error(e)
+
+        task_func, kwargs = get_task(parser, options, arguments)
 
         with settings(environmentdef=environmentdef,
                       user=options.user):
             with Options(assume_yes=options.assume_yes):
-                task(**kwargs)
+                task_func(**kwargs)
 
     except SystemExit:
         raise
