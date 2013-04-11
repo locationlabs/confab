@@ -85,11 +85,21 @@ def parse_options():
     return parser, opts, args
 
 
-def get_environmentdef(environment,
-                       dir_name,
-                       module_name=None,
-                       hosts=None,
-                       roles=None):
+def load_environmentdef(environment,
+                        dir_name,
+                        module_name=None,
+                        hosts=None,
+                        roles=None):
+    """
+    Load settings, construct an environment definition, and save in Fabric env
+    as "confab" for use by subsequent confab tasks.
+
+    :param environment: environment name
+    :param dir_name: directory path for confab settings
+    :param module_name: settings module name (defaults to 'settings' if absent)
+    :param hosts: comma delimited host list
+    :param roles: comma delimited role list
+    """
 
     settings_ = Settings.load_from_module(dir_name, module_name=module_name)
 
@@ -97,13 +107,18 @@ def get_environmentdef(environment,
     selected_hosts = hosts.split(",") if hosts else []
     selected_roles = roles.split(",") if roles else []
 
-    environmentdef = settings_.for_env(environment)
-    environmentdef = environmentdef.with_hosts(*selected_hosts)
-    environmentdef = environmentdef.with_roles(*selected_roles)
-    return environmentdef
+    env.confab = settings_.for_env(environment)
+    env.confab = env.confab.with_hosts(*selected_hosts)
+    env.confab = env.confab.with_roles(*selected_roles)
+    return env.confab
 
 
 def get_task(parser, options, arguments):
+    """
+    Parse a task from command line arguments.
+
+    Return the task function and its required arguments.
+    """
     # Determine task
     try:
         task_name = arguments[0]
@@ -146,10 +161,16 @@ def confab(environment="local", settings=None, *roles):
         dir_name, module_name = os.getcwd(), None
 
     try:
-        env.confab = get_environmentdef(environment=environment,
-                                        dir_name=dir_name,
-                                        module_name=module_name,
-                                        roles=",".join(roles))
+        # Do not select hosts here.
+        #
+        # If `fab` is run with multiple hosts, this task will be run multiple
+        # times, overwriting the value of "env.confab". By not selecting hosts
+        # here, we ensure that the same environmentdef will be loaded each
+        # time. See also confab.conffiles:iterconffiles
+        load_environmentdef(environment=environment,
+                            dir_name=dir_name,
+                            module_name=module_name,
+                            roles=",".join(roles))
     except ImportError as e:
         abort("Unable to load {settings}: {error}"
               .format(settings=os.path.join(dir_name, module_name or "settings.py"),
@@ -170,10 +191,10 @@ def main():
                          options.quiet)
 
         try:
-            environmentdef = get_environmentdef(options.environment,
-                                                options.directory,
-                                                options.hosts,
-                                                options.roles)
+            load_environmentdef(environment=options.environment,
+                                dir_name=options.directory,
+                                hosts=options.hosts,
+                                roles=options.roles)
         except ImportError as e:
             parser.error("Unable to load {settings}: {error}"
                          .format(settings=os.path.join(options.directory, "settings.py"),
@@ -183,8 +204,7 @@ def main():
 
         task_func, kwargs = get_task(parser, options, arguments)
 
-        with settings(confab=environmentdef,
-                      user=options.user):
+        with settings(user=options.user):
             with Options(assume_yes=options.assume_yes):
                 task_func(**kwargs)
 

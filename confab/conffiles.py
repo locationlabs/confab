@@ -296,11 +296,16 @@ def iterconffiles(environmentdef, templates_dir, data_dir):
     Generate ConfFiles objects for each host_and_role in an environment.
 
     Uses the default FileSystemEnvironmentLoader and DataLoader.
-    Assumes that env.host_string has been set.
     """
-    for host_and_role in environmentdef.with_hosts(env.host_string).iterall():
+    # If we're running via `fab`, we should restrict the environment
+    # to the current host. See also confab.main:confab
+    if env.host_string:
+        environmentdef.with_hosts(env.host_string)
+
+    for host_and_role in environmentdef.iterall():
         environment, host, role = host_and_role
         with settings(environment=environment,
+                      host_string=host,
                       role=role):
             yield ConfFiles(host_and_role,
                             FileSystemEnvironmentLoader(templates_dir),

@@ -50,9 +50,8 @@ def validate_host():
     """
     Fabric host_string must be defined.
     """
-    # XXX unclear if we still want this check
     if not env.host_string:
-        abort('Please specify a host or a role')
+        abort('Please specify a host')
 
 
 def validate_all(templates_dir, data_dir, generated_dir, remotes_dir):
