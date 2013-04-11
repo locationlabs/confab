@@ -94,7 +94,7 @@ class DataLoader(object):
         """
         Load the data for the current configuration.
 
-        :param component: a component name. can be `None` to load role data.
+        :param component: a component name.
         """
         is_not_none = lambda x: x is not None
 
@@ -117,7 +117,7 @@ class DataLoader(object):
         module_names = [
             ('default', 'default'),
             ('component', component),
-            ('role', _get_role_module()),
+            ('role', _get_role_module() if _get_role_module() != component else None),
             ('environment', _get_environment_module()),
             ('host', _get_host_module())
         ]

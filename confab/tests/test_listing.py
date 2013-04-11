@@ -97,12 +97,10 @@ class TestListing(TestCase):
             data_loader = lambda _: {'foo': 'foo'}
 
             with settings(role='role1'):
-                with self.assertRaises(Exception):
-                    conffiles = ConfFiles(environment_loader, data_loader)
+                conffiles = ConfFiles(environment_loader, data_loader)
 
             with settings(role='role2'):
-                with self.assertRaises(Exception):
-                    conffiles = ConfFiles(environment_loader, data_loader)
+                conffiles = ConfFiles(environment_loader, data_loader)
 
     def test_warn_no_conffiles(self):
         """

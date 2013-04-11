@@ -9,6 +9,7 @@ import filecmp
 
 from confab.conffiles import ConfFiles
 from confab.loaders import PackageEnvironmentLoader, FileSystemEnvironmentLoader
+from confab.data import DataLoader
 from confab.options import Options
 from confab.tests.utils import TempDir
 
@@ -101,22 +102,22 @@ class TestGenerate(TestCase):
         Generate templates for roles with components.
         """
         with settings(roledefs={'role1': ['host1'],
-                                'role2': ['host1']},
+                                'role2': ['host1'],
+                                'role3': ['host1']},
                       componentdefs={'role1': ['comp1'],
                                      'role2': ['compgroup'],
                                      'compgroup': ['comp2', 'comp3']},
                       host_string='host1'):
 
             with TempDir() as tmp_dir:
-                for role in ['role1', 'role2']:
+                for role in ['role1', 'role2', 'role3']:
                     with settings(role=role):
                         conffiles = ConfFiles(PackageEnvironmentLoader('confab.tests',
                                                                        'templates/components'),
-                                              lambda _: {'bar': 'bar', 'foo': 'foo', 'baz': 'baz'})
-
+                                              DataLoader(join(dirname(__file__), 'data/components')))  # noqa
                         conffiles.generate(tmp_dir.path)
 
-                self.assertEquals('foo', tmp_dir.read('host1/role1.txt'))
                 self.assertEquals('foo', tmp_dir.read('host1/foo.txt'))
                 self.assertEquals('bar', tmp_dir.read('host1/bar/bar.txt'))
                 self.assertEquals('baz', tmp_dir.read('host1/baz.conf'))
+                self.assertEquals('foo', tmp_dir.read('host1/role3.txt'))
