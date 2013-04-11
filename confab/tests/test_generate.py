@@ -120,3 +120,4 @@ class TestGenerate(TestCase):
                 self.assertEquals('foo', tmp_dir.read('host1/foo.txt'))
                 self.assertEquals('bar', tmp_dir.read('host1/bar/bar.txt'))
                 self.assertEquals('baz', tmp_dir.read('host1/baz.conf'))
+                self.assertEquals('foo', tmp_dir.read('host1/role3.txt'))
