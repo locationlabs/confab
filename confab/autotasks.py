@@ -32,7 +32,7 @@ def autogenerate_tasks():
     using 'load_model_from_dir' or similar.
     """
     settings = Settings()
-    # XXX where do we load settings from?
+    # XXX create separate task to load settings
 
     for environment in settings.environmentdefs.iterkeys():
         def select_environment():
