@@ -6,11 +6,12 @@ template location from rendering and synchronization.
 
 Note that the default Jinja2 Loaders assume a charset (default: utf-8).
 """
-
 from jinja2 import (Environment, FileSystemLoader, PackageLoader, BaseLoader,
                     StrictUndefined, TemplateNotFound)
 from os.path import join, exists
 from pkg_resources import get_provider
+
+from confab.output import debug
 
 
 class FileSystemEnvironmentLoader(object):
@@ -26,8 +27,10 @@ class FileSystemEnvironmentLoader(object):
         template_path = join(self.dir_name, subdir)
 
         if not exists(template_path):
+            debug("Using EmptyLoader for {}; no such directory".format(template_path))
             return Environment(loader=EmptyLoader())
 
+        debug("Creating ConfabFileSystemLoader for {}".format(template_path))
         return Environment(loader=ConfabFileSystemLoader(template_path),
                            undefined=StrictUndefined)
 
@@ -47,8 +50,10 @@ class PackageEnvironmentLoader(object):
 
         provider = get_provider(self.package_name)
         if not provider.resource_isdir(package_path):
+            debug("Using EmptyLoader for {}; no such directory".format(package_path))
             return Environment(loader=EmptyLoader())
 
+        debug("Creating PacksgeLoader for {}".format(package_path))
         return Environment(loader=PackageLoader(self.package_name, package_path),
                            undefined=StrictUndefined)
 
