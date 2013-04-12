@@ -10,29 +10,6 @@ from confab.options import options
 from confab.output import debug
 
 
-def _get_environment_module():
-    """
-    Return the current configuration environment.
-
-    Placeholder.
-    """
-    return options.get_environmentname()
-
-
-def _get_role_module():
-    """
-    Return the current configuration role.
-    """
-    return options.get_rolename()
-
-
-def _get_host_module():
-    """
-    Return the current configuration hostname.
-    """
-    return options.get_hostname()
-
-
 def import_configuration(module_name, data_dir):
     """
     Load configuration from file as python module.
@@ -94,7 +71,7 @@ class DataLoader(object):
         """
         Load the data for the current configuration.
 
-        :param component: a component name.
+        :param component: a component definition.
         """
         is_not_none = lambda x: x is not None
 
@@ -104,9 +81,9 @@ class DataLoader(object):
 
         module_dicts = filter(is_not_none, map(load_module, module_names))
 
-        confab_data = dict(confab=dict(environment=options.get_environmentname(),
-                                       host=options.get_hostname(),
-                                       component=component))
+        confab_data = dict(confab=dict(environment=component.environment,
+                                       host=component.host,
+                                       component=component.name))
 
         return merge(confab_data, *module_dicts)
 
@@ -116,10 +93,10 @@ class DataLoader(object):
         """
         module_names = [
             ('default', 'default'),
-            ('component', component),
-            ('role', _get_role_module() if _get_role_module() != component else None),
-            ('environment', _get_environment_module()),
-            ('host', _get_host_module())
+            ('component', component.name),
+            ('role', component.role if component.role != component.name else None),
+            ('environment', component.environment),
+            ('host', component.host)
         ]
 
         return [name for key, name in module_names if key in self.data_modules]
