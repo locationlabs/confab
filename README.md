@@ -75,7 +75,7 @@ Confab may be used in several ways:
     as task arguments.
     
     These tasks require that a valid `EnvironmentDefinition` exist in the Fabric environment
-    as `env.environmentdef`. To specify the environment definition, the custom `confab` task
+    as `env.confab`. To specify the environment definition, the custom `confab` task
     can be used in your `fabfile.py`:
 
         from confab.api import confab
@@ -90,11 +90,14 @@ Confab may be used in several ways:
     functions, either to create new tasks or to be called directly from 
     a new console script.
 
-        from confab.api import ConfFiles
+        from confab.api import ConfFiles, Settings
         
-        conffiles = ConfFiles(host_and_role,
-                              environment_loader,
-                              data_loader)
+        settings = Settings.load_from_module(dir_name, module_name)
+        
+        for host_and_role in settings.for_env(env_name).iterall():
+            conffiles = ConfFiles(host_and_role,
+                                  environment_loader,
+                                  data_loader)
 
 
 ## Loading Roles, Environments, and Hosts
