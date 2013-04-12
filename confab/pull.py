@@ -3,17 +3,20 @@ Pull configuration files from remote host into remotes_dir.
 """
 from fabric.api import abort, env, task
 from gusset.output import status
+from gusset.validation import with_validation
 
 from confab.conffiles import iterconffiles
-from confab.validate import validate_pull
+from confab.validate import assert_exists, assert_may_be_created
 
 
 @task
-def pull(templates_dir=None, data_dir=None, remotes_dir=None):
+@with_validation
+def pull(templates_dir, data_dir, remotes_dir):
     """
     Pull remote configuration files.
     """
-    validate_pull(templates_dir, data_dir, remotes_dir)
+    assert_exists(templates_dir, data_dir)
+    assert_may_be_created(remotes_dir)
 
     if not env.environmentdef:
         abort("No environment defined")

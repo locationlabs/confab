@@ -3,20 +3,20 @@ Push generated configuration files to remote host.
 """
 from fabric.api import abort, env, task
 from gusset.output import status
+from gusset.validation import with_validation
 
 from confab.conffiles import iterconffiles
-from confab.validate import validate_all
+from confab.validate import assert_exists, assert_may_be_created
 
 
 @task
-def push(templates_dir=None,
-         data_dir=None,
-         generated_dir=None,
-         remotes_dir=None):
+@with_validation
+def push(templates_dir, data_dir, generated_dir, remotes_dir):
     """
     Push configuration files.
     """
-    validate_all(templates_dir, data_dir, generated_dir, remotes_dir)
+    assert_exists(templates_dir, data_dir)
+    assert_may_be_created(generated_dir, remotes_dir)
 
     if not env.environmentdef:
         abort("No environment defined")
