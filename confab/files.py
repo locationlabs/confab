@@ -41,7 +41,6 @@ def _import(module_name, dir_name):
 
     Raises ImportError if not found.
     """
-
     # assign module a name that's not likely to conflict
     safe_name = 'confab.data.' + _hash(module_name, dir_name)
 

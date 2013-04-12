@@ -27,7 +27,7 @@ class Settings(object):
             for component in host_and_role.itercomponents():
                 print component
 
-        # Iterate over components only
+        # Iterate over components
         for component in settings.for_env("dev").itercomponents():
             environment, host, role, name = component
             print component
@@ -41,12 +41,18 @@ class Settings(object):
         self.componentdefs = {}
 
     @classmethod
-    def load_from_module(cls, dir_name, module_name='settings'):
+    def load_from_module(cls, dir_name, module_name=None):
         """
         Load settings from a Python module in the specified directory.
         """
         settings = Settings()
-        module = _import(module_name, dir_name)
+        try:
+            module = _import(module_name or 'settings', dir_name)
+        except ImportError as e:
+            raise Exception("Unable to load {settings}: {error}"
+                            .format(settings=join(dir_name, module_name or "settings.py"),
+                                    error=e))
+
         for key in Settings.KEYS:
             setattr(settings, key, getattr(module, key, {}))
         return settings

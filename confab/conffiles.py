@@ -2,7 +2,7 @@
 Configuration file template object model.
 """
 from warnings import warn
-from fabric.api import get, put, settings, sudo
+from fabric.api import get, env, put, settings, sudo
 from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists
 from fabric.contrib.console import confirm
@@ -298,6 +298,11 @@ def iterconffiles(environmentdef, templates_dir, data_dir):
 
     Uses the default FileSystemEnvironmentLoader and DataLoader.
     """
+    # If we're running via `fab`, we should restrict the environment
+    # to the current host. See also confab.main:confab
+    if env.host_string:
+        environmentdef.with_hosts(env.host_string)
+
     for host_and_role in environmentdef.iterall():
         environment, host, role = host_and_role
         # fabric needs the host_string if we're calling from main()

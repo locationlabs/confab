@@ -1,8 +1,7 @@
 """
 Functions for validating user input to tasks.
 """
-
-from fabric.api import abort, env
+from fabric.api import abort
 import os
 
 
@@ -44,15 +43,6 @@ def validate_remotes_dir(remotes_dir):
         abort('Please provide a valid remotes_dir')
     elif os.path.exists(remotes_dir) and not os.path.isdir(remotes_dir):
         abort('{remotes_dir} is not a valid directory'.format(remotes_dir=remotes_dir))
-
-
-def validate_host():
-    """
-    Fabric host_string must be defined.
-    """
-    # XXX unclear if we still want this check
-    if not env.host_string:
-        abort('Please specify a host or a role')
 
 
 def validate_all(templates_dir, data_dir, generated_dir, remotes_dir):

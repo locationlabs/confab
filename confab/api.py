@@ -5,6 +5,9 @@ Non-init module for doing convenient * imports from.
 # core
 from confab.conffiles import ConfFiles
 
+# main
+from confab.main import confab
+
 # settings
 from confab.definitions import Settings
 
@@ -25,6 +28,7 @@ from confab.push import push
 
 __ignore__ = [
     assume_yes,
+    confab,
     ConfFiles,
     FileSystemEnvironmentLoader,
     PackageEnvironmentLoader,
