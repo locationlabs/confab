@@ -67,7 +67,7 @@ class DataLoader(object):
         self.data_dir = data_dir
         self.data_modules = set(data_modules)
 
-    def __call__(self, component):
+    def __call__(self, componentdef):
         """
         Load the data for the current configuration.
 
@@ -75,28 +75,28 @@ class DataLoader(object):
         """
         is_not_none = lambda x: x is not None
 
-        module_names = filter(is_not_none, self._list_modules(component))
+        module_names = filter(is_not_none, self._list_modules(componentdef))
 
         load_module = lambda module_name: import_configuration(module_name, self.data_dir)
 
         module_dicts = filter(is_not_none, map(load_module, module_names))
 
-        confab_data = dict(confab=dict(environment=component.environment,
-                                       host=component.host,
-                                       component=component.name))
+        confab_data = dict(confab=dict(environment=componentdef.environment,
+                                       host=componentdef.host,
+                                       component=componentdef.name))
 
         return merge(confab_data, *module_dicts)
 
-    def _list_modules(self, component):
+    def _list_modules(self, componentdef):
         """
         Get the list of modules to load.
         """
         module_names = [
             ('default', 'default'),
-            ('component', component.name),
-            ('role', component.role if component.role != component.name else None),
-            ('environment', component.environment),
-            ('host', component.host)
+            ('component', componentdef.name),
+            ('role', componentdef.role if componentdef.role != componentdef.name else None),
+            ('environment', componentdef.environment),
+            ('host', componentdef.host)
         ]
 
         return [name for key, name in module_names if key in self.data_modules]

@@ -195,11 +195,11 @@ class HostAndRoleDefinition(object):
     A host and role in the context of a specific environment.
     """
 
-    def __init__(self, environment, host, role):
+    def __init__(self, environmentdef, host, role):
         """
         Constructor should not be called directly.
         """
-        self._environment = environment
+        self.environmentdef = environmentdef
         self.host = host
         self.role = role
 
@@ -211,7 +211,7 @@ class HostAndRoleDefinition(object):
 
     @property
     def environment(self):
-        return self._environment.name
+        return self.environmentdef.name
 
     def components(self):
         return list(self.itercomponents())
@@ -231,11 +231,11 @@ class HostAndRoleDefinition(object):
                                                       component_path))
         seen[component] = component_path
 
-        if component not in self._environment.settings.componentdefs:
+        if component not in self.environmentdef.settings.componentdefs:
             return [component]
 
         components = []
-        for c in self._environment.settings.componentdefs.get(component):
+        for c in self.environmentdef.settings.componentdefs.get(component):
             components += self._expand_components(c, component_path, seen)
 
         return components

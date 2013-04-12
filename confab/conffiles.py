@@ -300,6 +300,7 @@ def iterconffiles(environmentdef, templates_dir, data_dir):
     """
     for host_and_role in environmentdef.iterall():
         environment, host, role = host_and_role
+        # fabric needs the host_string if we're calling from main()
         with settings(host_string=host):
             yield ConfFiles(host_and_role,
                             FileSystemEnvironmentLoader(templates_dir),
