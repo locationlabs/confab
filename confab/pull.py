@@ -18,12 +18,12 @@ def pull(templates_dir, data_dir, remotes_dir):
     assert_exists(templates_dir, data_dir)
     assert_may_be_created(remotes_dir)
 
-    if not env.confab:
+    if 'environmentdef' not in env:
         abort("Confab needs to be configured")
 
-    for conffiles in iterconffiles(env.confab, templates_dir, data_dir):
+    for conffiles in iterconffiles(env.environmentdef, templates_dir, data_dir):
         status("Pulling remote templates for '{environment}' and '{role}'",
-               environment=env.confab.name,
+               environment=env.environmentdef.name,
                role=conffiles.role)
 
         conffiles.pull(remotes_dir)

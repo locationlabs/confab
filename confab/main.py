@@ -86,8 +86,7 @@ def parse_options():
 
 
 def load_environmentdef(environment,
-                        dir_name,
-                        module_name=None,
+                        settings=None,
                         hosts=None,
                         roles=None):
     """
@@ -96,21 +95,21 @@ def load_environmentdef(environment,
 
     :param environment: environment name
     :param dir_name: directory path for confab settings
-    :param module_name: settings module name (defaults to 'settings' if absent)
+    :param settings: path to settings module
     :param hosts: comma delimited host list
     :param roles: comma delimited role list
     """
 
-    settings_ = Settings.load_from_module(dir_name, module_name=module_name)
+    settings_ = Settings.load_from_module(settings)
 
     # Normalize and resolve hosts to roles mapping
     selected_hosts = hosts.split(",") if hosts else []
     selected_roles = roles.split(",") if roles else []
 
-    env.confab = settings_.for_env(environment)
-    env.confab = env.confab.with_hosts(*selected_hosts)
-    env.confab = env.confab.with_roles(*selected_roles)
-    return env.confab
+    env.environmentdef = settings_.for_env(environment)
+    env.environmentdef = env.environmentdef.with_hosts(*selected_hosts)
+    env.environmentdef = env.environmentdef.with_roles(*selected_roles)
+    return env.environmentdef
 
 
 def get_task(parser, options, arguments):
@@ -151,15 +150,6 @@ def confab(environment="local", settings=None, *roles):
     :param roles: specific role(s) to use
     :param settings: path to settings module
     """
-    if settings:
-        if settings.endswith(".py"):
-            dir_name, module = os.path.split(settings)
-            module_name, _ = os.path.splitext(module)
-        else:
-            dir_name, module_name = settings, None
-    else:
-        dir_name, module_name = os.getcwd(), None
-
     try:
         # Do not select hosts here.
         #
@@ -168,8 +158,7 @@ def confab(environment="local", settings=None, *roles):
         # here, we ensure that the same environmentdef will be loaded each
         # time. See also confab.conffiles:iterconffiles
         load_environmentdef(environment=environment,
-                            dir_name=dir_name,
-                            module_name=module_name,
+                            settings=settings,
                             roles=",".join(roles))
     except Exception as e:
         abort(e)
@@ -188,7 +177,7 @@ def main():
 
         try:
             load_environmentdef(environment=options.environment,
-                                dir_name=options.directory,
+                                settings=options.directory,
                                 hosts=options.hosts,
                                 roles=options.roles)
         except Exception as e:

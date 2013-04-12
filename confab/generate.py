@@ -18,12 +18,12 @@ def generate(templates_dir, data_dir, generated_dir):
     assert_exists(templates_dir, data_dir)
     assert_may_be_created(generated_dir)
 
-    if not env.confab:
+    if 'environmentdef' not in env:
         abort("Confab needs to be configured")
 
-    for conffiles in iterconffiles(env.confab, templates_dir, data_dir):
+    for conffiles in iterconffiles(env.environmentdef, templates_dir, data_dir):
         status("Generating templates for '{environment}' and '{role}'",
-               environment=env.confab.name,
+               environment=env.environmentdef.name,
                role=conffiles.role)
 
         conffiles.generate(generated_dir)
