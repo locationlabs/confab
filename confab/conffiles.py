@@ -1,6 +1,7 @@
 """
 Configuration file template object model.
 """
+from hashlib import sha1
 from warnings import warn
 from fabric.api import get, env, put, settings, sudo
 from fabric.colors import blue, red, green, magenta
@@ -81,10 +82,12 @@ class ConfFile(object):
     Encapsulation of a configuration file template.
     """
 
-    def __init__(self, template, data, host):
+    def __init__(self, template, data, conffiles):
         self.template = template
         self.data = data
-        self.host = host
+        self.host = conffiles.host
+        self.role = conffiles.role
+        self.environment = conffiles.environment
         self.mime_type = options.get_mime_type(template.filename)
         self.name = template.environment.from_string(template.name).render(**self.data)
         self.remote = os.sep + self.name
@@ -112,7 +115,7 @@ class ConfFile(object):
         If output is enabled, show the diffs nicely.
         """
         generated_file_name = os.sep.join([generated_dir, self.name])
-        remote_file_name = os.sep.join([remotes_dir, self .name])
+        remote_file_name = os.sep.join([remotes_dir, self.name])
 
         status('Computing diff for {file_name}', file_name=self.remote)
 
@@ -123,6 +126,17 @@ class ConfFile(object):
 
     def is_empty(self):
         return options.is_empty(self.mime_type)
+
+    def hexdigest(self):
+        """
+        Return a hex digest of conffile content.
+        """
+        if self.should_render():
+            content = self.template.render(**self.data).encode('utf-8')
+        else:
+            with open(self.template.filename) as file_:
+                content = file_.read()
+        return sha1(content).hexdigest()
 
     def generate(self, generated_dir):
         """
@@ -213,7 +227,7 @@ class ConfFiles(object):
             for template_name in environment.list_templates(filter_func=options.filter_func):
                 debug("Adding template: {}".format(template_name))
 
-                self.conffiles.append(ConfFile(environment.get_template(template_name), data, self.host))
+                self.conffiles.append(ConfFile(environment.get_template(template_name), data, self))
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"

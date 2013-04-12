@@ -45,26 +45,12 @@ def parse_options():
     usage = "confab [options] {tasks}".format(tasks="|".join(_tasks.keys()))
     parser = OptionParser(usage=usage)
 
-    parser.add_option("-d", "--directory", dest="directory",
-                      default=os.getcwd(),
-                      help="directory from which to load configuration [default: %default]")
-
-    parser.add_option("-e", "--environment", dest="environment",
-                      default="local",
-                      help="environment to operate on [default: %default]")
-
-    parser.add_option("-H", "--hosts", dest="hosts",
-                      default="",
-                      help="comma-separated list of hosts to operate on")
+    add_core_options(parser)
 
     parser.add_option("-q", "--quiet", dest="quiet",
                       action="store_true",
                       default=False,
                       help="minimize output verbosity")
-
-    parser.add_option("-R", "--roles", dest="roles",
-                      default="",
-                      help="comma-separated list of roles to operate on")
 
     parser.add_option("-u", "--user", dest="user",
                       default=getpass.getuser(),
@@ -83,6 +69,27 @@ def parse_options():
 
     opts, args = parser.parse_args()
     return parser, opts, args
+
+
+def add_core_options(parser):
+    """
+    Add core confab options.
+    """
+    parser.add_option("-d", "--directory", dest="directory",
+                      default=os.getcwd(),
+                      help="directory from which to load configuration [default: %default]")
+
+    parser.add_option("-e", "--environment", dest="environment",
+                      default="local",
+                      help="environment to operate on [default: %default]")
+
+    parser.add_option("-H", "--hosts", dest="hosts",
+                      default="",
+                      help="comma-separated list of hosts to operate on")
+
+    parser.add_option("-R", "--roles", dest="roles",
+                      default="",
+                      help="comma-separated list of roles to operate on")
 
 
 def load_environmentdef(environment,
