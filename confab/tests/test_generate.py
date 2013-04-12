@@ -38,10 +38,10 @@ class TestGenerate(TestCase):
             conffiles.generate(tmp_dir.path)
 
             # foo.txt is populated with 'foo'
-            eq_('foo', tmp_dir.read('localhost/foo.txt'))
+            eq_('foo', tmp_dir.read('generated/localhost/foo.txt'))
 
             # bar.txt is populated with 'bar' and path is substituted
-            eq_('bar', tmp_dir.read('localhost/bar/bar.txt'))
+            eq_('bar', tmp_dir.read('generated/localhost/bar/bar.txt'))
 
     def test_unicode(self):
         """
@@ -54,10 +54,10 @@ class TestGenerate(TestCase):
             conffiles.generate(tmp_dir.path)
 
             # foo.txt is populated with u'\xc5\xae'
-            eq_(u'\xc5\xae', tmp_dir.read('localhost/foo.txt'))
+            eq_(u'\xc5\xae', tmp_dir.read('generated/localhost/foo.txt'))
 
             # bar.txt is populated with 'bar' and path is substituted
-            eq_('bar', tmp_dir.read('localhost/bar/bar.txt'))
+            eq_('bar', tmp_dir.read('generated/localhost/bar/bar.txt'))
 
     def test_undefined(self):
         """
@@ -84,8 +84,8 @@ class TestGenerate(TestCase):
                 conffiles.generate(tmp_dir.path)
 
                 # templates not rendered (though paths are)
-                eq_('{{foo}}', tmp_dir.read('localhost/foo.txt'))
-                eq_('{{bar}}', tmp_dir.read('localhost/bar/bar.txt'))
+                eq_('{{foo}}', tmp_dir.read('generated/localhost/foo.txt'))
+                eq_('{{bar}}', tmp_dir.read('generated/localhost/bar/bar.txt'))
 
     def test_binary_template(self):
         """
@@ -98,7 +98,7 @@ class TestGenerate(TestCase):
         with TempDir() as tmp_dir:
             conffiles.generate(tmp_dir.path)
 
-            ok_(filecmp.cmp(join(tmp_dir.path, 'localhost/test.png'),
+            ok_(filecmp.cmp(join(tmp_dir.path, 'generated/localhost/test.png'),
                             join(templates_dir, 'role/test.png')))
 
     def test_components(self):
@@ -126,6 +126,6 @@ class TestGenerate(TestCase):
                                       DataLoader(join(dirname(__file__), 'data/components')))
                 conffiles.generate(tmp_dir.path)
 
-            self.assertEquals('foo', tmp_dir.read('host1/foo.txt'))
-            self.assertEquals('bar', tmp_dir.read('host1/bar/bar.txt'))
-            self.assertEquals('baz', tmp_dir.read('host1/baz.conf'))
+            self.assertEquals('foo', tmp_dir.read('generated/host1/foo.txt'))
+            self.assertEquals('bar', tmp_dir.read('generated/host1/bar/bar.txt'))
+            self.assertEquals('baz', tmp_dir.read('generated/host1/baz.conf'))

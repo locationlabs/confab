@@ -1,28 +1,29 @@
 """
 Functions for validating user input to tasks.
 """
-import os
+from os import makedirs
+from os.path import basename, exists, isdir
 from fabric.api import abort
 
 
 def assert_exists(*directories):
     """
-    Directories must be defined and exist.
+    Assert that directories exist.
     """
     for directory in directories:
-        if not os.path.isdir(directory):
+        if not isdir(directory):
             abort('{} is not a valid directory'.format(directory))
 
 
-def assert_may_be_created(*directories):
+def assert_may_be_created(path):
     """
-    Directories must either be defined or must not exist.
+    Assert that path's directory either exists or can be created.
     """
-    for directory in directories:
-        if not os.path.exists(directory):
-            try:
-                os.makedirs(directory)
-            except OSError as e:
-                abort(e)
-        elif not os.path.isdir(directory):
-            abort('{} is not a valid directory'.format(directory))
+    directory = basename(path)
+    if not exists(directory):
+        try:
+            makedirs(directory)
+        except OSError as e:
+            abort(e)
+    elif not isdir(directory):
+        abort('{} is not a valid directory'.format(directory))

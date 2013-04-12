@@ -13,9 +13,10 @@ tasks:
 For more complex invocation, a custom fabfile may be more appropriate.
 """
 import getpass
-import os
 import sys
 from optparse import OptionParser
+from os import getcwd
+from os.path import split, splitext
 from fabric.api import abort, env, settings, task
 from fabric.network import disconnect_all
 from gusset.output import configure_output
@@ -46,7 +47,7 @@ def parse_options():
     parser = OptionParser(usage=usage)
 
     parser.add_option("-d", "--directory", dest="directory",
-                      default=os.getcwd(),
+                      default=getcwd(),
                       help="directory from which to load configuration [default: %default]")
 
     parser.add_option("-e", "--environment", dest="environment",
@@ -115,9 +116,7 @@ def load_environmentdef(environment,
 
 def get_task(parser, options, arguments):
     """
-    Parse a task from command line arguments.
-
-    Return the task function and its required arguments.
+    Parse and return a task function from command line arguments.
     """
     # Determine task
     try:
@@ -129,16 +128,7 @@ def get_task(parser, options, arguments):
         parser.error("Specified task must be one of: {tasks}"
                      .format(tasks=", ".join(_tasks.keys())))
 
-    # Construct task arguments
-    kwargs = {"data_dir": os.path.join(options.directory, "data")}
-
-    if needs_templates:
-        kwargs["generated_dir"] = os.path.join(options.directory, "generated")
-    if needs_remotes:
-        kwargs["remotes_dir"] = os.path.join(options.directory, "remotes")
-
-    kwargs["templates_dir"] = os.path.join(options.directory, "templates")
-    return task_func, kwargs
+    return task_func
 
 
 @task(alias="confab")
@@ -153,12 +143,12 @@ def confab(environment="local", settings=None, *roles):
     """
     if settings:
         if settings.endswith(".py"):
-            dir_name, module = os.path.split(settings)
-            module_name, _ = os.path.splitext(module)
+            dir_name, module = split(settings)
+            module_name, _ = splitext(module)
         else:
             dir_name, module_name = settings, None
     else:
-        dir_name, module_name = os.getcwd(), None
+        dir_name, module_name = getcwd(), None
 
     try:
         # Do not select hosts here.
@@ -194,11 +184,11 @@ def main():
         except Exception as e:
             parser.error(e)
 
-        task_func, kwargs = get_task(parser, options, arguments)
+        task_func = get_task(parser, options, arguments)
 
         with settings(user=options.user):
             with Options(assume_yes=options.assume_yes):
-                task_func(**kwargs)
+                task_func(options.directory)
 
     except SystemExit:
         raise
