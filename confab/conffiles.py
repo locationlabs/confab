@@ -301,7 +301,7 @@ def iterconffiles(environmentdef, templates_dir, data_dir):
     # If we're running via `fab`, we should restrict the environment
     # to the current host. See also confab.main:confab
     if env.host_string:
-        environmentdef.with_hosts(env.host_string)
+        environmentdef = environmentdef.with_hosts(env.host_string)
 
     for host_and_role in environmentdef.iterall():
         environment, host, role = host_and_role
