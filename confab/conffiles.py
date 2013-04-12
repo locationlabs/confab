@@ -6,12 +6,12 @@ from fabric.api import get, env, put, settings, sudo
 from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists
 from fabric.contrib.console import confirm
+from gusset.output import debug, status
 
 from confab.data import DataLoader
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.loaders import FileSystemEnvironmentLoader
 from confab.options import options
-from confab.output import debug, status
 
 import os
 import shutil

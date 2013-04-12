@@ -18,12 +18,12 @@ import sys
 from optparse import OptionParser
 from fabric.api import abort, env, settings, task
 from fabric.network import disconnect_all
+from gusset.output import configure_output
 
 from confab.definitions import Settings
 from confab.diff import diff
 from confab.generate import generate
 from confab.options import Options
-from confab.output import configure_output
 from confab.pull import pull
 from confab.push import push
 

@@ -10,8 +10,7 @@ from jinja2 import (Environment, FileSystemLoader, PackageLoader, BaseLoader,
                     StrictUndefined, TemplateNotFound)
 from os.path import join, exists
 from pkg_resources import get_provider
-
-from confab.output import debug
+from gusset.output import debug
 
 
 class FileSystemEnvironmentLoader(object):

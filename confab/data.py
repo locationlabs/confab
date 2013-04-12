@@ -2,12 +2,12 @@
 Functions for loading configuration data.
 """
 from fabric.api import puts
+from gusset.output import debug
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from confab.files import _import, _import_string
 from confab.merge import merge
 from confab.options import options
-from confab.output import debug
 
 
 def import_configuration(module_name, data_dir):
