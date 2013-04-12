@@ -22,7 +22,7 @@ class TestData(TestCase):
         self.settings.componentdefs = {
             "role": ["component"],
         }
-        self.component = self.settings.for_env("environment").components()
+        self.component = self.settings.for_env("environment").components()[0]
 
     def test_data_templates(self):
         """
@@ -47,7 +47,7 @@ class TestData(TestCase):
         """
         loader = DataLoader(join(dirname(__file__), 'data/order'))
 
-        eq_(loader(self.settings.for_env("environment").components()[0])['data'],
+        eq_(loader(self.component)['data'],
             {'default': 'default',
              'component': 'component',
              'role': 'role',
@@ -62,7 +62,7 @@ class TestData(TestCase):
         loader = DataLoader(join(dirname(__file__), 'data/order'),
                             data_modules=reversed(DataLoader.ALL))
 
-        eq_(loader(self.settings.for_env("environment").components()[0])['data'],
+        eq_(loader(self.component)['data'],
             {'default': 'default',
              'component': 'component',
              'role': 'role',
@@ -78,7 +78,7 @@ class TestData(TestCase):
                             data_modules=['component',
                                           'host'])
 
-        eq_(loader(self.settings.for_env("environment").components()[0])['data'],
+        eq_(loader(self.component)['data'],
             {'role': 'component',
              'component': 'component',
              'environment': 'component',
