@@ -83,23 +83,20 @@ class TestListing(TestCase):
 
         # use data that will create different conffiles for the same
         # component in the two roles.
-        data_loader = lambda comp: {'foo': options.get_rolename()}
 
-        with settings(role='role1'):
-            conffiles = ConfFiles(self.settings.for_env('any').with_roles('role1').all()[0],
-                                  environment_loader,
-                                  data_loader)
+        conffiles = ConfFiles(self.settings.for_env('any').with_roles('role1').all()[0],
+                              environment_loader,
+                              lambda comp: {'foo': 'role1'})
 
-            eq_(1, len(conffiles.conffiles))
-            ok_('role1.txt' == conffiles.conffiles[0].name)
+        eq_(1, len(conffiles.conffiles))
+        ok_('role1.txt' == conffiles.conffiles[0].name)
 
-        with settings(role='role2'):
-            conffiles = ConfFiles(self.settings.for_env('any').with_roles('role2').all()[0],
-                                  environment_loader,
-                                  data_loader)
+        conffiles = ConfFiles(self.settings.for_env('any').with_roles('role2').all()[0],
+                              environment_loader,
+                              lambda comp: {'foo': 'role2'})
 
-            eq_(1, len(conffiles.conffiles))
-            ok_('role2.txt' == conffiles.conffiles[0].name)
+        eq_(1, len(conffiles.conffiles))
+        ok_('role2.txt' == conffiles.conffiles[0].name)
 
     def test_warn_no_conffiles(self):
         """

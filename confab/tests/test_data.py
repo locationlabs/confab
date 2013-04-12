@@ -1,21 +1,28 @@
 """
 Tests for confab data model.
 """
-
-from unittest import TestCase
-from nose.tools import eq_
-from confab.data import import_configuration, DataLoader
-from fabric.api import settings
 from os.path import dirname, join
+from nose.tools import eq_
+from unittest import TestCase
+
+from confab.data import import_configuration, DataLoader
+from confab.definitions import Settings
 
 
 class TestData(TestCase):
 
     def setUp(self):
-
-        self.settings = dict(environment='environment',
-                             role='role',
-                             host_string='host')
+        self.settings = Settings()
+        self.settings.environmentdefs = {
+            "environment": ["host"],
+        }
+        self.settings.roledefs = {
+            "role": ["host"],
+        }
+        self.settings.componentdefs = {
+            "role": ["component"],
+        }
+        self.component = self.settings.for_env("environment").components()[0]
 
     def test_data_templates(self):
         """
@@ -28,7 +35,6 @@ class TestData(TestCase):
         """
 
         data = import_configuration('bar', join(dirname(__file__), 'data/templates'))
-
         eq_(data,
             {'foo': 'foo',
              'bar': 'bar',
@@ -39,44 +45,41 @@ class TestData(TestCase):
         Data modules are always loaded in the same order: default,
         component, role, environment, then host.
         """
-        with settings(**self.settings):
-            loader = DataLoader(join(dirname(__file__), 'data/order'))
+        loader = DataLoader(join(dirname(__file__), 'data/order'))
 
-            eq_(loader('component')['data'],
-                {'default': 'default',
-                 'component': 'component',
-                 'role': 'role',
-                 'environment': 'environment',
-                 'host': 'host'})
+        eq_(loader(self.component)['data'],
+            {'default': 'default',
+             'component': 'component',
+             'role': 'role',
+             'environment': 'environment',
+             'host': 'host'})
 
     def test_custom_data_modules_load_order(self):
         """
         Defining custom data modules does not affect load order.
         """
 
-        with settings(**self.settings):
-            loader = DataLoader(join(dirname(__file__), 'data/order'),
-                                data_modules=reversed(DataLoader.ALL))
+        loader = DataLoader(join(dirname(__file__), 'data/order'),
+                            data_modules=reversed(DataLoader.ALL))
 
-            eq_(loader('component')['data'],
-                {'default': 'default',
-                 'component': 'component',
-                 'role': 'role',
-                 'environment': 'environment',
-                 'host': 'host'})
+        eq_(loader(self.component)['data'],
+            {'default': 'default',
+             'component': 'component',
+             'role': 'role',
+             'environment': 'environment',
+             'host': 'host'})
 
     def test_custom_data_modules_selection(self):
         """
         Defining custom data modules may select specific modules to load.
         """
 
-        with settings(**self.settings):
-            loader = DataLoader(join(dirname(__file__), 'data/order'),
-                                data_modules=['component',
-                                              'host'])
+        loader = DataLoader(join(dirname(__file__), 'data/order'),
+                            data_modules=['component',
+                                          'host'])
 
-            eq_(loader('component')['data'],
-                {'role': 'component',
-                 'component': 'component',
-                 'environment': 'component',
-                 'host': 'host'})
+        eq_(loader(self.component)['data'],
+            {'role': 'component',
+             'component': 'component',
+             'environment': 'component',
+             'host': 'host'})

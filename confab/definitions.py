@@ -195,19 +195,23 @@ class HostAndRoleDefinition(object):
     A host and role in the context of a specific environment.
     """
 
-    def __init__(self, environment, host, role):
+    def __init__(self, environmentdef, host, role):
         """
         Constructor should not be called directly.
         """
-        self.environment = environment
+        self.environmentdef = environmentdef
         self.host = host
         self.role = role
 
     def __iter__(self):
-        return iter([self.environment.name, self.host, self.role])
+        return iter([self.environment, self.host, self.role])
 
     def __repr__(self):
-        return str((self.environment.name, self.host, self.role))
+        return str((self.environment, self.host, self.role))
+
+    @property
+    def environment(self):
+        return self.environmentdef.name
 
     def components(self):
         return list(self.itercomponents())
@@ -227,11 +231,11 @@ class HostAndRoleDefinition(object):
                                                       component_path))
         seen[component] = component_path
 
-        if component not in self.environment.settings.componentdefs:
+        if component not in self.environmentdef.settings.componentdefs:
             return [component]
 
         components = []
-        for c in self.environment.settings.componentdefs.get(component):
+        for c in self.environmentdef.settings.componentdefs.get(component):
             components += self._expand_components(c, component_path, seen)
 
         return components
@@ -249,14 +253,26 @@ class ComponentDefinition(object):
         self.host_and_role = host_and_role
         self.name = name
 
+    @property
+    def environment(self):
+        return self.host_and_role.environment
+
+    @property
+    def host(self):
+        return self.host_and_role.host
+
+    @property
+    def role(self):
+        return self.host_and_role.role
+
     def __iter__(self):
-        return iter([self.host_and_role.environment.name,
-                     self.host_and_role.host,
-                     self.host_and_role.role,
+        return iter([self.environment,
+                     self.host,
+                     self.role,
                      self.name])
 
     def __repr__(self):
-        return str((self.host_and_role.environment.name,
-                    self.host_and_role.host,
-                    self.host_and_role.role,
+        return str((self.environment,
+                    self.host,
+                    self.role,
                     self.name))

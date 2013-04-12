@@ -202,11 +202,12 @@ class ConfFiles(object):
         self.conffiles = []
         self.host = host_and_role.host
         self.role = host_and_role.role
+        self.environment = host_and_role.environment
 
         for component in host_and_role.itercomponents():
             debug("Processing: {}".format(component.name))
 
-            data = data_loader(component.name)
+            data = data_loader(component)
             environment = environment_loader(component.name)
 
             for template_name in environment.list_templates(filter_func=options.filter_func):
@@ -216,9 +217,9 @@ class ConfFiles(object):
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"
-                 .format(role=options.get_rolename(),
-                         host=options.get_hostname(),
-                         environment=options.get_environmentname()))
+                 .format(role=self.role,
+                         host=self.host,
+                         environment=self.environment))
 
     def generate(self, generated_dir):
         """
@@ -299,9 +300,8 @@ def iterconffiles(environmentdef, templates_dir, data_dir):
     """
     for host_and_role in environmentdef.iterall():
         environment, host, role = host_and_role
-        with settings(environment=environment,
-                      host_string=host,
-                      role=role):
+        # fabric needs the host_string if we're calling from main()
+        with settings(host_string=host):
             yield ConfFiles(host_and_role,
                             FileSystemEnvironmentLoader(templates_dir),
                             DataLoader(data_dir))
