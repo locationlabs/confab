@@ -171,10 +171,6 @@ def confab(environment="local", settings=None, *roles):
                             dir_name=dir_name,
                             module_name=module_name,
                             roles=",".join(roles))
-    except ImportError as e:
-        abort("Unable to load {settings}: {error}"
-              .format(settings=os.path.join(dir_name, module_name or "settings.py"),
-                      error=e))
     except Exception as e:
         abort(e)
 
@@ -195,10 +191,6 @@ def main():
                                 dir_name=options.directory,
                                 hosts=options.hosts,
                                 roles=options.roles)
-        except ImportError as e:
-            parser.error("Unable to load {settings}: {error}"
-                         .format(settings=os.path.join(options.directory, "settings.py"),
-                                 error=e))
         except Exception as e:
             parser.error(e)
 

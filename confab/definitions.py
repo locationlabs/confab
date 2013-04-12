@@ -46,7 +46,13 @@ class Settings(object):
         Load settings from a Python module in the specified directory.
         """
         settings = Settings()
-        module = _import(module_name or 'settings', dir_name)
+        try:
+            module = _import(module_name or 'settings', dir_name)
+        except ImportError as e:
+            raise Exception("Unable to load {settings}: {error}"
+                            .format(settings=join(dir_name, module_name or "settings.py"),
+                                    error=e))
+
         for key in Settings.KEYS:
             setattr(settings, key, getattr(module, key, {}))
         return settings
