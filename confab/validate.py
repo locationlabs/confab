@@ -1,8 +1,7 @@
 """
 Functions for validating user input to tasks.
 """
-
-from fabric.api import abort, env
+from fabric.api import abort
 import os
 
 
