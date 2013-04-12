@@ -46,14 +46,6 @@ def validate_remotes_dir(remotes_dir):
         abort('{remotes_dir} is not a valid directory'.format(remotes_dir=remotes_dir))
 
 
-def validate_host():
-    """
-    Fabric host_string must be defined.
-    """
-    if not env.host_string:
-        abort('Please specify a host')
-
-
 def validate_all(templates_dir, data_dir, generated_dir, remotes_dir):
     """
     Validate templates_dir, data_dir, generated_dir, remotes_dir, and host.
