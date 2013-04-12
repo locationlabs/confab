@@ -27,7 +27,7 @@ class Settings(object):
             for component in host_and_role.itercomponents():
                 print component
 
-        # Iterate over components only
+        # Iterate over components
         for component in settings.for_env("dev").itercomponents():
             environment, host, role, name = component
             print component
