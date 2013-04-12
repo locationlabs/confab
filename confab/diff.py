@@ -2,9 +2,9 @@
 Determine the difference between remote and generated configuration files.
 """
 from fabric.api import abort, env, task
+from gusset.output import status
 
 from confab.conffiles import iterconffiles
-from confab.output import status
 from confab.validate import validate_all
 
 

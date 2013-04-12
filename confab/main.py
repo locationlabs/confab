@@ -22,7 +22,7 @@ from fabric.network import disconnect_all
 from confab.api import pull, push, diff, generate
 from confab.definitions import Settings
 from confab.options import Options
-from confab.output import configure_output
+from gusset.output import configure_output
 
 
 _tasks = {"diff":     (diff,     True,  True),
