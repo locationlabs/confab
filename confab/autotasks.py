@@ -30,15 +30,17 @@ def autogenerate_tasks(settings=None):
     Normally the roledefs and environment defs will be configured
     using 'load_model_from_dir' or similar.
     """
-    settings = Settings.load_from_module(settings)
-
-    for environment in settings.environmentdefs.iterkeys():
+    def create_task(settings, environment):
         def select_environment(*roles):
             if hasattr(env, "environmentdef"):
                 abort("Environment already defined as '{}'".format(env.environmentdef.name))
 
             env.environmentdef = settings.for_env(environment).with_roles(*roles)
+        return select_environment
 
+    settings = Settings.load_from_module(settings)
+
+    for environment in settings.environmentdefs.iterkeys():
         _add_task(environment,
-                  select_environment,
+                  create_task(settings, environment),
                   "Set environment to '{environment}'".format(environment=environment))
