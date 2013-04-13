@@ -1,10 +1,11 @@
 """
 Configuration file template object model.
 """
+from os.path import dirname, exists, join
 from warnings import warn
 from fabric.api import get, env, put, settings, sudo
 from fabric.colors import blue, red, green, magenta
-from fabric.contrib.files import exists
+from fabric.contrib.files import exists as exists_remote
 from fabric.contrib.console import confirm
 from gusset.output import debug, status
 
@@ -12,6 +13,7 @@ from confab.data import DataLoader
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.loaders import FileSystemEnvironmentLoader
 from confab.options import options
+from confab.validate import assert_exists, assert_may_be_created
 
 import os
 import shutil
@@ -33,10 +35,10 @@ class ConfFileDiff(object):
         self.conffile_name = conffile_name
         self.diff_lines = []
 
-        if not os.path.exists(generated_file_name):
+        if not exists(generated_file_name):
             self.missing_generated = True
 
-        if not os.path.exists(remote_file_name):
+        if not exists(remote_file_name):
             self.missing_remote = True
 
         if not self.missing_generated and not self.missing_remote:
@@ -111,8 +113,11 @@ class ConfFile(object):
 
         If output is enabled, show the diffs nicely.
         """
-        generated_file_name = os.sep.join([generated_dir, self.name])
-        remote_file_name = os.sep.join([remotes_dir, self .name])
+        generated_file_name = join(generated_dir, self.name)
+        assert_may_be_created(generated_file_name)
+
+        remote_file_name = join(remotes_dir, self.name)
+        assert_may_be_created(remote_file_name)
 
         status('Computing diff for {file_name}', file_name=self.remote)
 
@@ -124,47 +129,50 @@ class ConfFile(object):
     def is_empty(self):
         return options.is_empty(self.mime_type)
 
-    def generate(self, generated_dir):
+    def generate(self, directory):
         """
-        Write the configuration file to the dest_dir.
+        Write the configuration file.
         """
-        generated_file_name = os.sep.join([generated_dir, self.name])
+        generated_file_name = join(directory, self.name)
+        assert_may_be_created(generated_file_name)
 
         status('Generating {file_name}', file_name=self.remote)
 
         # ensure that destination directory exists
-        _ensure_dir(os.path.dirname(generated_file_name))
+        _ensure_dir(directory)
 
         if self.should_render():
             self._write_template(generated_file_name)
         else:
             self._write_verbatim(generated_file_name)
 
-    def pull(self, remotes_dir):
+    def pull(self, directory):
         """
         Pull remote configuration file to local file.
         """
-        local_file_name = os.sep.join([remotes_dir, self.name])
+        local_file_name = join(directory, self.name)
+        assert_may_be_created(local_file_name)
 
         status('Pulling {file_name} from {host}',
                file_name=self.remote,
                host=self.host)
 
-        _ensure_dir(os.path.dirname(local_file_name))
+        _ensure_dir(directory)
         _clear_file(local_file_name)
 
-        if exists(self.remote, use_sudo=True):
+        if exists_remote(self.remote, use_sudo=True):
             get(self.remote, local_file_name)
         else:
             status('Not found: {file_name}',
                    file_name=self.remote)
 
-    def push(self, generated_dir):
+    def push(self, directory):
         """
         Push the generated configuration file to the remote host.
         """
-        generated_file_name = os.sep.join([generated_dir, self.name])
-        remote_dir = os.path.dirname(self.remote)
+        generated_file_name = join(directory, self.name)
+        assert_may_be_created(generated_file_name)
+        remote_dir = dirname(self.remote)
 
         status('Pushing {file_name} to {host}',
                file_name=self.remote,
@@ -221,11 +229,11 @@ class ConfFiles(object):
                          host=self.host,
                          environment=self.environment))
 
-    def generate(self, generated_dir):
+    def generate(self, directory):
         """
         Write all configuration files to generated_dir.
         """
-        host_generated_dir = os.sep.join([generated_dir, self.host])
+        host_generated_dir = join(directory, options.get_generated_dir(), self.host)
 
         _clear_dir(host_generated_dir)
         _ensure_dir(host_generated_dir)
@@ -233,21 +241,21 @@ class ConfFiles(object):
         for conffile in self.conffiles:
             conffile.generate(host_generated_dir)
 
-    def pull(self, remotes_dir):
+    def pull(self, directory):
         """
         Pull remote versions of files into remotes_dir.
         """
-        host_remotes_dir = os.sep.join([remotes_dir, self.host])
+        host_remotes_dir = join(directory, options.get_remotes_dir(), self.host)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
 
-    def diff(self, generated_dir, remotes_dir):
+    def diff(self, directory):
         """
         Show diffs for all configuration files.
         """
-        host_generated_dir = os.sep.join([generated_dir, self.host])
-        host_remotes_dir = os.sep.join([remotes_dir, self.host])
+        host_generated_dir = join(directory, options.get_generated_dir(), self.host)
+        host_remotes_dir = join(directory, options.get_remotes_dir(), self.host)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -258,12 +266,12 @@ class ConfFiles(object):
         for conffile in self.conffiles:
             conffile.diff(host_generated_dir, host_remotes_dir).show()
 
-    def push(self, generated_dir, remotes_dir):
+    def push(self, directory):
         """
         Push configuration files that have changes, given user confirmation.
         """
-        host_generated_dir = os.sep.join([generated_dir, self.host])
-        host_remotes_dir = os.sep.join([remotes_dir, self.host])
+        host_generated_dir = join(directory, options.get_generated_dir(), self.host)
+        host_remotes_dir = join(directory, options.get_remotes_dir(), self.host)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -292,12 +300,17 @@ class ConfFiles(object):
                 conffile.push(host_generated_dir)
 
 
-def iterconffiles(environmentdef, templates_dir, data_dir):
+def iterconffiles(environmentdef, directory):
     """
     Generate ConfFiles objects for each host_and_role in an environment.
 
     Uses the default FileSystemEnvironmentLoader and DataLoader.
     """
+    # Construct directories
+    templates_dir = join(directory, options.get_templates_dir())
+    data_dir = join(directory, options.get_data_dir())
+    assert_exists(templates_dir, data_dir)
+
     # If we're running via `fab`, we should restrict the environment
     # to the current host. See also confab.main:confab
     if env.host_string:

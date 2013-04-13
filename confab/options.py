@@ -2,7 +2,7 @@
 Options for managing Confab.
 """
 
-from fabric.api import env, task
+from fabric.api import task
 from fabric.utils import _AttributeDict
 
 from difflib import unified_diff
@@ -92,7 +92,19 @@ options = _AttributeDict({
     'diff': _diff,
 
     # How to get dictionary configuration from module data?
-    'module_as_dict': _as_dict
+    'module_as_dict': _as_dict,
+
+    # What is the name of the template directory?
+    'get_templates_dir': lambda: 'templates',
+
+    # What is the name of the data directory?
+    'get_data_dir': lambda: 'data',
+
+    # What is the name of the generated directory?
+    'get_generated_dir': lambda: 'generated',
+
+    # What is the name of the remotes directory?
+    'get_remotes_dir': lambda: 'remotes',
 })
 
 
