@@ -21,7 +21,7 @@ class TestSettings(TestCase):
         """
         Loading empty state results in empty dictionaries.
         """
-        self.settings = Settings.load_from_module(dir_name=self.dir_name, module_name="empty")
+        self.settings = Settings.load_from_module(join(self.dir_name, "empty.py"))
         for key in Settings.KEYS:
             eq_({}, getattr(self.settings, key, {}))
 
@@ -37,7 +37,7 @@ class TestSettings(TestCase):
         """
         Loading non-empty module results in expected dictionaries.
         """
-        self.settings = Settings.load_from_module(dir_name=self.dir_name, module_name="example")
+        self.settings = Settings.load_from_module(join(self.dir_name, "example.py"))
         eq_(["host1", "host2"], self.settings.environmentdefs["environment1"])
         eq_(["host1"], self.settings.roledefs["role1"])
         eq_(["component1"], self.settings.componentdefs["role1"])
