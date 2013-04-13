@@ -139,7 +139,7 @@ class ConfFile(object):
         status('Generating {file_name}', file_name=self.remote)
 
         # ensure that destination directory exists
-        _ensure_dir(dirname(generated_file_name))
+        _ensure_dir(directory)
 
         if self.should_render():
             self._write_template(generated_file_name)
@@ -157,7 +157,7 @@ class ConfFile(object):
                file_name=self.remote,
                host=self.host)
 
-        _ensure_dir(dirname(local_file_name))
+        _ensure_dir(directory)
         _clear_file(local_file_name)
 
         if exists_remote(self.remote, use_sudo=True):
