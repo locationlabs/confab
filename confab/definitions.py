@@ -1,10 +1,10 @@
 """
 Representation of and iteration through defined hosts, environments, and roles.
 """
-from os.path import join
 from warnings import warn
-
 from confab.files import _import
+
+import os
 
 
 class Settings(object):
@@ -41,21 +41,34 @@ class Settings(object):
         self.componentdefs = {}
 
     @classmethod
-    def load_from_module(cls, dir_name, module_name=None):
+    def load_from_module(cls, settings_path=None):
         """
-        Load settings from a Python module in the specified directory.
+        Load settings from a Python module.
+
+        :param settings_path: path to settings module. a full path or directory name.
+                              module name defaults to 'settings'. directory defaults
+                              to the current working directory.
         """
-        settings = Settings()
+        if settings_path:
+            if settings_path.endswith(".py"):
+                dir_name, module = os.path.split(settings_path)
+                module_name, _ = os.path.splitext(module)
+            else:
+                dir_name, module_name = settings_path, None
+        else:
+            dir_name, module_name = os.getcwd(), None
+
+        settings_ = Settings()
         try:
             module = _import(module_name or 'settings', dir_name)
         except ImportError as e:
             raise Exception("Unable to load {settings}: {error}"
-                            .format(settings=join(dir_name, module_name or "settings.py"),
+                            .format(settings=os.path.join(dir_name, module_name or "settings.py"),
                                     error=e))
 
         for key in Settings.KEYS:
-            setattr(settings, key, getattr(module, key, {}))
-        return settings
+            setattr(settings_, key, getattr(module, key, {}))
+        return settings_
 
     @classmethod
     def load_from_dict(cls, dct):
@@ -228,7 +241,7 @@ class HostAndRoleDefinition(object):
             yield ComponentDefinition(self, component)
 
     def _expand_components(self, component, path, seen):
-        component_path = join(path, component)
+        component_path = os.path.join(path, component)
 
         if component in seen:
             raise Exception("Detected cycle or multiple paths with role/component '{}'"

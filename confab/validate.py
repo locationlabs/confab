@@ -2,7 +2,7 @@
 Functions for validating user input to tasks.
 """
 from os import makedirs
-from os.path import basename, exists, isdir
+from os.path import dirname, exists, isdir
 from fabric.api import abort
 
 
@@ -19,7 +19,7 @@ def assert_may_be_created(path):
     """
     Assert that path's directory either exists or can be created.
     """
-    directory = basename(path)
+    directory = dirname(path)
     if not exists(directory):
         try:
             makedirs(directory)

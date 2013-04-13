@@ -14,12 +14,12 @@ def pull(directory):
     """
     Pull remote configuration files.
     """
-    if not env.confab:
+    if 'environmentdef' not in env:
         abort("Confab needs to be configured")
 
-    for conffiles in iterconffiles(env.confab, directory):
+    for conffiles in iterconffiles(env.environmentdef, directory):
         status("Pulling remote templates for '{environment}' and '{role}'",
-               environment=env.confab.name,
+               environment=env.environmentdef.name,
                role=conffiles.role)
 
         conffiles.pull(directory)

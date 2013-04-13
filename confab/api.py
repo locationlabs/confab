@@ -5,11 +5,11 @@ Non-init module for doing convenient * imports from.
 # core
 from confab.conffiles import ConfFiles
 
-# main
-from confab.main import confab
-
 # settings
 from confab.definitions import Settings
+
+# environment tasks
+from confab.autotasks import generate_tasks
 
 # jinja2 environment loading
 from confab.loaders import FileSystemEnvironmentLoader, PackageEnvironmentLoader
@@ -28,7 +28,7 @@ from confab.push import push
 
 __ignore__ = [
     assume_yes,
-    confab,
+    generate_tasks,
     ConfFiles,
     FileSystemEnvironmentLoader,
     PackageEnvironmentLoader,

@@ -17,7 +17,7 @@ import sys
 from optparse import OptionParser
 from os import getcwd
 from os.path import split, splitext
-from fabric.api import abort, env, settings, task
+from fabric.api import env, settings
 from fabric.network import disconnect_all
 from gusset.output import configure_output
 
@@ -87,8 +87,7 @@ def parse_options():
 
 
 def load_environmentdef(environment,
-                        dir_name,
-                        module_name=None,
+                        settings_path=None,
                         hosts=None,
                         roles=None):
     """
@@ -96,22 +95,21 @@ def load_environmentdef(environment,
     as "confab" for use by subsequent confab tasks.
 
     :param environment: environment name
-    :param dir_name: directory path for confab settings
-    :param module_name: settings module name (defaults to 'settings' if absent)
+    :param settings_path: path to settings module
     :param hosts: comma delimited host list
     :param roles: comma delimited role list
     """
 
-    settings_ = Settings.load_from_module(dir_name, module_name=module_name)
+    settings_ = Settings.load_from_module(settings_path)
 
     # Normalize and resolve hosts to roles mapping
     selected_hosts = hosts.split(",") if hosts else []
     selected_roles = roles.split(",") if roles else []
 
-    env.confab = settings_.for_env(environment)
-    env.confab = env.confab.with_hosts(*selected_hosts)
-    env.confab = env.confab.with_roles(*selected_roles)
-    return env.confab
+    env.environmentdef = settings_.for_env(environment)
+    env.environmentdef = env.environmentdef.with_hosts(*selected_hosts)
+    env.environmentdef = env.environmentdef.with_roles(*selected_roles)
+    return env.environmentdef
 
 
 def get_task(parser, options, arguments):
@@ -131,40 +129,6 @@ def get_task(parser, options, arguments):
     return task_func
 
 
-@task(alias="confab")
-def confab(environment="local", settings=None, *roles):
-    """
-    Fabric command line entry point for loading settings, selecting an
-    environment, and choosing roles.
-
-    :param environment: environment name
-    :param roles: specific role(s) to use
-    :param settings: path to settings module
-    """
-    if settings:
-        if settings.endswith(".py"):
-            dir_name, module = split(settings)
-            module_name, _ = splitext(module)
-        else:
-            dir_name, module_name = settings, None
-    else:
-        dir_name, module_name = getcwd(), None
-
-    try:
-        # Do not select hosts here.
-        #
-        # If `fab` is run with multiple hosts, this task will be run multiple
-        # times, overwriting the value of "env.confab". By not selecting hosts
-        # here, we ensure that the same environmentdef will be loaded each
-        # time. See also confab.conffiles:iterconffiles
-        load_environmentdef(environment=environment,
-                            dir_name=dir_name,
-                            module_name=module_name,
-                            roles=",".join(roles))
-    except Exception as e:
-        abort(e)
-
-
 def main():
     """
     Main command line entry point.
@@ -178,7 +142,7 @@ def main():
 
         try:
             load_environmentdef(environment=options.environment,
-                                dir_name=options.directory,
+                                settings_path=options.directory,
                                 hosts=options.hosts,
                                 roles=options.roles)
         except Exception as e:

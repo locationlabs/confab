@@ -14,12 +14,12 @@ def diff(directory):
     """
     Show configuration file diffs.
     """
-    if not env.confab:
+    if 'environmentdef' not in env:
         abort("Confab needs to be configured")
 
-    for conffiles in iterconffiles(env.confab, directory):
+    for conffiles in iterconffiles(env.environmentdef, directory):
         status("Computing template diffs for '{environment}' and '{role}'",
-               environment=env.confab.name,
+               environment=env.environmentdef.name,
                role=conffiles.role)
 
         conffiles.diff(directory)
