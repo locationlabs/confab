@@ -66,25 +66,18 @@ Confab may be used in several ways:
  -  Confab's tasks may be included in another fabfile simply by adding:
     
         from confab.api import *
+
+        # generate environment tasks
+        generate_tasks('/path/to/settings')
     
     And then running:
 
-        fab <task>:<arguments>
-
-    When invoking Confab tasks from *fab*, configuration directories must be provided
-    as task arguments.
-    
-    These tasks require that a valid `EnvironmentDefinition` exist in the Fabric environment
-    as `env.confab`. To specify the environment definition, the custom `confab` task
-    can be used in your `fabfile.py`:
-
-        from confab.api import confab
-
-    Then run fab using:
-
-        fab confab:{environment},/path/to/settings.py,{role1},{role2} <task>:arguments
+        fab <env_name>:{role1},{role2} <task>:<arguments>
 
     Note that the settings path and roles list are optional.
+
+    Confab tasks require that a valid `EnvironmentDefinition` exist in the Fabric environment
+    as `env.environmentdef`. The generated environment tasks are used to set this field.
 
  -  Confab's lower level API can be invoked using customized data loading 
     functions, either to create new tasks or to be called directly from 
@@ -92,7 +85,7 @@ Confab may be used in several ways:
 
         from confab.api import ConfFiles, Settings
         
-        settings = Settings.load_from_module(dir_name, module_name)
+        settings = Settings.load_from_module(settings_path)
         
         for host_and_role in settings.for_env(env_name).iterall():
             conffiles = ConfFiles(host_and_role,
@@ -162,11 +155,12 @@ require that the current host be defined in Fabric's *env.host_string*.
 ## Configuration Data
 
 By default, Confab recursively merges configuration dictionaries from various sources,
-using a three level hierarchy: 
+using a four level hierarchy: 
 
  -  Host-specific values are used first.
  -  Environment-specific values are used next. 
- -  Role or component-specific values are used next.
+ -  Role-specific values are used next.
+ -  Component default values are used next.
  -  Default values are used last.
 
 Confab's recursive merge operation can be futher customized by using callable wrappers

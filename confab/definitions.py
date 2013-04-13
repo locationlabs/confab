@@ -41,20 +41,20 @@ class Settings(object):
         self.componentdefs = {}
 
     @classmethod
-    def load_from_module(cls, settings=None):
+    def load_from_module(cls, settings_path=None):
         """
         Load settings from a Python module.
 
-        :param settings: path to settings module. a full path or directory name.
-                         module name defaults to 'settings'. directory defaults
-                         to the current working directory.
+        :param settings_path: path to settings module. a full path or directory name.
+                              module name defaults to 'settings'. directory defaults
+                              to the current working directory.
         """
-        if settings:
-            if settings.endswith(".py"):
-                dir_name, module = os.path.split(settings)
+        if settings_path:
+            if settings_path.endswith(".py"):
+                dir_name, module = os.path.split(settings_path)
                 module_name, _ = os.path.splitext(module)
             else:
-                dir_name, module_name = settings, None
+                dir_name, module_name = settings_path, None
         else:
             dir_name, module_name = os.getcwd(), None
 

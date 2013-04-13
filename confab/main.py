@@ -16,7 +16,7 @@ import getpass
 import os
 import sys
 from optparse import OptionParser
-from fabric.api import abort, env, settings, task
+from fabric.api import env, settings
 from fabric.network import disconnect_all
 from gusset.output import configure_output
 
@@ -86,7 +86,7 @@ def parse_options():
 
 
 def load_environmentdef(environment,
-                        settings=None,
+                        settings_path=None,
                         hosts=None,
                         roles=None):
     """
@@ -94,8 +94,7 @@ def load_environmentdef(environment,
     as "confab" for use by subsequent confab tasks.
 
     :param environment: environment name
-    :param dir_name: directory path for confab settings
-    :param settings: path to settings module
+    :param settings_path: path to settings module
     :param hosts: comma delimited host list
     :param roles: comma delimited role list
     """
@@ -140,30 +139,6 @@ def get_task(parser, options, arguments):
     return task_func, kwargs
 
 
-@task(alias="confab")
-def confab(environment="local", settings=None, *roles):
-    """
-    Fabric command line entry point for loading settings, selecting an
-    environment, and choosing roles.
-
-    :param environment: environment name
-    :param roles: specific role(s) to use
-    :param settings: path to settings module
-    """
-    try:
-        # Do not select hosts here.
-        #
-        # If `fab` is run with multiple hosts, this task will be run multiple
-        # times, overwriting the value of "env.confab". By not selecting hosts
-        # here, we ensure that the same environmentdef will be loaded each
-        # time. See also confab.conffiles:iterconffiles
-        load_environmentdef(environment=environment,
-                            settings=settings,
-                            roles=",".join(roles))
-    except Exception as e:
-        abort(e)
-
-
 def main():
     """
     Main command line entry point.
@@ -177,7 +152,7 @@ def main():
 
         try:
             load_environmentdef(environment=options.environment,
-                                settings=options.directory,
+                                settings_path=options.directory,
                                 hosts=options.hosts,
                                 roles=options.roles)
         except Exception as e:
