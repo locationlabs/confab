@@ -82,12 +82,13 @@ class ConfFile(object):
     Encapsulation of a configuration file template.
     """
 
-    def __init__(self, template, data, conffiles):
+    def __init__(self, template, data, component):
         self.template = template
         self.data = data
-        self.host = conffiles.host
-        self.role = conffiles.role
-        self.environment = conffiles.environment
+        self.host = component.host
+        self.role = component.role
+        self.component = component.name
+        self.environment = component.environment
         self.mime_type = options.get_mime_type(template.filename)
         self.name = template.environment.from_string(template.name).render(**self.data)
         self.remote = os.sep + self.name
@@ -227,7 +228,9 @@ class ConfFiles(object):
             for template_name in environment.list_templates(filter_func=options.filter_func):
                 debug("Adding template: {}".format(template_name))
 
-                self.conffiles.append(ConfFile(environment.get_template(template_name), data, self))
+                self.conffiles.append(ConfFile(environment.get_template(template_name),
+                                               data,
+                                               component))
 
         if not self.conffiles:
             warn("No conffiles found for '{role}' on '{host}' in environment '{environment}'"

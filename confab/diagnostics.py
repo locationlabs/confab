@@ -5,7 +5,7 @@ from collections import OrderedDict
 from os.path import join
 from optparse import OptionParser
 from string import capwords
-from fabric.colors import red, green, blue, magenta, white
+from fabric.colors import red, green, blue, magenta, white, yellow
 
 from confab.definitions import Settings
 from confab.conffiles import iterconffiles
@@ -23,7 +23,10 @@ def parse_options():
     return parser, opts, args
 
 
-def make_row(conffile):
+def make_conffile_description(conffile):
+    """
+    Generate an ordered dictionary describing this conffile.
+    """
     row = OrderedDict()
     # order here determine row order of output
     row["hash"] = conffile.hexdigest()
@@ -31,15 +34,16 @@ def make_row(conffile):
     row["host"] = conffile.host
     row["path"] = conffile.remote
     row["role"] = conffile.role
+    row["component"] = conffile.component
     return row
 
 
-def make_rows(settings,
-              environment,
-              hosts,
-              roles,
-              template_dir,
-              data_dir):
+def make_conffile_descriptions(settings,
+                               environment,
+                               hosts,
+                               roles,
+                               template_dir,
+                               data_dir):
     """
     Transform command line arguments into a list of rows.
     """
@@ -54,47 +58,52 @@ def make_rows(settings,
 
         for conffiles in iterconffiles(environmentdef, template_dir, data_dir):
             for conffile in conffiles.conffiles:
-                rows.append(make_row(conffile))
+                rows.append(make_conffile_description(conffile))
     return rows
 
 
-def print_rows(rows):
+def print_conffiles(descriptions):
     """
-    Print rows.
+    Print descriptions.
 
-    :param rows: a list of rows
+    :param descriptions: a list of descriptions
     """
-    if not rows:
+    if not descriptions:
         return
 
     # Assign colors for each column
-    colors = (red, magenta, blue, green, white)
+    colors = (red, magenta, blue, green, white, yellow)
 
     # Construct header
     header = OrderedDict()
-    for key in rows[0].keys():
+    for key in descriptions[0].keys():
         header[key] = capwords(key)
 
     # Compute maximum width for each key (including header)
-    widths = dict([(key, max([len(row[key]) for row in [header] + rows])) for key in rows[0].keys()])
+    make_lengths = lambda key: [len(description[key]) for description in [header] + descriptions]
+    widths = dict([(key, max(make_lengths(key))) for key in descriptions[0].keys()])
 
     # Construct separator
     separator = OrderedDict()
-    for key in rows[0].keys():
+    for key in descriptions[0].keys():
         separator[key] = "-" * widths[key]
 
-    # Format rows using color and left justification
-    def format_row(row):
+    # Format descriptions using color and left justification
+    def format_description(description):
         format_value = lambda color, key, value: color(" {}".format(value).ljust(1 + widths[key]))
-        return " ".join([format_value(color, key, value) for color, (key, value) in zip(colors, row.items())])
+        return " ".join([format_value(color, key, value) for color, (key, value) in zip(colors, description.items())])
 
     # Choose columns for sort order
-    sort_key = lambda row: (row["environment"], row["host"], row["path"])
+    sort_key = lambda description: (description["environment"],
+                                    description["host"],
+                                    description["path"],
+                                    description["role"],
+                                    description["component"])
 
-    print format_row(header)
-    print format_row(separator)
-    for row in sorted(rows, key=sort_key):
-        print format_row(row)
+    print format_description(header)
+    print format_description(separator)
+    for description in sorted(descriptions, key=sort_key):
+        print format_description(description)
 
 
 def main():
@@ -110,11 +119,10 @@ def main():
     except Exception as e:
         parser.error(e)
 
-    rows = make_rows(settings,
-                     options.environment,
-                     options.hosts.split(",") if options.hosts else [],
-                     options.roles.split(",") if options.roles else [],
-                     join(options.directory, "templates"),
-                     join(options.directory, "data"))
-
-    print_rows(rows)
+    descriptions = make_conffile_descriptions(settings,
+                                              options.environment,
+                                              options.hosts.split(",") if options.hosts else [],
+                                              options.roles.split(",") if options.roles else [],
+                                              join(options.directory, "templates"),
+                                              join(options.directory, "data"))
+    print_conffiles(descriptions)
