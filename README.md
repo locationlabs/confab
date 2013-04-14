@@ -6,7 +6,7 @@ Configuration management with Fabric and Jinja2.
 
  1. Install confab:
 
-        pip install -e git://github.com/locationlabs/confab.git#egg=confab-1.2
+        pip install confab
 
  2. Create a `settings.py` file:
  
