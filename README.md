@@ -66,13 +66,13 @@ so that changes to configuration are managed through a regular versioning and re
 
 Confab provides four default tasks:
 
- 1. Generate configuration files from templates. (**generate**)
+ 1. Generate configuration files from templates. (`generate`)
 
- 2. Pull copies of configuration files from a remote host. (**pull**)
+ 2. Pull copies of configuration files from a remote host. (`pull`)
 
- 3. Show differences between generated and remote configuration files. (**diff**)
+ 3. Show differences between generated and remote configuration files. (`diff`)
 
- 4. Interactively push generated configuration files to a remote host. (**push**)
+ 4. Interactively push generated configuration files to a remote host. (`push`)
 
 ## Definitions
 
@@ -181,8 +181,8 @@ given the following directory structure:
     /path/to/base_dir/templates/foo/etc/hostname
     /path/to/base_dir/templates/bar/etc/cron.d/baz
 
-If the **foo** component is selected, `/etc/motd.tail` and `/etc/hostname` will be loaded; if
-the **bar** component is selected, only `/etc/cron.d/baz` will be loaded. Note that
+If the `foo` component is selected, `/etc/motd.tail` and `/etc/hostname` will be loaded; if
+the `bar` component is selected, only `/etc/cron.d/baz` will be loaded. Note that
 configuration file names and paths may also be templates.
 
 ## Configuration Data Loading
@@ -190,8 +190,8 @@ configuration file names and paths may also be templates.
 Configuration data is loaded from python modules named after the selected environment, role,
 component, and host, plus a standard set of defaults. For example, if Confab is operating
 on an environment named "foo", a role named "bar", a component named "baz", and a host named "host",
-configuration data would be loaded for **foo.py**, **bar.py**, **baz.py**, **host.py**, 
-and **default.py**.
+configuration data would be loaded for `foo.py`, `bar.py`, `baz.py`, `host.py`, 
+and `default.py`.
 
 If a configuration data module is not found, Confab will also look for a file with a `.py_tmpl`
 suffix and treat it as a Jinja2 template for the same module, allowing configuration data to
