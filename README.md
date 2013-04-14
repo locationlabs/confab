@@ -2,32 +2,42 @@
 
 Configuration management with Fabric and Jinja2.
 
-
 ## Quickstart
 
-```
-pip install -e git://github.com/locationlabs/confab.git#egg=confab-1.2
+ 1. Install confab:
 
-cat > settings.py << "EOF"
-environmentdefs = {
-    'local': ['localhost']
-}
+        pip install -e git://github.com/locationlabs/confab.git#egg=confab-1.2
 
-roledefs = {
-    'base': ['localhost']
-}
-EOF
+ 2. Create a `settings.py` file:
+ 
+        cat > settings.py << "EOF"
+        environmentdefs = {
+            'local': ['localhost']
+        }
+        
+        roledefs = {
+            'example': ['localhost']
+        }
+        EOF
+   
+ 3. Create a template:
 
-mkdir -p data templates/base/tmp/
-echo 'my name is {{confab.host}}.' > templates/base/tmp/hello.txt
+        mkdir -p templates/example/tmp/
+        echo '{{ value }}' > templates/example/tmp/hello.txt
 
-confab diff
+ 4. Create data to populate your template:
 
-confab push
+        mkdir -p data
+        echo 'value = "world"' > data/default.py
 
-cat /tmp/hello.txt
-```
-
+ 5. Review your changes:
+ 
+        confab diff
+    
+ 6. Push changes to your target host:
+ 
+        confab push
+        cat /tmp/hello.txt
 
 ## Overview
 
