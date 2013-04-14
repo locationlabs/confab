@@ -185,7 +185,7 @@ If the `foo` component is selected, `/etc/motd.tail` and `/etc/hostname` will be
 the `bar` component is selected, only `/etc/cron.d/baz` will be loaded. Note that
 configuration file names and paths may also be templates.
 
-## Configuration Data Loading
+## Data Loading
 
 Configuration data is loaded from python modules named after the selected environment, role,
 component, and host, plus a standard set of defaults. For example, if Confab is operating
@@ -207,7 +207,7 @@ results in this dictionary:
 	
 	{'foo': 'bar'}
 
-## Configuration Data Merging
+## Merging
 
 The dictionaries from all of the loaded modules (if any) are recursively merged into a
 single dictionary, which is then used to populate templates. Merging operates in the
