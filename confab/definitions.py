@@ -11,6 +11,8 @@ class Settings(object):
     """
     Collection of environment, role, and component definitions.
 
+    :param directory: optional configuration directory
+
     Supports convenient iteration. For example:
 
         # Iterate over all hosts and roles
@@ -35,7 +37,8 @@ class Settings(object):
 
     KEYS = ["environmentdefs", "roledefs", "componentdefs"]
 
-    def __init__(self):
+    def __init__(self, directory=None):
+        self.directory = directory
         self.environmentdefs = {}
         self.roledefs = {}
         self.componentdefs = {}
@@ -58,7 +61,7 @@ class Settings(object):
         else:
             dir_name, module_name = os.getcwd(), None
 
-        settings_ = Settings()
+        settings_ = Settings(dir_name)
         try:
             module = _import(module_name or 'settings', dir_name)
         except ImportError as e:
@@ -132,6 +135,13 @@ class EnvironmentDefinition(object):
         self.name = name
         self.selected_hosts = selected_hosts or []
         self.selected_roles = selected_roles or []
+
+    @property
+    def directory(self):
+        """
+        Return the configuration directory (if any)
+        """
+        return self.settings.directory
 
     @property
     def host_roles(self):

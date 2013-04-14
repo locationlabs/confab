@@ -2,7 +2,6 @@
 Diagnostics output for Confab settings.
 """
 from collections import OrderedDict
-from os.path import join
 from optparse import OptionParser
 from string import capwords
 from fabric.colors import red, green, blue, magenta, white, yellow
@@ -41,8 +40,7 @@ def make_conffile_description(conffile):
 def make_conffile_descriptions(settings,
                                environment,
                                hosts,
-                               roles,
-                               directory):
+                               roles):
     """
     Transform command line arguments into a list of rows.
     """
@@ -55,7 +53,7 @@ def make_conffile_descriptions(settings,
         # match hosts and roles, if any
         environmentdef = environmentdef.with_hosts(*hosts).with_roles(*roles)
 
-        for conffiles in iterconffiles(environmentdef, directory):
+        for conffiles in iterconffiles(environmentdef, settings.directory):
             for conffile in conffiles.conffiles:
                 rows.append(make_conffile_description(conffile))
     return rows
@@ -121,6 +119,5 @@ def main():
     descriptions = make_conffile_descriptions(settings,
                                               options.environment,
                                               options.hosts.split(",") if options.hosts else [],
-                                              options.roles.split(",") if options.roles else [],
-                                              options.directory)
+                                              options.roles.split(",") if options.roles else [])
     print_conffiles(descriptions)
