@@ -42,8 +42,7 @@ def make_conffile_descriptions(settings,
                                environment,
                                hosts,
                                roles,
-                               template_dir,
-                               data_dir):
+                               directory):
     """
     Transform command line arguments into a list of rows.
     """
@@ -56,7 +55,7 @@ def make_conffile_descriptions(settings,
         # match hosts and roles, if any
         environmentdef = environmentdef.with_hosts(*hosts).with_roles(*roles)
 
-        for conffiles in iterconffiles(environmentdef, template_dir, data_dir):
+        for conffiles in iterconffiles(environmentdef, directory):
             for conffile in conffiles.conffiles:
                 rows.append(make_conffile_description(conffile))
     return rows
@@ -123,6 +122,5 @@ def main():
                                               options.environment,
                                               options.hosts.split(",") if options.hosts else [],
                                               options.roles.split(",") if options.roles else [],
-                                              join(options.directory, "templates"),
-                                              join(options.directory, "data"))
+                                              options.directory)
     print_conffiles(descriptions)
