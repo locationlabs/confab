@@ -97,6 +97,19 @@ class Settings(object):
                 raise Exception("Host '{}' does not have any configured roles".format(host))
         return EnvironmentDefinition(self, environment)
 
+    def all(self):
+        """
+        Return all valid environments.
+        """
+        return list(self.iterall())
+
+    def iterall(self):
+        """
+        Iterate through all valid enviornments.
+        """
+        for environment in self.environmentdefs:
+            yield self.for_env(environment)
+
     def _roles_for_host(self, host):
         """
         Compute complete list of roles for a host.

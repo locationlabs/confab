@@ -3,7 +3,7 @@ Non-init module for doing convenient * imports from.
 """
 
 # core
-from confab.conffiles import ConfFiles
+from confab.conffiles import ConfFiles, iterconffiles
 
 # settings
 from confab.definitions import Settings
@@ -35,6 +35,7 @@ __ignore__ = [
     DataLoader,
     diff,
     generate,
+    iterconffiles,
     pull,
     push,
     Options,

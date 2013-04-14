@@ -38,6 +38,7 @@ setup(name='confab',
       entry_points={
           'console_scripts': [
               'confab = confab.main:main',
+              'confab-show = confab.diagnostics:main',
           ]
       },
       )
