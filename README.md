@@ -3,6 +3,32 @@
 Configuration management with Fabric and Jinja2.
 
 
+## Quickstart
+
+```
+pip install -e git://github.com/locationlabs/confab.git#egg=confab-1.2
+
+cat > settings.py << "EOF"
+environmentdefs = {
+    'local': ['localhost']
+}
+
+roledefs = {
+    'base': ['localhost']
+}
+EOF
+
+mkdir -p data templates/base/tmp/
+echo 'my name is {{confab.host}}.' > templates/base/tmp/hello.txt
+
+confab diff
+
+confab push
+
+cat /tmp/hello.txt
+```
+
+
 ## Overview
 
 Confab provides four basic functions:
