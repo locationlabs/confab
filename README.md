@@ -128,7 +128,7 @@ Confab may be used in several ways:
 
         fab <env_name>:{role1},{role2} <task>:<arguments>
 
-    Note that the settings path and roles list are optional.
+    Note that the settings path, roles list, and arguments are optional.
 
  -  Confab's lower level API can be invoked directly either to create new tasks
     or as part of some other script:
