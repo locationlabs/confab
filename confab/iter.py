@@ -38,6 +38,8 @@ def iterconffiles(directory=None):
     Generate ConfFiles objects for each host_and_role in an environment.
 
     Uses the default FileSystemEnvironmentLoader and DataLoader.
+
+    :param directory: Path to templates and data directories.
     """
     hosts_and_roles = iter_hosts_and_roles()
     directory = directory or env.environmentdef.directory or getcwd()
@@ -50,5 +52,4 @@ def iterconffiles(directory=None):
     for host_and_role in hosts_and_roles:
         yield ConfFiles(host_and_role,
                         FileSystemEnvironmentLoader(templates_dir),
-                        DataLoader(data_dir),
-                        directory)
+                        DataLoader(data_dir))

@@ -207,8 +207,7 @@ class ConfFiles(object):
     def __init__(self,
                  host_and_role,
                  environment_loader,
-                 data_loader,
-                 directory):
+                 data_loader):
         """
         A set of templated configuration files.
 
@@ -228,7 +227,9 @@ class ConfFiles(object):
         self.host = host_and_role.host
         self.role = host_and_role.role
         self.environment = host_and_role.environment
-        self.directory = directory
+
+        # default base path for generated and remotes directories
+        self.directory = host_and_role.environmentdef.directory or os.getcwd()
 
         for component in host_and_role.itercomponents():
             debug("Processing: {}".format(component.name))
@@ -249,11 +250,21 @@ class ConfFiles(object):
                          host=self.host,
                          environment=self.environment))
 
-    def generate(self):
+    def _get_host_generated_dir(self, directory):
+        return join(directory or self.directory,
+                    options.get_generated_dir(),
+                    self.host)
+
+    def _get_host_remotes_dir(self, directory):
+        return join(directory or self.directory,
+                    options.get_remotes_dir(),
+                    self.host)
+
+    def generate(self, directory=None):
         """
         Write all configuration files to generated_dir.
         """
-        host_generated_dir = join(self.directory, options.get_generated_dir(), self.host)
+        host_generated_dir = self._get_host_generated_dir(directory)
 
         _clear_dir(host_generated_dir)
         _ensure_dir(host_generated_dir)
@@ -261,21 +272,21 @@ class ConfFiles(object):
         for conffile in self.conffiles:
             conffile.generate(host_generated_dir)
 
-    def pull(self):
+    def pull(self, directory=None):
         """
         Pull remote versions of files into remotes_dir.
         """
-        host_remotes_dir = join(self.directory, options.get_remotes_dir(), self.host)
+        host_remotes_dir = self._get_host_remotes_dir(directory)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
 
-    def diff(self):
+    def diff(self, directory=None):
         """
         Show diffs for all configuration files.
         """
-        host_generated_dir = join(self.directory, options.get_generated_dir(), self.host)
-        host_remotes_dir = join(self.directory, options.get_remotes_dir(), self.host)
+        host_generated_dir = self._get_host_generated_dir(directory)
+        host_remotes_dir = self._get_host_remotes_dir(directory)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -286,12 +297,12 @@ class ConfFiles(object):
         for conffile in self.conffiles:
             conffile.diff(host_generated_dir, host_remotes_dir).show()
 
-    def push(self):
+    def push(self, directory=None):
         """
         Push configuration files that have changes, given user confirmation.
         """
-        host_generated_dir = join(self.directory, options.get_generated_dir(), self.host)
-        host_remotes_dir = join(self.directory, options.get_remotes_dir(), self.host)
+        host_generated_dir = self._get_host_generated_dir(directory)
+        host_remotes_dir = self._get_host_remotes_dir(directory)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
