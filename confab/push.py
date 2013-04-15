@@ -1,12 +1,11 @@
 """
 Push generated configuration files to remote host.
 """
-from os import getcwd
-from fabric.api import abort, env, task
+from fabric.api import task
 from gusset.output import status
 from gusset.validation import with_validation
 
-from confab.conffiles import iterconffiles
+from confab.iter import iterconffiles
 
 
 @task
@@ -15,14 +14,9 @@ def push(directory=None):
     """
     Push configuration files.
     """
-    if 'environmentdef' not in env:
-        abort("Confab needs to be configured")
-
-    directory = directory or env.environmentdef.directory or getcwd()
-
-    for conffiles in iterconffiles(env.environmentdef, directory):
+    for conffiles in iterconffiles(directory):
         status("Pushing templates for '{environment}' and '{role}'",
-               environment=env.environmentdef.name,
+               environment=conffiles.environment,
                role=conffiles.role)
 
-        conffiles.push(directory)
+        conffiles.push()
