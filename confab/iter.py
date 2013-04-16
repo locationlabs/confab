@@ -33,7 +33,7 @@ def iter_hosts_and_roles():
             yield host_and_role
 
 
-def iterconffiles(directory=None):
+def iter_conffiles(directory=None):
     """
     Generate ConfFiles objects for each host_and_role in an environment.
 

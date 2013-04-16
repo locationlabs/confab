@@ -4,10 +4,11 @@ Diagnostics output for Confab settings.
 from collections import OrderedDict
 from optparse import OptionParser
 from string import capwords
+from fabric.api import settings
 from fabric.colors import red, green, blue, magenta, white, yellow
 
 from confab.definitions import Settings
-from confab.conffiles import iterconffiles
+from confab.iter import iter_conffiles
 from confab.main import add_core_options
 
 
@@ -37,7 +38,7 @@ def make_conffile_description(conffile):
     return row
 
 
-def make_conffile_descriptions(settings,
+def make_conffile_descriptions(settings_,
                                environment,
                                hosts,
                                roles):
@@ -45,7 +46,7 @@ def make_conffile_descriptions(settings,
     Transform command line arguments into a list of rows.
     """
     rows = []
-    for environmentdef in settings.iterall():
+    for environmentdef in settings_.iterall():
         # match environment, if any
         if environment is not None and environment != environmentdef.name:
             continue
@@ -53,9 +54,10 @@ def make_conffile_descriptions(settings,
         # match hosts and roles, if any
         environmentdef = environmentdef.with_hosts(*hosts).with_roles(*roles)
 
-        for conffiles in iterconffiles(environmentdef, settings.directory):
-            for conffile in conffiles.conffiles:
-                rows.append(make_conffile_description(conffile))
+        with settings(environmentdef=environmentdef):
+            for conffiles in iter_conffiles(settings_.directory):
+                for conffile in conffiles.conffiles:
+                    rows.append(make_conffile_description(conffile))
     return rows
 
 
