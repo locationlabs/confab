@@ -21,7 +21,7 @@ from confab.data import DataLoader
 from confab.options import assume_yes, Options
 
 # iterations
-from confab.iter import iter_hosts_and_roles, iterconffiles
+from confab.iter import iter_hosts_and_roles, iterconffiles, make_conffiles
 
 # fabric tasks
 from confab.diff import diff
@@ -44,4 +44,5 @@ __ignore__ = [
     Settings,
     iter_hosts_and_roles,
     iterconffiles,
+    make_conffiles,
 ]
