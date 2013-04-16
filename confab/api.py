@@ -3,7 +3,7 @@ Non-init module for doing convenient * imports from.
 """
 
 # core
-from confab.conffiles import ConfFiles, iterconffiles
+from confab.conffiles import ConfFiles
 
 # settings
 from confab.definitions import Settings
@@ -20,6 +20,9 @@ from confab.data import DataLoader
 # options
 from confab.options import assume_yes, Options
 
+# iterations
+from confab.iter import iter_hosts_and_roles, iter_conffiles, make_conffiles
+
 # fabric tasks
 from confab.diff import diff
 from confab.generate import generate
@@ -35,9 +38,11 @@ __ignore__ = [
     DataLoader,
     diff,
     generate,
-    iterconffiles,
     pull,
     push,
     Options,
     Settings,
+    iter_hosts_and_roles,
+    iter_conffiles,
+    make_conffiles,
 ]

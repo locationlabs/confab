@@ -37,7 +37,7 @@ def generate_tasks(settings_path=None):
             # If `fab` is run with multiple hosts, this task will be run multiple
             # times, overwriting the value of "env.environmentdef". By not selecting hosts
             # here, we ensure that the same environmentdef will be loaded each
-            # time. See also confab.conffiles:iterconffiles
+            # time. See also confab.iter:iter_conffiles
             env.environmentdef = settings.for_env(environment).with_roles(*roles)
         return select_environment
 

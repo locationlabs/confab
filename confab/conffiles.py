@@ -4,17 +4,15 @@ Configuration file template object model.
 from os.path import dirname, exists, join
 from hashlib import sha1
 from warnings import warn
-from fabric.api import get, env, put, settings, sudo
+from fabric.api import get, put, sudo
 from fabric.colors import blue, red, green, magenta
 from fabric.contrib.files import exists as exists_remote
 from fabric.contrib.console import confirm
 from gusset.output import debug, status
 
-from confab.data import DataLoader
 from confab.files import _clear_dir, _clear_file, _ensure_dir
-from confab.loaders import FileSystemEnvironmentLoader
 from confab.options import options
-from confab.validate import assert_exists, assert_may_be_created
+from confab.validate import assert_may_be_created
 
 import os
 import shutil
@@ -206,7 +204,10 @@ class ConfFiles(object):
     Encapsulation of a set of configuration files.
     """
 
-    def __init__(self, host_and_role, environment_loader, data_loader):
+    def __init__(self,
+                 host_and_role,
+                 environment_loader,
+                 data_loader):
         """
         A set of templated configuration files.
 
@@ -227,6 +228,9 @@ class ConfFiles(object):
         self.role = host_and_role.role
         self.environment = host_and_role.environment
 
+        # default base path for generated and remotes directories
+        self.directory = host_and_role.environmentdef.directory or os.getcwd()
+
         for component in host_and_role.itercomponents():
             debug("Processing: {}".format(component.name))
 
@@ -246,11 +250,21 @@ class ConfFiles(object):
                          host=self.host,
                          environment=self.environment))
 
-    def generate(self, directory):
+    def _get_host_generated_dir(self, directory):
+        return join(directory or self.directory,
+                    options.get_generated_dir(),
+                    self.host)
+
+    def _get_host_remotes_dir(self, directory):
+        return join(directory or self.directory,
+                    options.get_remotes_dir(),
+                    self.host)
+
+    def generate(self, directory=None):
         """
         Write all configuration files to generated_dir.
         """
-        host_generated_dir = join(directory, options.get_generated_dir(), self.host)
+        host_generated_dir = self._get_host_generated_dir(directory)
 
         _clear_dir(host_generated_dir)
         _ensure_dir(host_generated_dir)
@@ -258,21 +272,21 @@ class ConfFiles(object):
         for conffile in self.conffiles:
             conffile.generate(host_generated_dir)
 
-    def pull(self, directory):
+    def pull(self, directory=None):
         """
         Pull remote versions of files into remotes_dir.
         """
-        host_remotes_dir = join(directory, options.get_remotes_dir(), self.host)
+        host_remotes_dir = self._get_host_remotes_dir(directory)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
 
-    def diff(self, directory):
+    def diff(self, directory=None):
         """
         Show diffs for all configuration files.
         """
-        host_generated_dir = join(directory, options.get_generated_dir(), self.host)
-        host_remotes_dir = join(directory, options.get_remotes_dir(), self.host)
+        host_generated_dir = self._get_host_generated_dir(directory)
+        host_remotes_dir = self._get_host_remotes_dir(directory)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -283,12 +297,12 @@ class ConfFiles(object):
         for conffile in self.conffiles:
             conffile.diff(host_generated_dir, host_remotes_dir).show()
 
-    def push(self, directory):
+    def push(self, directory=None):
         """
         Push configuration files that have changes, given user confirmation.
         """
-        host_generated_dir = join(directory, options.get_generated_dir(), self.host)
-        host_remotes_dir = join(directory, options.get_remotes_dir(), self.host)
+        host_generated_dir = self._get_host_generated_dir(directory)
+        host_remotes_dir = self._get_host_remotes_dir(directory)
 
         for conffile in self.conffiles:
             conffile.pull(host_remotes_dir)
@@ -315,28 +329,3 @@ class ConfFiles(object):
                                          default=False):
             for conffile in with_diffs:
                 conffile.push(host_generated_dir)
-
-
-def iterconffiles(environmentdef, directory):
-    """
-    Generate ConfFiles objects for each host_and_role in an environment.
-
-    Uses the default FileSystemEnvironmentLoader and DataLoader.
-    """
-    # Construct directories
-    templates_dir = join(directory, options.get_templates_dir())
-    data_dir = join(directory, options.get_data_dir())
-    assert_exists(templates_dir, data_dir)
-
-    # If we're running via `fab`, we should restrict the environment
-    # to the current host. See also confab.main:confab
-    if env.host_string:
-        environmentdef = environmentdef.with_hosts(env.host_string)
-
-    for host_and_role in environmentdef.iterall():
-        environment, host, role = host_and_role
-        # fabric needs the host_string if we're calling from main()
-        with settings(host_string=host):
-            yield ConfFiles(host_and_role,
-                            FileSystemEnvironmentLoader(templates_dir),
-                            DataLoader(data_dir))
