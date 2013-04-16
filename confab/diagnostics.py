@@ -45,7 +45,7 @@ def make_conffile_descriptions(settings,
     Transform command line arguments into a list of rows.
     """
     rows = []
-    for environmentdef in settings.iterall():
+    for environmentdef in settings.all():
         # match environment, if any
         if environment is not None and environment != environmentdef.name:
             continue

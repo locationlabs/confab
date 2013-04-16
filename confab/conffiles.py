@@ -227,7 +227,7 @@ class ConfFiles(object):
         self.role = host_and_role.role
         self.environment = host_and_role.environment
 
-        for component in host_and_role.itercomponents():
+        for component in host_and_role.components():
             debug("Processing: {}".format(component.name))
 
             data = data_loader(component)
@@ -333,7 +333,7 @@ def iterconffiles(environmentdef, directory):
     if env.host_string:
         environmentdef = environmentdef.with_hosts(env.host_string)
 
-    for host_and_role in environmentdef.iterall():
+    for host_and_role in environmentdef.all():
         environment, host, role = host_and_role
         # fabric needs the host_string if we're calling from main()
         with settings(host_string=host):

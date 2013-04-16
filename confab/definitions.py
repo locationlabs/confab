@@ -16,21 +16,21 @@ class Settings(object):
     Supports convenient iteration. For example:
 
         # Iterate over all hosts and roles
-        for host_and_role in settings.for_env("env").iterall():
+        for host_and_role in settings.for_env("env").all():
             print host_and_role
 
         # Iterate over selected hosts and/or roles
-        for host_and_role in settings.for_env("env").with_hosts("host1", "host2").with_roles("role1").iterall():
+        for host_and_role in settings.for_env("env").with_hosts("host1", "host2").with_roles("role1").all():
             print host_and_role
 
         # Iterate over all hosts and roles, then all components
-        for host_and_role in settings.for_env("dev").iterall():
+        for host_and_role in settings.for_env("dev").all():
             environment, host, role = host_and_role
-            for component in host_and_role.itercomponents():
+            for component in host_and_role.components():
                 print component
 
         # Iterate over components
-        for component in settings.for_env("dev").itercomponents():
+        for component in settings.for_env("dev").components():
             environment, host, role, name = component
             print component
     """
@@ -101,12 +101,6 @@ class Settings(object):
         return EnvironmentDefinition(self, environment)
 
     def all(self):
-        """
-        Return all valid environments.
-        """
-        return list(self.iterall())
-
-    def iterall(self):
         """
         Iterate through all valid enviornments.
         """
@@ -187,12 +181,6 @@ class EnvironmentDefinition(object):
         """
         Iterate through all valid host and role combinations.
         """
-        return list(self.iterall())
-
-    def iterall(self):
-        """
-        Iterate through all valid host and role combinations.
-        """
         for host, roles in self.host_roles.iteritems():
             for role in roles:
                 yield HostAndRoleDefinition(self, host, role)
@@ -201,14 +189,8 @@ class EnvironmentDefinition(object):
         """
         Iterate through all valid components of all host and role combinations.
         """
-        return list(self.itercomponents())
-
-    def itercomponents(self):
-        """
-        Iterate through all valid components of all host and role combinations.
-        """
-        for host_and_role in self.iterall():
-            for component in host_and_role.itercomponents():
+        for host_and_role in self.all():
+            for component in host_and_role.components():
                 yield component
 
     def _resolve_host_roles(self):
@@ -256,9 +238,6 @@ class HostAndRoleDefinition(object):
         return self.environmentdef.name
 
     def components(self):
-        return list(self.itercomponents())
-
-    def itercomponents(self):
         # If a role has no components, will generate a component named after the role
         for component in self._expand_components(self.role, '', {}):
             yield ComponentDefinition(self, component)

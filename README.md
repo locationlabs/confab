@@ -137,7 +137,7 @@ Confab may be used in several ways:
         
         settings = Settings.load_from_module(settings_path)
         
-        for host_and_role in settings.for_env(env_name).iterall():
+        for host_and_role in settings.for_env(env_name).all():
             conffiles = ConfFiles(host_and_role,
                                   environment_loader,
                                   data_loader)

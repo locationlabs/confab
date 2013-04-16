@@ -30,7 +30,7 @@ class TestGenerate(TestCase):
         """
         Generated templates have the correct values.
         """
-        conffiles = ConfFiles(self.settings.for_env('any').all()[0],
+        conffiles = ConfFiles(self.settings.for_env('any').all().next(),
                               PackageEnvironmentLoader('confab.tests', 'templates/default'),
                               lambda _: {'bar': 'bar', 'foo': 'foo'})
 
@@ -47,7 +47,7 @@ class TestGenerate(TestCase):
         """
         Generated templates with unicode data.
         """
-        conffiles = ConfFiles(self.settings.for_env('any').all()[0],
+        conffiles = ConfFiles(self.settings.for_env('any').all().next(),
                               PackageEnvironmentLoader('confab.tests', 'templates/default'),
                               lambda _: {'bar': 'bar', 'foo': u'\xc5\xae'})
         with TempDir() as tmp_dir:
@@ -63,7 +63,7 @@ class TestGenerate(TestCase):
         """
         An exception is raised if a template value is undefined.
         """
-        conffiles = ConfFiles(self.settings.for_env('any').all()[0],
+        conffiles = ConfFiles(self.settings.for_env('any').all().next(),
                               PackageEnvironmentLoader('confab.tests', 'templates/default'),
                               lambda _: {'bar': 'bar'})
 
@@ -76,7 +76,7 @@ class TestGenerate(TestCase):
         Passing a mime_type_func controls whether templates are rendered.
         """
         with Options(should_render=lambda mime_type: False):
-            conffiles = ConfFiles(self.settings.for_env('any').all()[0],
+            conffiles = ConfFiles(self.settings.for_env('any').all().next(),
                                   PackageEnvironmentLoader('confab.tests', 'templates/default'),
                                   lambda _: {'bar': 'bar', 'foo': 'foo'})
 
@@ -92,7 +92,7 @@ class TestGenerate(TestCase):
         Confab copies binary config files verbatim to generated folder.
         """
         templates_dir = join(dirname(__file__), 'templates/binary')
-        conffiles = ConfFiles(self.settings.for_env('any').all()[0],
+        conffiles = ConfFiles(self.settings.for_env('any').all().next(),
                               FileSystemEnvironmentLoader(templates_dir), lambda _: {})
 
         with TempDir() as tmp_dir:
@@ -119,7 +119,7 @@ class TestGenerate(TestCase):
             'compgroup': ['comp2', 'comp3'],
         }
         with TempDir() as tmp_dir:
-            for host_and_role in self.settings.for_env('any').iterall():
+            for host_and_role in self.settings.for_env('any').all():
                 conffiles = ConfFiles(host_and_role,
                                       PackageEnvironmentLoader('confab.tests',
                                                                'templates/components'),
