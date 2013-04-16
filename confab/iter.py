@@ -27,7 +27,7 @@ def iter_hosts_and_roles():
     if env.host_string:
         environmentdef = environmentdef.with_hosts(env.host_string)
 
-    for host_and_role in environmentdef.iterall():
+    for host_and_role in environmentdef.all():
         # fabric needs the host_string if we're calling from main()
         with settings(host_string=host_and_role.host):
             yield host_and_role

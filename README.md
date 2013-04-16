@@ -133,14 +133,23 @@ Confab may be used in several ways:
  -  Confab's lower level API can be invoked directly either to create new tasks
     or as part of some other script:
 
-        from confab.api import ConfFiles, Settings
-        
+        from fabric.api import env
+        from confab.api import iter_conffiles, Settings
+
+        # load settings
         settings = Settings.load_from_module(settings_path)
         
-        for host_and_role in settings.for_env(env_name).iterall():
-            conffiles = ConfFiles(host_and_role,
-                                  environment_loader,
-                                  data_loader)
+        # select and save environment
+        env.environmentdef = settings.for_env(env_name)
+        
+        # optionally restrict hosts and roles
+        env.environmentdef = env.environmentdef.with_hosts(host1, host2)
+        env.environmentdef = env.environmentdef.with_roles(role1, role2)
+        
+        # iterate over conffiles for each host, role, component triple
+        for conffiles in iter_conffiles():
+            # your action here
+            conffiles.generate()
 
 ## Directories
 

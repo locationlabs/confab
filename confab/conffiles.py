@@ -231,7 +231,7 @@ class ConfFiles(object):
         # default base path for generated and remotes directories
         self.directory = host_and_role.environmentdef.directory or os.getcwd()
 
-        for component in host_and_role.itercomponents():
+        for component in host_and_role.components():
             debug("Processing: {}".format(component.name))
 
             data = data_loader(component)

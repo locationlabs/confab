@@ -22,7 +22,7 @@ class TestData(TestCase):
         self.settings.componentdefs = {
             "role": ["component"],
         }
-        self.component = self.settings.for_env("environment").components()[0]
+        self.component = self.settings.for_env("environment").components().next()
 
     def test_data_templates(self):
         """

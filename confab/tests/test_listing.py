@@ -1,7 +1,6 @@
 """
 Test configuration file listing.
 """
-from fabric.api import settings
 from jinja2 import UndefinedError
 from nose.tools import eq_, ok_
 from unittest import TestCase
@@ -10,7 +9,7 @@ from warnings import catch_warnings
 from confab.conffiles import ConfFiles
 from confab.definitions import Settings
 from confab.loaders import PackageEnvironmentLoader
-from confab.options import options, Options
+from confab.options import Options
 
 
 class TestListing(TestCase):
@@ -30,7 +29,7 @@ class TestListing(TestCase):
         and generates their names properly.
         """
 
-        conffiles = ConfFiles(self.settings.for_env('any').all()[0],
+        conffiles = ConfFiles(self.settings.for_env('any').all().next(),
                               PackageEnvironmentLoader('confab.tests', 'templates/default'),
                               lambda _: {'bar': 'bar'})
 
@@ -47,7 +46,7 @@ class TestListing(TestCase):
         """
 
         with self.assertRaises(UndefinedError):
-            ConfFiles(self.settings.for_env('any').all()[0],
+            ConfFiles(self.settings.for_env('any').all().next(),
                       PackageEnvironmentLoader('confab.tests', 'templates/default'),
                       lambda _: {})
 
@@ -57,7 +56,7 @@ class TestListing(TestCase):
         """
 
         with Options(filter_func=lambda file_name: file_name != 'foo.txt'):
-            conffiles = ConfFiles(self.settings.for_env('any').all()[0],
+            conffiles = ConfFiles(self.settings.for_env('any').all().next(),
                                   PackageEnvironmentLoader('confab.tests', 'templates/default'),
                                   lambda _: {'bar': 'bar'})
 
@@ -84,14 +83,14 @@ class TestListing(TestCase):
         # use data that will create different conffiles for the same
         # component in the two roles.
 
-        conffiles = ConfFiles(self.settings.for_env('any').with_roles('role1').all()[0],
+        conffiles = ConfFiles(self.settings.for_env('any').with_roles('role1').all().next(),
                               environment_loader,
                               lambda comp: {'foo': 'role1'})
 
         eq_(1, len(conffiles.conffiles))
         ok_('role1.txt' == conffiles.conffiles[0].name)
 
-        conffiles = ConfFiles(self.settings.for_env('any').with_roles('role2').all()[0],
+        conffiles = ConfFiles(self.settings.for_env('any').with_roles('role2').all().next(),
                               environment_loader,
                               lambda comp: {'foo': 'role2'})
 
@@ -104,7 +103,7 @@ class TestListing(TestCase):
         """
         with Options(filter_func=lambda _: False):
             with catch_warnings(record=True) as captured_warnings:
-                conffiles = ConfFiles(self.settings.for_env('any').all()[0],
+                conffiles = ConfFiles(self.settings.for_env('any').all().next(),
                                       PackageEnvironmentLoader('confab.tests',
                                                                'templates/default'),
                                       lambda _: {})
