@@ -1,7 +1,7 @@
 """
 Options for managing Confab.
 """
-
+from os.path import basename
 from fabric.api import task
 from fabric.utils import _AttributeDict
 
@@ -37,6 +37,23 @@ def _is_not_temporary(file_name):
     files to be ignored.
     """
     return not file_name.endswith('~')
+
+
+def _is_not_internal(file_name):
+    """
+    Return whether a file name does not represent internal usage.
+
+    When listing configuration files, we want to omit internal
+    files, especially if they are used as Jinja includes
+    """
+    return not basename(file_name).startswith('_')
+
+
+def _filter_func(file_name):
+    """
+    Return the default filter func, which excludes temporary and internal files.
+    """
+    return _is_not_temporary(file_name) and _is_not_internal(file_name)
 
 
 def _get_mime_type(file_name):
@@ -86,7 +103,7 @@ options = _AttributeDict({
     'is_empty': _is_empty,
 
     # How do filter available templates within the jinja environment?
-    'filter_func': _is_not_temporary,
+    'filter_func': _filter_func,
 
     # How to determine diffs?
     'diff': _diff,
