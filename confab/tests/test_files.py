@@ -23,9 +23,13 @@ class TestImport(TestCase):
         eq_("bar", module.foo)
 
     def test_import_not_found(self):
-        with self.assertRaises(ImportError):
+        with self.assertRaises(ImportError) as e:
             _import("missing", self.dir_name)
+        # module_path not set: the module itself could not be found
+        eq_(None, getattr(e.exception, 'module_path', None))
 
     def test_import_broken(self):
-        with self.assertRaises(ImportError):
+        with self.assertRaises(ImportError) as e:
             _import("broken", self.dir_name)
+        # module_path was set: the module was found but had an import error
+        eq_(join(self.dir_name, 'broken.py'), e.exception.module_path)

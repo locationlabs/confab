@@ -24,7 +24,8 @@ def import_configuration(module_name, data_dir):
         puts("Loaded {module_name}.py from {data_dir}".format(module_name=module_name,
                                                               data_dir=data_dir))
     except ImportError as e:
-        if module_name not in e.message:
+        # if the module was found but could not be loaded, re-raise the error
+        if getattr(e, 'module_path', None):
             raise e
         debug("Attempting to load {module_name}.py_tmpl from {data_dir}",
               module_name=module_name,
