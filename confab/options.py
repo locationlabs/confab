@@ -81,7 +81,7 @@ def _as_dict(module):
     try:
         return {k: v for k, v in module.__dict__.iteritems() if not k[0:1] == '_'}
     except AttributeError:
-        return None
+        return {}
 
 
 # Options that control how confab runs.

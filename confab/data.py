@@ -31,15 +31,14 @@ def import_configuration(module_name, data_dir):
         try:
             env = Environment(loader=FileSystemLoader(data_dir))
             rendered_module = env.get_template(module_name + '.py_tmpl').render({})
+            module = _import_string(module_name, rendered_module)
+            puts("Loaded {module_name}.py_tmpl from {data_dir}".format(module_name=module_name,
+                                                                       data_dir=data_dir))
         except TemplateNotFound:
             debug("Could not load {module_name} from {data_dir}",
                   module_name=module_name,
                   data_dir=data_dir)
-            return None
-
-        module = _import_string(module_name, rendered_module)
-        puts("Loaded {module_name}.py_tmpl from {data_dir}".format(module_name=module_name,
-                                                                   data_dir=data_dir))
+            module = {}
 
     return options.module_as_dict(module)
 
@@ -79,7 +78,7 @@ class DataLoader(object):
 
         load_module = lambda module_name: import_configuration(module_name, self.data_dir)
 
-        module_dicts = filter(is_not_none, map(load_module, module_names))
+        module_dicts = map(load_module, module_names)
 
         confab_data = dict(confab=dict(environment=componentdef.environment,
                                        host=componentdef.host,
