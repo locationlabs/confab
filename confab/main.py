@@ -67,6 +67,11 @@ def parse_options():
                       default=False,
                       help="automatically answer yes to prompts")
 
+    parser.add_option("--use-ssh-config", dest="use_ssh_config",
+                      default=False,
+                      action="store_true",
+                      help="cause Fabric to load your local SSH config file")
+
     opts, args = parser.parse_args()
     return parser, opts, args
 
@@ -156,7 +161,8 @@ def main():
 
         task_func = get_task(parser, options, arguments)
 
-        with settings(user=options.user):
+        with settings(user=options.user,
+                      use_ssh_config=options.use_ssh_config):
             with Options(assume_yes=options.assume_yes):
                 task_func(options.directory)
 
