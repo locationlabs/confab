@@ -67,7 +67,7 @@ def parse_options():
                       default=False,
                       help="automatically answer yes to prompts")
 
-    parser.add_option("--use-ssh-config", dest="use_ssh_config",
+    parser.add_option("-x", "--use-ssh-config", dest="use_ssh_config",
                       default=False,
                       action="store_true",
                       help="cause Fabric to load your local SSH config file")
