@@ -11,7 +11,7 @@ from confab.files import _import
 class TestImport(TestCase):
 
     def setUp(self):
-        self.dir_name = join(dirname(__file__), 'data')
+        self.dir_name = join(dirname(__file__), 'data/default')
 
     def test_import_empty(self):
         module = _import("empty", self.dir_name)
