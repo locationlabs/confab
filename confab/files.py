@@ -51,7 +51,16 @@ def _import(module_name, dir_name):
 
     # try to load module
     module_info = imp.find_module(module_name, [dir_name])
-    module = imp.load_module(safe_name, *module_info)
+    try:
+        module = imp.load_module(safe_name, *module_info)
+    except ImportError as e:
+        # In the normal case, an import error is raised during imp.find_module()
+        # because the module is not found. However, ImportError can also be raised
+        # if the module itself contains other ImportErrors. Rather than depend on the
+        # error message or invent a non-standard exception type, decorate the error
+        # with the path to the module that was found.
+        e.module_path = module_info[1]
+        raise e
     return module
 
 

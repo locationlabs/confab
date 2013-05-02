@@ -83,3 +83,33 @@ class TestData(TestCase):
              'component': 'component',
              'environment': 'component',
              'host': 'host'})
+
+    def test_missing_data_module(self):
+        """
+        If a data module does not exist, it is ignored.
+        """
+        loader = DataLoader(join(dirname(__file__), 'data/missing'),
+                            data_modules=['component'])
+
+        # no module named component
+        eq_(None, loader(self.component).get('data'))
+
+    def test_broken_data_module(self):
+        """
+        If a data module has a broken import, an import error is raised.
+        """
+        loader = DataLoader(join(dirname(__file__), 'data/broken'),
+                            data_modules=['component'])
+
+        with self.assertRaises(ImportError):
+            loader(self.component).get('data')
+
+    def test_broken_data_template(self):
+        """
+        If a data template has a broken import, an import error is raised.
+        """
+        loader = DataLoader(join(dirname(__file__), 'data/broken'),
+                            data_modules=['host'])
+
+        with self.assertRaises(ImportError):
+            loader(self.component).get('data')
