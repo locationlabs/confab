@@ -1,1 +1,1 @@
-from foo import bar # flake8: noqa
+import doesnotexist # flake8: noqa
