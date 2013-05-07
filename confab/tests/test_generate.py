@@ -17,7 +17,6 @@ class TestGenerate(TestCase):
 
     def setUp(self):
         self.settings = dict(roledefs={'role': ['localhost']},
-                             componentdefs={},
                              host_string='localhost',
                              role='role')
 

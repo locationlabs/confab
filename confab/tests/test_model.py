@@ -104,8 +104,7 @@ class TestModel(TestCase):
         """
 
         # no componentdefs is ok
-        with settings(roledefs={'role1': ['host1']},
-                      componentdefs={}):
+        with settings(roledefs={'role1': ['host1']}):
             eq_([], get_components_for_role('role1'))
 
         with settings(roledefs={'role1': ['host1'],

@@ -62,7 +62,7 @@ def get_components_for_role(role):
     if role not in env.roledefs:
         raise Exception("Role '{}' is not defined".format(role))
 
-    if role not in env.componentdefs:
+    if 'componentdefs' not in env or role not in env.componentdefs:
         return []
 
     return _expand_components(role, '', {})
