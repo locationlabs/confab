@@ -208,7 +208,7 @@ class ConfFiles(object):
                     raise Exception("Found two configuration templates with the same file path."
                                     " File: {}, Components: {}"
                                     .format(conffile.remote,
-                                            ",".join(component, other_component)))
+                                            ",".join([component, other_component])))
 
                 conffile_names[conffile.name] = component
 
