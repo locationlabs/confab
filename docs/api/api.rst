@@ -3,7 +3,7 @@
 :mod:`confab.api`
 -----------------
 
-.. module:: confab.api
+.. automodule:: confab.api
 
 Core
 ~~~~
@@ -25,7 +25,7 @@ Jinja2 Environment Loading
 Data Loading
 ~~~~~~~~~~~~
 
-- :class:`~confab.dataDataLoader`
+- :class:`~confab.data.DataLoader`
 
 Options
 ~~~~~~~
