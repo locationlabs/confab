@@ -1,0 +1,384 @@
+<!DOCTYPE html><html>
+<head>
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=utf-8"/>
+    
+        <title>confab.merge &mdash; Confab 1.1.1 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='http://fonts.googleapis.com/css?family=Crete+Round' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="../_static/sphinx-bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css"/>
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+        <script type="text/javascript">
+            var DOCUMENTATION_OPTIONS = {
+                URL_ROOT:'../',
+                VERSION:'1.1.1',
+                COLLAPSE_INDEX:false,
+                FILE_SUFFIX:'.html',
+                HAS_SOURCE:  true
+            };
+        </script>
+            <script type="text/javascript" src="../_static/jquery.js"></script>
+            <script type="text/javascript" src="../_static/underscore.js"></script>
+            <script type="text/javascript" src="../_static/doctools.js"></script>
+            <script type="text/javascript" src="../_static/bootstrap-dropdown.js"></script>
+        <link rel="top" title="Confab 1.1.1 documentation" href="../index.html"/>
+            <link rel="up" title="API Reference" href="../api.html"/>
+            <link rel="next" title="confab.model" href="model.html"/>
+            <link rel="prev" title="confab.main" href="main.html"/> 
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+</head>
+<body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+
+    <div class="related">
+        <ul class="nav">
+                <li class=""><a class="brand" href="../index.html">Confab</a></li>
+                <li>
+                    <a href="../genindex.html"
+                       title="General Index" accesskey="I">index</a>
+                </li>
+                <li>
+                    <a href="../py-modindex.html"
+                       title="Python Module Index" >modules</a>
+                </li>
+                <li>
+                    <a href="model.html"
+                       title="confab.model" accesskey="N">next</a>
+                </li>
+                <li>
+                    <a href="main.html"
+                       title="confab.main" accesskey="P">previous</a>
+                </li>
+                <li><a href="../api.html"
+                        accesskey="U">API Reference</a>
+                </li> 
+        </ul>
+    </div>
+                <div class="pull-right">
+                    
+        <form class="navbar-search form-search" action="../search.html"
+              method="get">
+            <input class="search-query" type="text" name="q" placeholder="search"/>
+            <input type="hidden" name="check_keywords" value="yes"/>
+            <input type="hidden" name="area" value="default"/>
+        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    <div class="container">
+        <div class="content row">
+                <div class="span9">
+                    
+  <div class="section" id="module-confab.merge">
+<span id="confab-merge"></span><span id="merge-module"></span><h1><a class="reference internal" href="#module-confab.merge" title="confab.merge"><tt class="xref py py-mod docutils literal"><span class="pre">confab.merge</span></tt></a><a class="headerlink" href="#module-confab.merge" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="confab.merge.merge">
+<tt class="descclassname">confab.merge.</tt><tt class="descname">merge</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/confab/merge.html#merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.merge.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively merge multiple dictionaries.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="confab.merge.Append">
+<em class="property">class </em><tt class="descclassname">confab.merge.</tt><tt class="descname">Append</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/confab/merge.html#Append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.merge.Append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Customized callable list that appends its values to the default.</p>
+<dl class="method">
+<dt id="confab.merge.Append.append">
+<tt class="descname">append</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Append.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.append(object) &#8211; append object to end</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Append.count">
+<tt class="descname">count</tt><big>(</big><em>value</em><big>)</big> &rarr; integer -- return number of occurrences of value<a class="headerlink" href="#confab.merge.Append.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Append.extend">
+<tt class="descname">extend</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Append.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.extend(iterable) &#8211; extend list by appending elements from the iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Append.index">
+<tt class="descname">index</tt><big>(</big><em>value</em><span class="optional">[</span>, <em>start</em><span class="optional">[</span>, <em>stop</em><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; integer -- return first index of value.<a class="headerlink" href="#confab.merge.Append.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Append.insert">
+<tt class="descname">insert</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Append.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.insert(index, object) &#8211; insert object before index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Append.pop">
+<tt class="descname">pop</tt><big>(</big><span class="optional">[</span><em>index</em><span class="optional">]</span><big>)</big> &rarr; item -- remove and return item at index (default last).<a class="headerlink" href="#confab.merge.Append.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises IndexError if list is empty or index is out of range.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Append.remove">
+<tt class="descname">remove</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Append.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.remove(value) &#8211; remove first occurrence of value.
+Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Append.reverse">
+<tt class="descname">reverse</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Append.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.reverse() &#8211; reverse <em>IN PLACE</em></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Append.sort">
+<tt class="descname">sort</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Append.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.sort(cmp=None, key=None, reverse=False) &#8211; stable sort <em>IN PLACE</em>;
+cmp(x, y) -&gt; -1, 0, 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="confab.merge.append">
+<tt class="descclassname">confab.merge.</tt><tt class="descname">append</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/confab/merge.html#append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.merge.append" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="confab.merge.Prepend">
+<em class="property">class </em><tt class="descclassname">confab.merge.</tt><tt class="descname">Prepend</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/confab/merge.html#Prepend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.merge.Prepend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Customized callable list that prepends its values to the default.</p>
+<dl class="method">
+<dt id="confab.merge.Prepend.append">
+<tt class="descname">append</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Prepend.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.append(object) &#8211; append object to end</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Prepend.count">
+<tt class="descname">count</tt><big>(</big><em>value</em><big>)</big> &rarr; integer -- return number of occurrences of value<a class="headerlink" href="#confab.merge.Prepend.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Prepend.extend">
+<tt class="descname">extend</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Prepend.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.extend(iterable) &#8211; extend list by appending elements from the iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Prepend.index">
+<tt class="descname">index</tt><big>(</big><em>value</em><span class="optional">[</span>, <em>start</em><span class="optional">[</span>, <em>stop</em><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; integer -- return first index of value.<a class="headerlink" href="#confab.merge.Prepend.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Prepend.insert">
+<tt class="descname">insert</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Prepend.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.insert(index, object) &#8211; insert object before index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Prepend.pop">
+<tt class="descname">pop</tt><big>(</big><span class="optional">[</span><em>index</em><span class="optional">]</span><big>)</big> &rarr; item -- remove and return item at index (default last).<a class="headerlink" href="#confab.merge.Prepend.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises IndexError if list is empty or index is out of range.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Prepend.remove">
+<tt class="descname">remove</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Prepend.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.remove(value) &#8211; remove first occurrence of value.
+Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Prepend.reverse">
+<tt class="descname">reverse</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Prepend.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.reverse() &#8211; reverse <em>IN PLACE</em></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.Prepend.sort">
+<tt class="descname">sort</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.Prepend.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.sort(cmp=None, key=None, reverse=False) &#8211; stable sort <em>IN PLACE</em>;
+cmp(x, y) -&gt; -1, 0, 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="confab.merge.prepend">
+<tt class="descclassname">confab.merge.</tt><tt class="descname">prepend</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/confab/merge.html#prepend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.merge.prepend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="confab.merge.UniqueUnion">
+<em class="property">class </em><tt class="descclassname">confab.merge.</tt><tt class="descname">UniqueUnion</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/confab/merge.html#UniqueUnion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.merge.UniqueUnion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Customized callable list that adds its values to the default list
+preserving unique values.</p>
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.append">
+<tt class="descname">append</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.UniqueUnion.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.append(object) &#8211; append object to end</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.count">
+<tt class="descname">count</tt><big>(</big><em>value</em><big>)</big> &rarr; integer -- return number of occurrences of value<a class="headerlink" href="#confab.merge.UniqueUnion.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.extend">
+<tt class="descname">extend</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.UniqueUnion.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.extend(iterable) &#8211; extend list by appending elements from the iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.index">
+<tt class="descname">index</tt><big>(</big><em>value</em><span class="optional">[</span>, <em>start</em><span class="optional">[</span>, <em>stop</em><span class="optional">]</span><span class="optional">]</span><big>)</big> &rarr; integer -- return first index of value.<a class="headerlink" href="#confab.merge.UniqueUnion.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.insert">
+<tt class="descname">insert</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.UniqueUnion.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.insert(index, object) &#8211; insert object before index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.pop">
+<tt class="descname">pop</tt><big>(</big><span class="optional">[</span><em>index</em><span class="optional">]</span><big>)</big> &rarr; item -- remove and return item at index (default last).<a class="headerlink" href="#confab.merge.UniqueUnion.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises IndexError if list is empty or index is out of range.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.remove">
+<tt class="descname">remove</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.UniqueUnion.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.remove(value) &#8211; remove first occurrence of value.
+Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.reverse">
+<tt class="descname">reverse</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.UniqueUnion.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.reverse() &#8211; reverse <em>IN PLACE</em></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.merge.UniqueUnion.sort">
+<tt class="descname">sort</tt><big>(</big><big>)</big><a class="headerlink" href="#confab.merge.UniqueUnion.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>L.sort(cmp=None, key=None, reverse=False) &#8211; stable sort <em>IN PLACE</em>;
+cmp(x, y) -&gt; -1, 0, 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="confab.merge.unique_union">
+<tt class="descclassname">confab.merge.</tt><tt class="descname">unique_union</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/confab/merge.html#unique_union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.merge.unique_union" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+                    
+                </div>
+                <div class="span3">
+                    
+        <div class="sphinxsidebar">
+            <ul class="nav nav-list well">
+  <li class="nav-header">Previous topic</li>
+  <li>
+    <a href="main.html"
+       title="previous chapter"><tt class="docutils literal docutils literal docutils literal docutils literal"><span class="pre">confab.main</span></tt></a>
+  </li>
+  <li class="nav-header">Next topic</li>
+  <li>
+    <a href="model.html"
+       title="next chapter"><tt class="docutils literal"><span class="pre">confab.model</span></tt></a>
+  </li>
+            </ul>
+            <p>&nbsp;</p>
+            <ul class="nav nav-list well">
+                <li class="nav-header">GitHub</li>
+                <li>
+                    <a href="https://github.com/locationlabs/confab/">Repo</a>
+                </li>
+                <li>
+                    <a href="https://github.com/locationlabs/confab/issues?state=open">Issues</a>
+                </li>
+                <li>
+                    <iframe class="github-btn"
+                            src="http://ghbtns.com/github-btn.html?user=locationlabs&repo=confab&type=watch&count=true"
+                            allowtransparency="true" frameborder="0" scrolling="0"
+                            width="110px" height="20px"></iframe>
+                </li>
+                <li>
+                    <iframe class="github-btn"
+                            src="http://ghbtns.com/github-btn.html?user=locationlabs&repo=confab&type=fork&count=true"
+                            allowtransparency="true" frameborder="0" scrolling="0"
+                            width="94px" height="20px"></iframe>
+                </li>
+            </ul>
+        </div>
+                </div>
+            
+        </div>
+    </div>
+    <div class="footer">
+        
+        <div class="container">
+                    &copy;
+                        Copyright 2013, locationlabs and contributors.
+                Last updated
+                    on 2013-05-11.
+                    <br />
+                Created using <a
+                        href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b1
+                    .
+                Theme based on
+                <a href="https://github.com/scotch/sphinx-bootstrap">
+                    Sphinx-Bootstrap
+                </a>
+                adapted from
+                <a href="http://twitter.github.com/bootstrap/">
+                    Twitter's Bootstrap
+                </a>
+                by <a href="http://www.scotchmedia.com">Scotch Media</a>
+        </div>
+    </div>
+
+
+
+<script type="text/javascript">
+    $('.nav .active').on('click', function () {
+        e.preventDefault()
+        $(this).siblings().toggle()
+    });
+</script>
+
+<!-- plusone -->
+<script type="text/javascript">
+    (function () {
+        var po = document.createElement('script');
+        po.type = 'text/javascript';
+        po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<!-- twitter -->
+<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>
+
+</body>
+</html>

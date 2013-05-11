@@ -1,0 +1,247 @@
+<!DOCTYPE html><html>
+<head>
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=utf-8"/>
+    
+        <title>confab.loaders &mdash; Confab 1.1.1 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='http://fonts.googleapis.com/css?family=Crete+Round' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="../../_static/sphinx-bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css"/>
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+        <script type="text/javascript">
+            var DOCUMENTATION_OPTIONS = {
+                URL_ROOT:'../../',
+                VERSION:'1.1.1',
+                COLLAPSE_INDEX:false,
+                FILE_SUFFIX:'.html',
+                HAS_SOURCE:  true
+            };
+        </script>
+            <script type="text/javascript" src="../../_static/jquery.js"></script>
+            <script type="text/javascript" src="../../_static/underscore.js"></script>
+            <script type="text/javascript" src="../../_static/doctools.js"></script>
+            <script type="text/javascript" src="../../_static/bootstrap-dropdown.js"></script>
+        <link rel="top" title="Confab 1.1.1 documentation" href="../../index.html"/>
+            <link rel="up" title="Module code" href="../index.html"/> 
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+</head>
+<body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+
+    <div class="related">
+        <ul class="nav">
+                <li class=""><a class="brand" href="../../index.html">Confab</a></li>
+                <li>
+                    <a href="../../genindex.html"
+                       title="General Index" accesskey="I">index</a>
+                </li>
+                <li>
+                    <a href="../../py-modindex.html"
+                       title="Python Module Index" >modules</a>
+                </li>
+                <li><a href="../index.html"
+                        accesskey="U">Module code</a>
+                </li> 
+        </ul>
+    </div>
+                <div class="pull-right">
+                    
+        <form class="navbar-search form-search" action="../../search.html"
+              method="get">
+            <input class="search-query" type="text" name="q" placeholder="search"/>
+            <input type="hidden" name="check_keywords" value="yes"/>
+            <input type="hidden" name="area" value="default"/>
+        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    <div class="container">
+        <div class="content row">
+                <div class="span9">
+                    
+  <h1>Source code for confab.loaders</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Jinja2 Environment loading helper functions.</span>
+
+<span class="sd">Confab uses the environments list_templates() method to abstract</span>
+<span class="sd">template location from rendering and synchronization.</span>
+
+<span class="sd">Note that the default Jinja2 Loaders assume a charset (default: utf-8).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Environment</span><span class="p">,</span> <span class="n">FileSystemLoader</span><span class="p">,</span> <span class="n">PackageLoader</span><span class="p">,</span> <span class="n">BaseLoader</span><span class="p">,</span>
+                    <span class="n">StrictUndefined</span><span class="p">,</span> <span class="n">TemplateNotFound</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">get_provider</span>
+
+
+<div class="viewcode-block" id="FileSystemEnvironmentLoader"><a class="viewcode-back" href="../../api/loaders.html#confab.loaders.FileSystemEnvironmentLoader">[docs]</a><span class="k">class</span> <span class="nc">FileSystemEnvironmentLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads Jinja2 environments from directories.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dir_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir_name</span> <span class="o">=</span> <span class="n">dir_name</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a Jinja2 Environment for a component.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">component_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_name</span><span class="p">,</span> <span class="n">component</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">component_path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">EmptyLoader</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">ConfabFileSystemLoader</span><span class="p">(</span><span class="n">component_path</span><span class="p">),</span>
+                           <span class="n">undefined</span><span class="o">=</span><span class="n">StrictUndefined</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="PackageEnvironmentLoader"><a class="viewcode-back" href="../../api/loaders.html#confab.loaders.PackageEnvironmentLoader">[docs]</a><span class="k">class</span> <span class="nc">PackageEnvironmentLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads Jinja2 environments from python packages.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">templates_path</span><span class="o">=</span><span class="s">&#39;templates&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">package_name</span> <span class="o">=</span> <span class="n">package_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">templates_path</span> <span class="o">=</span> <span class="n">templates_path</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a Jinja2 Environment for a component.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">package_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates_path</span><span class="p">,</span> <span class="n">component</span><span class="p">)</span>
+
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">get_provider</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">provider</span><span class="o">.</span><span class="n">resource_isdir</span><span class="p">(</span><span class="n">package_path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">EmptyLoader</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">PackageLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">package_name</span><span class="p">,</span> <span class="n">package_path</span><span class="p">),</span>
+                           <span class="n">undefined</span><span class="o">=</span><span class="n">StrictUndefined</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ConfabFileSystemLoader"><a class="viewcode-back" href="../../api/loaders.html#confab.loaders.ConfabFileSystemLoader">[docs]</a><span class="k">class</span> <span class="nc">ConfabFileSystemLoader</span><span class="p">(</span><span class="n">FileSystemLoader</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adds support for binary templates when loading an environment from the file system.</span>
+
+<span class="sd">    Binary config files cannot be loaded as Jinja templates by default, but since confab&#39;s</span>
+<span class="sd">    model is built around Jinja environments we need to make sure we can still represent</span>
+<span class="sd">    them as jinja Templates.</span>
+
+<span class="sd">    Since confab only renders templates from text config files (see</span>
+<span class="sd">    :py:meth:`confab.conffiles.Conffile.generate` and :py:meth:`confab.options.should_render`)</span>
+<span class="sd">    we can workaround this by returning a dummy template for binary config files</span>
+<span class="sd">    with the appropriate metadata. When generating the configuration, confab,</span>
+<span class="sd">    instead of rendering the template, will just copy the template file</span>
+<span class="sd">    (the binary config file) verbatim to the generated folder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">environment</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ConfabFileSystemLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_source</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c"># not a text file</span>
+
+        <span class="k">for</span> <span class="n">searchpath</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchpath</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">searchpath</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="bp">True</span>
+
+        <span class="k">raise</span> <span class="n">TemplateNotFound</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="EmptyLoader"><a class="viewcode-back" href="../../api/loaders.html#confab.loaders.EmptyLoader">[docs]</a><span class="k">class</span> <span class="nc">EmptyLoader</span><span class="p">(</span><span class="n">BaseLoader</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Jinja template loader with no templates.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">list_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+</pre></div>
+
+                    
+                </div>
+                <div class="span3">
+                    
+        <div class="sphinxsidebar">
+            <ul class="nav nav-list well">
+            </ul>
+            <p>&nbsp;</p>
+            <ul class="nav nav-list well">
+                <li class="nav-header">GitHub</li>
+                <li>
+                    <a href="https://github.com/locationlabs/confab/">Repo</a>
+                </li>
+                <li>
+                    <a href="https://github.com/locationlabs/confab/issues?state=open">Issues</a>
+                </li>
+                <li>
+                    <iframe class="github-btn"
+                            src="http://ghbtns.com/github-btn.html?user=locationlabs&repo=confab&type=watch&count=true"
+                            allowtransparency="true" frameborder="0" scrolling="0"
+                            width="110px" height="20px"></iframe>
+                </li>
+                <li>
+                    <iframe class="github-btn"
+                            src="http://ghbtns.com/github-btn.html?user=locationlabs&repo=confab&type=fork&count=true"
+                            allowtransparency="true" frameborder="0" scrolling="0"
+                            width="94px" height="20px"></iframe>
+                </li>
+            </ul>
+        </div>
+                </div>
+            
+        </div>
+    </div>
+    <div class="footer">
+        
+        <div class="container">
+                    &copy;
+                        Copyright 2013, locationlabs and contributors.
+                Last updated
+                    on 2013-05-11.
+                    <br />
+                Created using <a
+                        href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b1
+                    .
+                Theme based on
+                <a href="https://github.com/scotch/sphinx-bootstrap">
+                    Sphinx-Bootstrap
+                </a>
+                adapted from
+                <a href="http://twitter.github.com/bootstrap/">
+                    Twitter's Bootstrap
+                </a>
+                by <a href="http://www.scotchmedia.com">Scotch Media</a>
+        </div>
+    </div>
+
+
+
+<script type="text/javascript">
+    $('.nav .active').on('click', function () {
+        e.preventDefault()
+        $(this).siblings().toggle()
+    });
+</script>
+
+<!-- plusone -->
+<script type="text/javascript">
+    (function () {
+        var po = document.createElement('script');
+        po.type = 'text/javascript';
+        po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<!-- twitter -->
+<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>
+
+</body>
+</html>

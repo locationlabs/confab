@@ -1,0 +1,251 @@
+<!DOCTYPE html><html>
+<head>
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=utf-8"/>
+    
+        <title>confab.loaders &mdash; Confab 1.1.1 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='http://fonts.googleapis.com/css?family=Crete+Round' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="../_static/sphinx-bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css"/>
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+        <script type="text/javascript">
+            var DOCUMENTATION_OPTIONS = {
+                URL_ROOT:'../',
+                VERSION:'1.1.1',
+                COLLAPSE_INDEX:false,
+                FILE_SUFFIX:'.html',
+                HAS_SOURCE:  true
+            };
+        </script>
+            <script type="text/javascript" src="../_static/jquery.js"></script>
+            <script type="text/javascript" src="../_static/underscore.js"></script>
+            <script type="text/javascript" src="../_static/doctools.js"></script>
+            <script type="text/javascript" src="../_static/bootstrap-dropdown.js"></script>
+        <link rel="top" title="Confab 1.1.1 documentation" href="../index.html"/>
+            <link rel="up" title="API Reference" href="../api.html"/>
+            <link rel="next" title="confab.main" href="main.html"/>
+            <link rel="prev" title="confab.generate" href="generate.html"/> 
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+</head>
+<body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+
+    <div class="related">
+        <ul class="nav">
+                <li class=""><a class="brand" href="../index.html">Confab</a></li>
+                <li>
+                    <a href="../genindex.html"
+                       title="General Index" accesskey="I">index</a>
+                </li>
+                <li>
+                    <a href="../py-modindex.html"
+                       title="Python Module Index" >modules</a>
+                </li>
+                <li>
+                    <a href="main.html"
+                       title="confab.main" accesskey="N">next</a>
+                </li>
+                <li>
+                    <a href="generate.html"
+                       title="confab.generate" accesskey="P">previous</a>
+                </li>
+                <li><a href="../api.html"
+                        accesskey="U">API Reference</a>
+                </li> 
+        </ul>
+    </div>
+                <div class="pull-right">
+                    
+        <form class="navbar-search form-search" action="../search.html"
+              method="get">
+            <input class="search-query" type="text" name="q" placeholder="search"/>
+            <input type="hidden" name="check_keywords" value="yes"/>
+            <input type="hidden" name="area" value="default"/>
+        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    <div class="container">
+        <div class="content row">
+                <div class="span9">
+                    
+  <div class="section" id="module-confab.loaders">
+<span id="confab-loaders"></span><span id="loaders-module"></span><h1><a class="reference internal" href="#module-confab.loaders" title="confab.loaders"><tt class="xref py py-mod docutils literal"><span class="pre">confab.loaders</span></tt></a><a class="headerlink" href="#module-confab.loaders" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="confab.loaders.FileSystemEnvironmentLoader">
+<em class="property">class </em><tt class="descclassname">confab.loaders.</tt><tt class="descname">FileSystemEnvironmentLoader</tt><big>(</big><em>dir_name</em><big>)</big><a class="reference internal" href="../_modules/confab/loaders.html#FileSystemEnvironmentLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.loaders.FileSystemEnvironmentLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads Jinja2 environments from directories.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="confab.loaders.PackageEnvironmentLoader">
+<em class="property">class </em><tt class="descclassname">confab.loaders.</tt><tt class="descname">PackageEnvironmentLoader</tt><big>(</big><em>package_name</em>, <em>templates_path='templates'</em><big>)</big><a class="reference internal" href="../_modules/confab/loaders.html#PackageEnvironmentLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.loaders.PackageEnvironmentLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads Jinja2 environments from python packages.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="confab.loaders.ConfabFileSystemLoader">
+<em class="property">class </em><tt class="descclassname">confab.loaders.</tt><tt class="descname">ConfabFileSystemLoader</tt><big>(</big><em>searchpath</em>, <em>encoding='utf-8'</em><big>)</big><a class="reference internal" href="../_modules/confab/loaders.html#ConfabFileSystemLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.loaders.ConfabFileSystemLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds support for binary templates when loading an environment from the file system.</p>
+<p>Binary config files cannot be loaded as Jinja templates by default, but since confab&#8217;s
+model is built around Jinja environments we need to make sure we can still represent
+them as jinja Templates.</p>
+<p>Since confab only renders templates from text config files (see
+<tt class="xref py py-meth docutils literal"><span class="pre">confab.conffiles.Conffile.generate()</span></tt> and <tt class="xref py py-meth docutils literal"><span class="pre">confab.options.should_render()</span></tt>)
+we can workaround this by returning a dummy template for binary config files
+with the appropriate metadata. When generating the configuration, confab,
+instead of rendering the template, will just copy the template file
+(the binary config file) verbatim to the generated folder.</p>
+<dl class="method">
+<dt id="confab.loaders.ConfabFileSystemLoader.load">
+<tt class="descname">load</tt><big>(</big><em>environment</em>, <em>name</em>, <em>globals=None</em><big>)</big><a class="headerlink" href="#confab.loaders.ConfabFileSystemLoader.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a template.  This method looks up the template in the cache
+or loads one by calling <tt class="xref py py-meth docutils literal"><span class="pre">get_source()</span></tt>.  Subclasses should not
+override this method as loaders working on collections of other
+loaders (such as <tt class="xref py py-class docutils literal"><span class="pre">PrefixLoader</span></tt> or <tt class="xref py py-class docutils literal"><span class="pre">ChoiceLoader</span></tt>)
+will not call this method but <cite>get_source</cite> directly.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="confab.loaders.EmptyLoader">
+<em class="property">class </em><tt class="descclassname">confab.loaders.</tt><tt class="descname">EmptyLoader</tt><a class="reference internal" href="../_modules/confab/loaders.html#EmptyLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#confab.loaders.EmptyLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jinja template loader with no templates.</p>
+<dl class="method">
+<dt id="confab.loaders.EmptyLoader.get_source">
+<tt class="descname">get_source</tt><big>(</big><em>environment</em>, <em>template</em><big>)</big><a class="headerlink" href="#confab.loaders.EmptyLoader.get_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the template source, filename and reload helper for a template.
+It&#8217;s passed the environment and template name and has to return a
+tuple in the form <tt class="docutils literal"><span class="pre">(source,</span> <span class="pre">filename,</span> <span class="pre">uptodate)</span></tt> or raise a
+<cite>TemplateNotFound</cite> error if it can&#8217;t locate the template.</p>
+<p>The source part of the returned tuple must be the source of the
+template as unicode string or a ASCII bytestring.  The filename should
+be the name of the file on the filesystem if it was loaded from there,
+otherwise <cite>None</cite>.  The filename is used by python for the tracebacks
+if no loader extension is used.</p>
+<p>The last item in the tuple is the <cite>uptodate</cite> function.  If auto
+reloading is enabled it&#8217;s always called to check if the template
+changed.  No arguments are passed so the function must store the
+old state somewhere (for example in a closure).  If it returns <cite>False</cite>
+the template will be reloaded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="confab.loaders.EmptyLoader.load">
+<tt class="descname">load</tt><big>(</big><em>environment</em>, <em>name</em>, <em>globals=None</em><big>)</big><a class="headerlink" href="#confab.loaders.EmptyLoader.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a template.  This method looks up the template in the cache
+or loads one by calling <a class="reference internal" href="#confab.loaders.EmptyLoader.get_source" title="confab.loaders.EmptyLoader.get_source"><tt class="xref py py-meth docutils literal"><span class="pre">get_source()</span></tt></a>.  Subclasses should not
+override this method as loaders working on collections of other
+loaders (such as <tt class="xref py py-class docutils literal"><span class="pre">PrefixLoader</span></tt> or <tt class="xref py py-class docutils literal"><span class="pre">ChoiceLoader</span></tt>)
+will not call this method but <cite>get_source</cite> directly.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+                    
+                </div>
+                <div class="span3">
+                    
+        <div class="sphinxsidebar">
+            <ul class="nav nav-list well">
+  <li class="nav-header">Previous topic</li>
+  <li>
+    <a href="generate.html"
+       title="previous chapter"><tt class="docutils literal docutils literal docutils literal docutils literal"><span class="pre">confab.generate</span></tt></a>
+  </li>
+  <li class="nav-header">Next topic</li>
+  <li>
+    <a href="main.html"
+       title="next chapter"><tt class="docutils literal"><span class="pre">confab.main</span></tt></a>
+  </li>
+            </ul>
+            <p>&nbsp;</p>
+            <ul class="nav nav-list well">
+                <li class="nav-header">GitHub</li>
+                <li>
+                    <a href="https://github.com/locationlabs/confab/">Repo</a>
+                </li>
+                <li>
+                    <a href="https://github.com/locationlabs/confab/issues?state=open">Issues</a>
+                </li>
+                <li>
+                    <iframe class="github-btn"
+                            src="http://ghbtns.com/github-btn.html?user=locationlabs&repo=confab&type=watch&count=true"
+                            allowtransparency="true" frameborder="0" scrolling="0"
+                            width="110px" height="20px"></iframe>
+                </li>
+                <li>
+                    <iframe class="github-btn"
+                            src="http://ghbtns.com/github-btn.html?user=locationlabs&repo=confab&type=fork&count=true"
+                            allowtransparency="true" frameborder="0" scrolling="0"
+                            width="94px" height="20px"></iframe>
+                </li>
+            </ul>
+        </div>
+                </div>
+            
+        </div>
+    </div>
+    <div class="footer">
+        
+        <div class="container">
+                    &copy;
+                        Copyright 2013, locationlabs and contributors.
+                Last updated
+                    on 2013-05-11.
+                    <br />
+                Created using <a
+                        href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b1
+                    .
+                Theme based on
+                <a href="https://github.com/scotch/sphinx-bootstrap">
+                    Sphinx-Bootstrap
+                </a>
+                adapted from
+                <a href="http://twitter.github.com/bootstrap/">
+                    Twitter's Bootstrap
+                </a>
+                by <a href="http://www.scotchmedia.com">Scotch Media</a>
+        </div>
+    </div>
+
+
+
+<script type="text/javascript">
+    $('.nav .active').on('click', function () {
+        e.preventDefault()
+        $(this).siblings().toggle()
+    });
+</script>
+
+<!-- plusone -->
+<script type="text/javascript">
+    (function () {
+        var po = document.createElement('script');
+        po.type = 'text/javascript';
+        po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<!-- twitter -->
+<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>
+
+</body>
+</html>

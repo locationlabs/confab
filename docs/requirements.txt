@@ -1,0 +1,10 @@
+# a Twitter Bootstrap theme
+kotti_docs_theme
+
+# needed to make "python setup.py install" on rtd
+setuptools-git
+
+# Direct requirements, needed for API docs.
+Fabric==1.6
+Jinja2==2.6
+python-magic==0.4.3

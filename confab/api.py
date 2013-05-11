@@ -5,7 +5,7 @@ Non-init module for doing convenient * imports from.
 # core
 from confab.conffiles import ConfFiles
 
-# model lading
+# model loading
 from confab.model import load_model_from_dir, load_model_from_dict
 
 # jinja2 environment loading

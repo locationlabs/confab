@@ -1,0 +1,228 @@
+<!DOCTYPE html><html>
+<head>
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=utf-8"/>
+    
+        <title>Configuration Data &mdash; Confab 1.1.1 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='http://fonts.googleapis.com/css?family=Crete+Round' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="_static/sphinx-bootstrap.css" type="text/css"/>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css"/>
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+        <script type="text/javascript">
+            var DOCUMENTATION_OPTIONS = {
+                URL_ROOT:'./',
+                VERSION:'1.1.1',
+                COLLAPSE_INDEX:false,
+                FILE_SUFFIX:'.html',
+                HAS_SOURCE:  true
+            };
+        </script>
+            <script type="text/javascript" src="_static/jquery.js"></script>
+            <script type="text/javascript" src="_static/underscore.js"></script>
+            <script type="text/javascript" src="_static/doctools.js"></script>
+            <script type="text/javascript" src="_static/bootstrap-dropdown.js"></script>
+        <link rel="top" title="Confab 1.1.1 documentation" href="index.html"/>
+            <link rel="next" title="Templates" href="templates.html"/>
+            <link rel="prev" title="Loading Roles, Environments, and Hosts" href="loading.html"/> 
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+</head>
+<body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+
+    <div class="related">
+        <ul class="nav">
+                <li class=""><a class="brand" href="index.html">Confab</a></li>
+                <li>
+                    <a href="genindex.html"
+                       title="General Index" accesskey="I">index</a>
+                </li>
+                <li>
+                    <a href="py-modindex.html"
+                       title="Python Module Index" >modules</a>
+                </li>
+                <li>
+                    <a href="templates.html"
+                       title="Templates" accesskey="N">next</a>
+                </li>
+                <li>
+                    <a href="loading.html"
+                       title="Loading Roles, Environments, and Hosts" accesskey="P">previous</a>
+                </li> 
+        </ul>
+    </div>
+                <div class="pull-right">
+                    
+        <form class="navbar-search form-search" action="search.html"
+              method="get">
+            <input class="search-query" type="text" name="q" placeholder="search"/>
+            <input type="hidden" name="check_keywords" value="yes"/>
+            <input type="hidden" name="area" value="default"/>
+        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    <div class="container">
+        <div class="content row">
+                <div class="span9">
+                    
+  <div class="section" id="configuration-data">
+<span id="id1"></span><h1>Configuration Data<a class="headerlink" href="#configuration-data" title="Permalink to this headline">¶</a></h1>
+<p>Configuration data is loaded from python modules named after the names of the
+selected environment, role, component, and host, plus a standard set of defaults.
+The dictionaries from these modules (if any) are recursively merged (see below),
+so that given an environment named &#8220;foo&#8221;, a role named &#8220;bar&#8221;, a component named
+&#8220;baz&#8221;, and a host named &#8220;host&#8221;, the configuration data would be merged between
+<strong>default.py</strong>, <strong>foo.py</strong>, <strong>bar.py</strong>, <strong>baz.py</strong>, and <strong>host.py</strong>.</p>
+<p>Confab uses the <em>__dict__</em> property of the loaded module, but filters out any
+entries starting with &#8216;_&#8217;. In other words, this module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">foo</span> <span class="o">=</span> <span class="s">&#39;bar&#39;</span>
+<span class="n">_ignore</span> <span class="o">=</span> <span class="s">&#39;this&#39;</span>
+</pre></div>
+</div>
+<p>results in this dictionary:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&#39;foo&#39;</span><span class="p">:</span> <span class="s">&#39;bar&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>If a configuration data module is not found, Confab will also look for a file
+with a <cite>.py_tmpl</cite> suffix and treat it as a Jinja2 template for the same module,
+allowing configuration data to use Jinja2 template syntax (including includes).</p>
+<p>Confab expects roles, environments, and definitions thereof to be saved in the
+Fabric environment.  The <em>confab</em> console script requires these definitions,
+although the lower level API is designed to be tolerant of these values being
+absent.  Both the console script and the lower level API require that the
+current host be defined in Fabric&#8217;s <em>env.host_string</em>.</p>
+<div class="section" id="merging-strategy">
+<h2>Merging Strategy<a class="headerlink" href="#merging-strategy" title="Permalink to this headline">¶</a></h2>
+<p>By default, Confab recursively merges configuration dictionaries from various
+sources, using a three level hierarchy:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Host-specific values are used first.</li>
+<li>Environment-specific values are used next.</li>
+<li>Role or component-specific values are used next.</li>
+<li>Default values are used last.</li>
+</ul>
+</div></blockquote>
+<p>Confab&#8217;s recursive merge operation can be futher customized by using callable
+wrappers around configuration values.  Confab will always delegate to a callable
+to define how values are overriden, e.g. allowing lists values to be
+appended/prepended to default values.</p>
+</div>
+</div>
+
+
+                    
+                </div>
+                <div class="span3">
+                    
+        <div class="sphinxsidebar">
+            <ul class="nav nav-list well">
+    <li class="nav-header">
+        Table Of Contents
+    </li>
+    <li>
+        <ul>
+<li><a class="reference internal" href="#">Configuration Data</a><ul>
+<li><a class="reference internal" href="#merging-strategy">Merging Strategy</a></li>
+</ul>
+</li>
+</ul>
+
+    </li>
+  <li class="nav-header">Previous topic</li>
+  <li>
+    <a href="loading.html"
+       title="previous chapter">Loading Roles, Environments, and Hosts</a>
+  </li>
+  <li class="nav-header">Next topic</li>
+  <li>
+    <a href="templates.html"
+       title="next chapter">Templates</a>
+  </li>
+            </ul>
+            <p>&nbsp;</p>
+            <ul class="nav nav-list well">
+                <li class="nav-header">GitHub</li>
+                <li>
+                    <a href="https://github.com/locationlabs/confab/">Repo</a>
+                </li>
+                <li>
+                    <a href="https://github.com/locationlabs/confab/issues?state=open">Issues</a>
+                </li>
+                <li>
+                    <iframe class="github-btn"
+                            src="http://ghbtns.com/github-btn.html?user=locationlabs&repo=confab&type=watch&count=true"
+                            allowtransparency="true" frameborder="0" scrolling="0"
+                            width="110px" height="20px"></iframe>
+                </li>
+                <li>
+                    <iframe class="github-btn"
+                            src="http://ghbtns.com/github-btn.html?user=locationlabs&repo=confab&type=fork&count=true"
+                            allowtransparency="true" frameborder="0" scrolling="0"
+                            width="94px" height="20px"></iframe>
+                </li>
+            </ul>
+        </div>
+                </div>
+            
+        </div>
+    </div>
+    <div class="footer">
+        
+        <div class="container">
+                    &copy;
+                        Copyright 2013, locationlabs and contributors.
+                Last updated
+                    on 2013-05-11.
+                    <br />
+                Created using <a
+                        href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b1
+                    .
+                Theme based on
+                <a href="https://github.com/scotch/sphinx-bootstrap">
+                    Sphinx-Bootstrap
+                </a>
+                adapted from
+                <a href="http://twitter.github.com/bootstrap/">
+                    Twitter's Bootstrap
+                </a>
+                by <a href="http://www.scotchmedia.com">Scotch Media</a>
+        </div>
+    </div>
+
+
+
+<script type="text/javascript">
+    $('.nav .active').on('click', function () {
+        e.preventDefault()
+        $(this).siblings().toggle()
+    });
+</script>
+
+<!-- plusone -->
+<script type="text/javascript">
+    (function () {
+        var po = document.createElement('script');
+        po.type = 'text/javascript';
+        po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<!-- twitter -->
+<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>
+
+</body>
+</html>
