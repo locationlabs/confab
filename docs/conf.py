@@ -35,6 +35,10 @@ show_authors = False
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+autodoc_default_flags = [
+    'members',
+    'show-inheritance',
+]
 
 # -- Options for HTML output ---------------------------------------------------
 

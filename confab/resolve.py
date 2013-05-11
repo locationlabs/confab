@@ -1,7 +1,7 @@
 """
 Resolve environment, role, and host choices into actions.
 
-If a user specifies only an environment, confab should target all hosts
+If a user specifies only an :term:`environment`, confab should target all hosts
 and roles in that environment. If one or more roles -- or one or more hosts --
 are specified explicilty, confab should target a subset.
 """

@@ -85,7 +85,7 @@ class DataLoader(object):
     per-component values, per-environment values and per-host values.
 
     Configuration data also includes the current environment
-    and host string values under a 'confab' key.
+    and host string values under a ``confab`` key.
     """
 
     def __init__(self, data_dir):

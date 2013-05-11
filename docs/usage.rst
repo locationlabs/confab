@@ -5,6 +5,8 @@ Usage
 
 Confab may be used in several ways.
 
+.. _usage_confab:
+
 Via ``confab`` – The Default Console Script
 -------------------------------------------
 

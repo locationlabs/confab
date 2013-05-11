@@ -1,10 +1,10 @@
 """
 Auto-generate Fabric tasks for roles and environments.
 
-The 'autogenerate_tasks' function creates fabric tasks to
-set the current role or environment and are intended to be
-used along side the other standard Confab tasks (e.g. pull)
-to customize configuration data.
+The :func:`autogenerate_tasks` function creates fabric tasks to
+set the current :term:`role` or :term`environment` and is intended to be
+used along side the other standard Confab tasks (e.g.
+:func:`~confab.pull.pull`) to customize configuration data.
 
 These tasks are somewhat experimental.
 """
@@ -23,11 +23,11 @@ def _add_task(name, task, doc):
 
 def autogenerate_tasks():
     """
-    Autogenerate role_ and env_ tasks for all defined roles and
+    Autogenerate ``role_`` and ``env_`` tasks for all defined roles and
     environments in the Fabric environment.
 
     Normally the roledefs and environment defs will be configured
-    using 'load_model_from_dir' or similar.
+    using :func:`confab.model.load_model_from_dir` or similar.
     """
     for role in env.roledefs.iterkeys():
         _add_task('role_' + role,

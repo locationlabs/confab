@@ -1,8 +1,8 @@
 """
 Jinja2 Environment loading helper functions.
 
-Confab uses the environments list_templates() method to abstract
-template location from rendering and synchronization.
+Confab uses the environments :meth:`jinja2.Environment.list_templates` method
+to abstract template location from rendering and synchronization.
 
 Note that the default Jinja2 Loaders assume a charset (default: utf-8).
 """
@@ -54,18 +54,20 @@ class PackageEnvironmentLoader(object):
 
 
 class ConfabFileSystemLoader(FileSystemLoader):
-    """Adds support for binary templates when loading an environment from the file system.
+    """Adds support for binary templates when loading an environment from the
+    file system.
 
-    Binary config files cannot be loaded as Jinja templates by default, but since confab's
-    model is built around Jinja environments we need to make sure we can still represent
-    them as jinja Templates.
+    Binary config files cannot be loaded as Jinja2 templates by default, but
+    since confab's model is built around Jinja2 environments we need to make
+    sure we can still represent them as Jinja2 Templates.
 
     Since confab only renders templates from text config files (see
-    :py:meth:`confab.conffiles.Conffile.generate` and :py:meth:`confab.options.should_render`)
-    we can workaround this by returning a dummy template for binary config files
-    with the appropriate metadata. When generating the configuration, confab,
-    instead of rendering the template, will just copy the template file
-    (the binary config file) verbatim to the generated folder.
+    :meth:`confab.conffiles.Conffile.generate` and
+    :meth:`confab.options.should_render`) we can workaround this by returning a
+    dummy template for binary config files with the appropriate metadata. When
+    generating the configuration, confab, instead of rendering the template,
+    will just copy the template file (the binary config file) verbatim to the
+    generated folder.
     """
 
     def get_source(self, environment, template):

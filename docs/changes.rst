@@ -1,6 +1,3 @@
 .. _changes:
 
-Change History
-==============
-
-.. include:: ../CHANGES.md
+.. include:: ../CHANGES.rst

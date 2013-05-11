@@ -31,3 +31,8 @@ Glossary
 
      In the degenerate case where a role has no components, the role
      itself is  taken to be a component.
+
+   confab
+    confab (in all lowercase) is an included command line script.
+
+    For details see :ref:`usage_confab`.

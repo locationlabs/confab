@@ -1,5 +1,6 @@
 """
-Functions for interacting with the defined hosts, environments, and roles.
+Functions for interacting with the defined :term:`hosts<host>`,
+:term:`environments<environment>`, and :term:`roles<role>`.
 """
 from fabric.api import env
 from confab.files import _import

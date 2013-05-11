@@ -67,7 +67,7 @@ class ConfFileDiff(object):
 
     def __nonzero__(self):
         """
-        Evaluate to true if there is a diff.
+        Evaluate to ``True`` if there is a diff.
         """
         if self.missing_generated:
             return not self.missing_remote
@@ -191,7 +191,7 @@ class ConfFiles(object):
         environment loader and data loader.
 
         The environment loader must return a Jinja2 environment that uses a
-        loader that supports list_templates().
+        loader that supports :meth:`jinja2.Environment.list_templates`.
         """
         def load_templates(component):
 
