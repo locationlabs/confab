@@ -1,7 +1,8 @@
 """
-Resolve environment, role, and host choices into actions.
+Resolve :term:`environment`, :term:`role`, and :term:`host` choices into
+actions.
 
-If a user specifies only an :term:`environment`, confab should target all hosts
+If a user specifies only an environment, confab should target all hosts
 and roles in that environment. If one or more roles -- or one or more hosts --
 are specified explicilty, confab should target a subset.
 """
@@ -11,8 +12,8 @@ from confab.model import get_roles_for_host, get_hosts_for_environment
 
 def resolve_hosts_and_roles(environment, hosts=None, roles=None):
     """
-    Given an environment, (possibly empty) list of hosts, and a (possibly empty)
-    list of roles, return a mapping from host to roles to target.
+    Given an environment, a (possibly empty) list of hosts, and a (possibly
+    empty) list of roles, return a mapping from host to roles to target.
 
     Raises an exception if any targeted host would have no roles after resolution.
     """

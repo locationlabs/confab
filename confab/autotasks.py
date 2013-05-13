@@ -2,7 +2,7 @@
 Auto-generate Fabric tasks for roles and environments.
 
 The :func:`autogenerate_tasks` function creates fabric tasks to
-set the current :term:`role` or :term`environment` and is intended to be
+set the current :term:`role` or :term:`environment` and is intended to be
 used along side the other standard Confab tasks (e.g.
 :func:`~confab.pull.pull`) to customize configuration data.
 
