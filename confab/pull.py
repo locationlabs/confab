@@ -1,23 +1,22 @@
 """
 Pull configuration files from remote host into remotes_dir.
 """
-
-from confab.conffiles import ConfFiles
-from confab.data import DataLoader
-from confab.loaders import FileSystemEnvironmentLoader
-from confab.validate import validate_pull
-
 from fabric.api import task
+from gusset.output import status
+from gusset.validation import with_validation
+
+from confab.iter import iter_conffiles
 
 
 @task
-def pull(templates_dir=None, data_dir=None, remotes_dir=None):
+@with_validation
+def pull(directory=None):
     """
     Pull remote configuration files.
     """
-    validate_pull(templates_dir, data_dir, remotes_dir)
+    for conffiles in iter_conffiles(directory):
+        status("Pulling remote templates for '{environment}' and '{role}'",
+               environment=conffiles.environment,
+               role=conffiles.role)
 
-    conffiles = ConfFiles(FileSystemEnvironmentLoader(templates_dir),
-                          DataLoader(data_dir))
-
-    conffiles.pull(remotes_dir)
+        conffiles.pull()

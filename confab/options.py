@@ -1,8 +1,8 @@
 """
 Options for managing Confab.
 """
-
-from fabric.api import env, task
+from os.path import basename
+from fabric.api import task
 from fabric.utils import _AttributeDict
 
 from difflib import unified_diff
@@ -39,6 +39,23 @@ def _is_not_temporary(file_name):
     return not file_name.endswith('~')
 
 
+def _is_not_internal(file_name):
+    """
+    Return whether a file name does not represent internal usage.
+
+    When listing configuration files, we want to omit internal
+    files, especially if they are used as Jinja includes
+    """
+    return not basename(file_name).startswith('_')
+
+
+def _filter_func(file_name):
+    """
+    Return the default filter func, which excludes temporary and internal files.
+    """
+    return _is_not_temporary(file_name) and _is_not_internal(file_name)
+
+
 def _get_mime_type(file_name):
     """
     Return the mime type of a file.
@@ -48,39 +65,6 @@ def _get_mime_type(file_name):
     return Magic(mime=True).from_file(file_name)
 
 
-def _get_hostname():
-    """
-    Return the current target hostname.
-    """
-    return env.host_string
-
-
-def _get_rolename():
-    """
-    Return the current target role.
-
-    Assume the role value is being saved in Fabric's env;
-    if not return None.
-    """
-    try:
-        return env.role
-    except AttributeError:
-        return None
-
-
-def _get_environmentname():
-    """
-    Return the current target environment.
-
-    Assume the environment value is being saved in Fabric's env;
-    if not return None.
-    """
-    try:
-        return env.environment
-    except AttributeError:
-        return None
-
-
 def _diff(a, b, fromfile=None, tofile=None):
     """
     Return a diff using '---', '+++', and '@@' control lines.
@@ -88,6 +72,17 @@ def _diff(a, b, fromfile=None, tofile=None):
     By default, uses unified_diff.
     """
     return unified_diff(a, b, fromfile=fromfile, tofile=tofile)
+
+
+def _as_dict(module):
+    """
+    Returns publicly names values in module's __dict__.
+    """
+    try:
+        return {k: v for k, v in module.__dict__.iteritems() if not k[0:1] == '_'}
+    except AttributeError:
+        return {}
+
 
 # Options that control how confab runs.
 #
@@ -107,20 +102,26 @@ options = _AttributeDict({
     # How to determine if a template is an empty file?
     'is_empty': _is_empty,
 
-    # How to determine the current host name?
-    'get_hostname': _get_hostname,
-
-    # How to determine the current role name?
-    'get_rolename': _get_rolename,
-
-    # How to determine the current environment name?
-    'get_environmentname': _get_environmentname,
-
     # How do filter available templates within the jinja environment?
-    'filter_func': _is_not_temporary,
+    'filter_func': _filter_func,
 
     # How to determine diffs?
-    'diff': _diff
+    'diff': _diff,
+
+    # How to get dictionary configuration from module data?
+    'module_as_dict': _as_dict,
+
+    # What is the name of the template directory?
+    'get_templates_dir': lambda: 'templates',
+
+    # What is the name of the data directory?
+    'get_data_dir': lambda: 'data',
+
+    # What is the name of the generated directory?
+    'get_generated_dir': lambda: 'generated',
+
+    # What is the name of the remotes directory?
+    'get_remotes_dir': lambda: 'remotes',
 })
 
 

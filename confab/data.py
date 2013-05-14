@@ -1,51 +1,19 @@
 """
 Functions for loading configuration data.
 """
-from itertools import chain
 from fabric.api import puts
+from gusset.output import debug
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from confab.files import _import, _import_string
 from confab.merge import merge
 from confab.options import options
-from confab.output import debug
-
-
-def _get_environment_module():
-    """
-    Return the current configuration environment.
-
-    Placeholder.
-    """
-    return options.get_environmentname()
-
-
-def _get_component_modules(component):
-    """
-    Return the different modules in the component path.
-    """
-    return component.split('/')
-
-
-def _get_host_module():
-    """
-    Return the current configuration hostname.
-    """
-    return options.get_hostname()
 
 
 def import_configuration(module_name, data_dir):
     """
     Load configuration from file as python module.
-
-    Returns publicly names values in module's __dict__.
     """
-
-    def as_dict(module):
-        try:
-            return {k: v for k, v in module.__dict__.iteritems() if not k[0:1] == '_'}
-        except AttributeError:
-            return None
 
     try:
         debug("Attempting to load {module_name}.py from {data_dir}",
@@ -55,7 +23,10 @@ def import_configuration(module_name, data_dir):
         module = _import(module_name, data_dir)
         puts("Loaded {module_name}.py from {data_dir}".format(module_name=module_name,
                                                               data_dir=data_dir))
-    except ImportError:
+    except ImportError as e:
+        # if the module was found but could not be loaded, re-raise the error
+        if getattr(e, 'module_path', None):
+            raise e
         debug("Attempting to load {module_name}.py_tmpl from {data_dir}",
               module_name=module_name,
               data_dir=data_dir)
@@ -63,17 +34,16 @@ def import_configuration(module_name, data_dir):
         try:
             env = Environment(loader=FileSystemLoader(data_dir))
             rendered_module = env.get_template(module_name + '.py_tmpl').render({})
+            module = _import_string(module_name, rendered_module)
+            puts("Loaded {module_name}.py_tmpl from {data_dir}".format(module_name=module_name,
+                                                                       data_dir=data_dir))
         except TemplateNotFound:
             debug("Could not load {module_name} from {data_dir}",
                   module_name=module_name,
                   data_dir=data_dir)
-            return None
+            module = {}
 
-        module = _import_string(module_name, rendered_module)
-        puts("Loaded {module_name}.py_tmpl from {data_dir}".format(module_name=module_name,
-                                                                   data_dir=data_dir))
-
-    return as_dict(module)
+    return options.module_as_dict(module)
 
 
 class DataLoader(object):
@@ -84,33 +54,51 @@ class DataLoader(object):
     where type is defined to include defaults, per-role values,
     per-component values, per-environment values and per-host values.
 
-    Configuration data also includes the current environment
+    Configuration data also includes the current environment, component
     and host string values under a 'confab' key.
     """
 
-    def __init__(self, data_dir):
-        self.data_dir = data_dir
+    ALL = ['default', 'component', 'role', 'environment', 'host']
 
-    def __call__(self, component):
+    def __init__(self, data_dir, data_modules=ALL):
         """
-        Load the data for the given component.
+        Create a data loader for the given data directory.
 
-        :param component: a component path, i.e. `{role}/{sub-component}/{component}`.
+        :param data_modules: list of modules to load in the order to load them.
+        """
+        self.data_dir = data_dir
+        self.data_modules = set(data_modules)
+
+    def __call__(self, componentdef):
+        """
+        Load the data for the current configuration.
+
+        :param component: a component definition.
         """
         is_not_none = lambda x: x is not None
 
-        module_names = filter(is_not_none,
-                              chain(['default'],
-                                    _get_component_modules(component),
-                                    [_get_environment_module(),
-                                     _get_host_module()]))
+        module_names = filter(is_not_none, self._list_modules(componentdef))
 
         load_module = lambda module_name: import_configuration(module_name, self.data_dir)
 
-        module_dicts = filter(is_not_none, map(load_module, module_names))
+        module_dicts = map(load_module, module_names)
 
-        confab_data = dict(confab=dict(environment=options.get_environmentname(),
-                                       host=options.get_hostname(),
-                                       component=component))
+        confab_data = dict(confab=dict(environment=componentdef.environment,
+                                       host=componentdef.host,
+                                       component=componentdef.name))
 
         return merge(confab_data, *module_dicts)
+
+    def _list_modules(self, componentdef):
+        """
+        Get the list of modules to load.
+        """
+        module_names = [
+            ('default', 'default'),
+            ('component', componentdef.name),
+            ('role', componentdef.role if componentdef.role != componentdef.name else None),
+            ('environment', componentdef.environment),
+            ('host', componentdef.host)
+        ]
+
+        return [name for key, name in module_names if key in self.data_modules]

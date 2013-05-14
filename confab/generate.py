@@ -1,23 +1,22 @@
 """
 Generate configuration files into generated_dir.
 """
-
-from confab.conffiles import ConfFiles
-from confab.data import DataLoader
-from confab.loaders import FileSystemEnvironmentLoader
-from confab.validate import validate_generate
-
 from fabric.api import task
+from gusset.output import status
+from gusset.validation import with_validation
+
+from confab.iter import iter_conffiles
 
 
 @task
-def generate(templates_dir=None, data_dir=None, generated_dir=None):
+@with_validation
+def generate(directory=None):
     """
     Generate configuration files.
     """
-    validate_generate(templates_dir, data_dir, generated_dir)
+    for conffiles in iter_conffiles(directory):
+        status("Generating templates for '{environment}' and '{role}'",
+               environment=conffiles.environment,
+               role=conffiles.role)
 
-    conffiles = ConfFiles(FileSystemEnvironmentLoader(templates_dir),
-                          DataLoader(data_dir))
-
-    conffiles.generate(generated_dir)
+        conffiles.generate()
