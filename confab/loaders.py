@@ -16,17 +16,18 @@ from gusset.output import debug
 class FileSystemEnvironmentLoader(object):
     """Loads Jinja2 environments from directories."""
 
-    def __init__(self, dir_name):
-        self.dir_name = dir_name
+    def __init__(self, *directories):
+        self.directories = directories
 
     def __call__(self, subdir):
         """
         Load a Jinja2 Environment for a template sub-directory.
         """
-        template_path = join(self.dir_name, subdir)
+        paths = map(lambda d: join(d, subdir), self.directories)
+        template_path = next(iter(filter(exists, paths)), None)
 
-        if not exists(template_path):
-            debug("Using EmptyLoader for {}; no such directory".format(template_path))
+        if template_path is None:
+            debug("Using EmptyLoader for {}; no such directory".format(subdir))
             return Environment(loader=EmptyLoader())
 
         debug("Creating ConfabFileSystemLoader for {}".format(template_path))

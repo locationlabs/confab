@@ -33,33 +33,33 @@ def iter_hosts_and_roles():
             yield host_and_role
 
 
-def iter_conffiles(directory=None):
+def iter_conffiles(*directories):
     """
     Generate ConfFiles objects for each host_and_role in an environment.
 
     Uses the default FileSystemEnvironmentLoader and DataLoader.
 
-    :param directory: Path to templates and data directories.
+    :param directories: List of paths to templates and data directories.
     """
     for host_and_role in iter_hosts_and_roles():
-        yield make_conffiles(host_and_role, directory)
+        yield make_conffiles(host_and_role, directories)
 
 
-def make_conffiles(host_and_role, directory=None):
+def make_conffiles(host_and_role, *directories):
     """
     Create a ConfFiles object for a host_and_role in an environment.
 
     Uses the default FileSystemEnvironmentLoader and DataLoader.
 
-    :param directory: Path to templates and data directories.
+    :param directories: List of paths to templates and data directories.
     """
-    directory = directory or env.environmentdef.directory or getcwd()
+    directories = directories or [env.environmentdef.directory or getcwd()]
 
     # Construct directories
-    templates_dir = join(directory, options.get_templates_dir())
-    data_dir = join(directory, options.get_data_dir())
-    assert_exists(templates_dir, data_dir)
+    templates_dirs = map(lambda dir: join(dir, options.get_templates_dir()), directories)
+    data_dirs = map(lambda dir: join(dir, options.get_data_dir()), directories)
+    assert_exists(templates_dirs, data_dirs)
 
     return ConfFiles(host_and_role,
-                     FileSystemEnvironmentLoader(templates_dir),
-                     DataLoader(data_dir))
+                     FileSystemEnvironmentLoader(templates_dirs),
+                     DataLoader(data_dirs))
