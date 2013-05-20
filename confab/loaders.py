@@ -6,11 +6,11 @@ to abstract template location from rendering and synchronization.
 
 Note that the default Jinja2 Loaders assume a charset (default: utf-8).
 """
-
 from jinja2 import (Environment, FileSystemLoader, PackageLoader, BaseLoader,
                     StrictUndefined, TemplateNotFound)
 from os.path import join, exists
 from pkg_resources import get_provider
+from gusset.output import debug
 
 
 class FileSystemEnvironmentLoader(object):
@@ -19,16 +19,18 @@ class FileSystemEnvironmentLoader(object):
     def __init__(self, dir_name):
         self.dir_name = dir_name
 
-    def __call__(self, component):
+    def __call__(self, subdir):
         """
-        Load a Jinja2 Environment for a component.
+        Load a Jinja2 Environment for a template sub-directory.
         """
-        component_path = join(self.dir_name, component)
+        template_path = join(self.dir_name, subdir)
 
-        if not exists(component_path):
+        if not exists(template_path):
+            debug("Using EmptyLoader for {}; no such directory".format(template_path))
             return Environment(loader=EmptyLoader())
 
-        return Environment(loader=ConfabFileSystemLoader(component_path),
+        debug("Creating ConfabFileSystemLoader for {}".format(template_path))
+        return Environment(loader=ConfabFileSystemLoader(template_path),
                            undefined=StrictUndefined)
 
 
@@ -39,35 +41,35 @@ class PackageEnvironmentLoader(object):
         self.package_name = package_name
         self.templates_path = templates_path
 
-    def __call__(self, component):
+    def __call__(self, subdir):
         """
-        Load a Jinja2 Environment for a component.
+        Load a Jinja2 Environment for a template sub-directory.
         """
-        package_path = join(self.templates_path, component)
+        package_path = join(self.templates_path, subdir)
 
         provider = get_provider(self.package_name)
         if not provider.resource_isdir(package_path):
+            debug("Using EmptyLoader for {}; no such directory".format(package_path))
             return Environment(loader=EmptyLoader())
 
+        debug("Creating PackageLoader for {}".format(package_path))
         return Environment(loader=PackageLoader(self.package_name, package_path),
                            undefined=StrictUndefined)
 
 
 class ConfabFileSystemLoader(FileSystemLoader):
-    """Adds support for binary templates when loading an environment from the
-    file system.
+    """Adds support for binary templates when loading an environment from the file system.
 
-    Binary config files cannot be loaded as Jinja2 templates by default, but
-    since confab's model is built around Jinja2 environments we need to make
-    sure we can still represent them as Jinja2 Templates.
+    Binary config files cannot be loaded as Jinja templates by default, but since confab's
+    design is built around Jinja environments we need to make sure we can still represent
+    them as jinja Templates.
 
     Since confab only renders templates from text config files (see
-    :meth:`confab.conffiles.Conffile.generate` and
-    :meth:`confab.options.should_render`) we can workaround this by returning a
-    dummy template for binary config files with the appropriate metadata. When
-    generating the configuration, confab, instead of rendering the template,
-    will just copy the template file (the binary config file) verbatim to the
-    generated folder.
+    :py:meth:`confab.conffiles.Conffile.generate` and :py:meth:`confab.options.should_render`)
+    we can workaround this by returning a dummy template for binary config files
+    with the appropriate metadata. When generating the configuration, confab,
+    instead of rendering the template, will just copy the template file
+    (the binary config file) verbatim to the generated folder.
     """
 
     def get_source(self, environment, template):

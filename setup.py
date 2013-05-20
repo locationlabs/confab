@@ -9,7 +9,7 @@ try:
 except ImportError:
     pass
 
-__version__ = '1.1.2dev'
+__version__ = '1.3'
 
 # Jenkins will replace __build__ with a unique value.
 __build__ = ''
@@ -28,7 +28,8 @@ setup(name='confab',
       install_requires=[
           'Fabric>=1.4',
           'Jinja2>=2.4',
-          'python-magic'
+          'python-magic',
+          'gusset==1.1',
       ],
       test_requires=[
           'mock==1.0.1'
@@ -37,6 +38,7 @@ setup(name='confab',
       entry_points={
           'console_scripts': [
               'confab = confab.main:main',
+              'confab-show = confab.diagnostics:main',
           ]
       },
       )

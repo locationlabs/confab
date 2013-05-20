@@ -1,26 +1,22 @@
 """
 Determine the difference between remote and generated configuration files.
 """
-
-from confab.conffiles import ConfFiles
-from confab.data import DataLoader
-from confab.loaders import FileSystemEnvironmentLoader
-from confab.validate import validate_all
-
 from fabric.api import task
+from gusset.output import status
+from gusset.validation import with_validation
+
+from confab.iter import iter_conffiles
 
 
 @task
-def diff(templates_dir=None,
-         data_dir=None,
-         generated_dir=None,
-         remotes_dir=None):
+@with_validation
+def diff(directory=None):
     """
     Show configuration file diffs.
     """
-    validate_all(templates_dir, data_dir, generated_dir, remotes_dir)
+    for conffiles in iter_conffiles(directory):
+        status("Computing template diffs for '{environment}' and '{role}'",
+               environment=conffiles.environment,
+               role=conffiles.role)
 
-    conffiles = ConfFiles(FileSystemEnvironmentLoader(templates_dir),
-                          DataLoader(data_dir))
-
-    conffiles.diff(generated_dir, remotes_dir)
+        conffiles.diff(directory)
