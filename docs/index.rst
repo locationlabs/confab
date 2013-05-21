@@ -1,5 +1,7 @@
-Confab - Configuration Management with Fabric and Jinja2
-========================================================
+Confab
+======
+
+Configuration Management with Fabric_ and Jinja2_.
 
 Contents
 --------
@@ -33,3 +35,6 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _Fabric: http://docs.fabfile.org/en/1.6/
+.. _Jinja2: http://jinja.pocoo.org/docs/
