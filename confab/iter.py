@@ -35,27 +35,27 @@ def iter_hosts_and_roles():
             yield host_and_role
 
 
-def iter_conffiles(*directories):
+def iter_conffiles(directory=None):
     """
     Generate ConfFiles objects for each host_and_role in an environment.
 
     Uses the default FileSystemEnvironmentLoader and DataLoader.
 
-    :param directories: List of paths to templates and data directories.
+    :param directory: Path to templates and data directories.
     """
     for host_and_role in iter_hosts_and_roles():
-        yield make_conffiles(host_and_role, *directories)
+        yield make_conffiles(host_and_role, directory)
 
 
-def make_conffiles(host_and_role, *directories):
+def make_conffiles(host_and_role, directory=None):
     """
     Create a ConfFiles object for a host_and_role in an environment.
 
     Uses the default FileSystemEnvironmentLoader and DataLoader.
 
-    :param directories: List of paths to templates and data directories.
+    :param directory: Path to templates and data directories.
     """
-    directories = list(directories) or [env.environmentdef.directory or getcwd()]
+    directories = [directory or env.environmentdef.directory or getcwd()]
     directories.extend(iter_extension_paths())
 
     # Construct directories
