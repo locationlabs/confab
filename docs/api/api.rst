@@ -8,13 +8,17 @@
 Core
 ~~~~
 
-- :class:`confab.conffiles.ConfFiles`
+- :class:`~confab.conffiles.ConfFiles`
 
-Model Loading
-~~~~~~~~~~~~~
+Settings
+~~~~~~~~
 
-- :func:`confab.model.load_model_from_dir`
-- :func:`confab.model.load_model_from_dict`
+- :class:`~confab.definitions.Settings`
+
+Environment Tasks
+~~~~~~~~~~~~~~~~~
+
+- :func:`~confab.autotasks.generate_tasks`
 
 Jinja2 Environment Loading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,6 +36,13 @@ Options
 
 - :class:`~confab.options.Options`
 - :func:`~confab.options.assume_yes`
+
+Iterations
+~~~~~~~~~~
+
+- :func:`~confab.iter.iter_hosts_and_roles`
+- :func:`~confab.iter.iter_conffiles`
+- :func:`~confab.iter.make_conffiles`
 
 Fabric Tasks
 ~~~~~~~~~~~~

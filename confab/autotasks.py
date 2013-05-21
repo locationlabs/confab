@@ -1,12 +1,12 @@
 """
-Auto-generate Fabric tasks for environments.
+Auto-generate Fabric tasks for :term:`environments<environment>`.
 
-The 'autogenerate_tasks' function creates fabric tasks to
-set the current environment definition and are intended to be
-used as a setup step to other standard Confab tasks (e.g. pull)
-to customize configuration data::
+The :func:`generate_tasks` function creates Fabric tasks to set the current
+environment definition and is intended to be used as a setup step to other
+standard Confab tasks (e.g. pull) to customize configuration data::
 
     fab dev:web,queue push
+
 """
 from fabric.api import abort, env
 from fabric.state import commands

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from setuptools import setup, find_packages
 
 # Workaround for running "setup.py test"
@@ -14,9 +15,21 @@ __version__ = '1.3'
 # Jenkins will replace __build__ with a unique value.
 __build__ = ''
 
+here = os.path.abspath(os.path.dirname(__file__))
+
+try:
+    with open(os.path.join(here, 'README.rst')) as f:
+        README = f.read()
+    with open(os.path.join(here, 'CHANGES.rst')) as f:
+        CHANGES = f.read()
+except:
+    README = ''
+    CHANGES = ''
+
 setup(name='confab',
       version=__version__ + __build__,
       description='Configuration management with Fabric and Jinja2.',
+      long_description=README + '\n\n' + CHANGES,
       author='Location Labs',
       author_email='info@locationlabs.com',
       url='http://github.com/locationlabs/confab',

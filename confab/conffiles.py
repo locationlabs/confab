@@ -211,17 +211,17 @@ class ConfFiles(object):
         """
         A set of templated configuration files.
 
-        :param host_and_role: An instance of HostAndRoleDefinition
-        :param environment_loader: An environment loader (e.g. FileSystemEnvironmentLoader)
+        :param host_and_role: An instance of
+                              :class:`confab.definitions.HostAndRoleDefinition`
+        :param environment_loader: An environment loader (e.g.
+                                   :class:`confab.loaders.FileSystemEnvironmentLoader`)
         :param data_load: An instance DataLoader
 
-        The environment loader must return a Jinja2 environment with an underlying
-        loader that supports list_templates(). On init, ConfFiles will load all
-        templates in the environment for the specified host and role (including any
-        role components).
-
-        The environment loader must return a Jinja2 environment that uses a
-        loader that supports :meth:`jinja2.Environment.list_templates`.
+        The environment loader must return a Jinja2 environment with an
+        underlying loader that supports :meth:`jinja2.Environment.list_templates`.
+        On init, ``ConfFiles`` will load all :term:`templates<template>` in the
+        :term:`environment` for the specified :term:`host` and :term:`role`
+        (including any role components).
         """
         self.conffiles = []
         self.host = host_and_role.host
@@ -262,7 +262,7 @@ class ConfFiles(object):
 
     def generate(self, directory=None):
         """
-        Write all configuration files to generated_dir.
+        Write all configuration files to ``generated_dir``.
         """
         host_generated_dir = self._get_host_generated_dir(directory)
 
@@ -274,7 +274,7 @@ class ConfFiles(object):
 
     def pull(self, directory=None):
         """
-        Pull remote versions of files into remotes_dir.
+        Pull remote versions of files into ``remotes_dir``.
         """
         host_remotes_dir = self._get_host_remotes_dir(directory)
 

@@ -6,11 +6,14 @@ and want to merge the higher precedence (override) data into the
 lower precedence (default) data, potentially multiple times.
 
 Merge rules are as follows:
+
  - Dictionaries are merged recursively by default.
+
  - Lists and primitives are replaced by default.
+
  - Callables are called to provide custom extension.
 
-For example, a list of hosts in the default dictionary will normally
+For example, a list of hosts in the ``default`` dictionary will normally
 be replaced by values defined in the override dictionary; however if
 the override dictionary's list is a callable, it can be made to do
 something else, such as append a new host to the default list.
@@ -43,8 +46,8 @@ def _iterkeys(default, override):
 
 def _entry(default, override, key):
     """
-    Return a dictionary entry with the best value from the default and
-    override dictionaries.
+    Return a dictionary entry with the best value from the ``default`` and
+    ``override`` dictionaries.
     """
     return key, _best(default.get(key), key in override, override.get(key))
 
