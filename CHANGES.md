@@ -1,3 +1,9 @@
+Version 1.3
+
+-  Supports specifying extra paths to templates and data directories via a
+   'confab.extensions' distribution entry point.
+-  Lower-level API supports loading templates and data from multiple directories.
+
 Version 1.2
 
  -  Major refactor of underlying data model:
