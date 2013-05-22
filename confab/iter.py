@@ -5,6 +5,8 @@ Iterations over hosts, roles, components, config files.
 from fabric.api import env, settings, abort
 from os.path import join
 from os import getcwd
+from pkg_resources import iter_entry_points
+from warnings import warn
 
 from confab.options import options
 from confab.validate import assert_exists
@@ -53,13 +55,30 @@ def make_conffiles(host_and_role, directory=None):
 
     :param directory: Path to templates and data directories.
     """
-    directory = directory or env.environmentdef.directory or getcwd()
+    directories = [directory or env.environmentdef.directory or getcwd()]
+    directories.extend(iter_extension_paths())
 
     # Construct directories
-    templates_dir = join(directory, options.get_templates_dir())
-    data_dir = join(directory, options.get_data_dir())
-    assert_exists(templates_dir, data_dir)
+    templates_dirs = map(lambda dir: join(dir, options.get_templates_dir()), directories)
+    assert_exists(*templates_dirs)
+    data_dirs = map(lambda dir: join(dir, options.get_data_dir()), directories)
+    assert_exists(*data_dirs)
 
     return ConfFiles(host_and_role,
-                     FileSystemEnvironmentLoader(templates_dir),
-                     DataLoader(data_dir))
+                     FileSystemEnvironmentLoader(*templates_dirs),
+                     DataLoader(data_dirs))
+
+
+def iter_extension_paths():
+    """
+    Get templates paths from confab extension entry points.
+
+    entry points should point to a callable that returns the base path
+    to the data and templates directories.
+    """
+    for entry_point in iter_entry_points(group="confab.extensions"):
+        try:
+            path_func = entry_point.load()
+            yield path_func()
+        except ImportError as e:
+            warn(str(e))

@@ -31,7 +31,7 @@ setup(name='confab',
           'python-magic',
           'gusset==1.1',
       ],
-      test_requires=[
+      tests_require=[
           'mock==1.0.1'
       ],
       test_suite='confab.tests',
