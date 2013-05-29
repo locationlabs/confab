@@ -1,5 +1,6 @@
 """
-Iterations over hosts, roles, components, config files.
+Iterations over :term:`hosts<host>`, :term:`roles<role>`,
+:term:`components<component>` and config files.
 """
 
 from fabric.api import env, settings, abort
@@ -37,9 +38,11 @@ def iter_hosts_and_roles():
 
 def iter_conffiles(directory=None):
     """
-    Generate ConfFiles objects for each host_and_role in an environment.
+    Generate :class:`~confab.conffiles.ConfFiles` objects for each
+    ``host_and_role`` in an :term:`environment`.
 
-    Uses the default FileSystemEnvironmentLoader and DataLoader.
+    Uses the default :class:`~confab.loaders.FileSystemEnvironmentLoader` and
+    :class:`~confab.data.DataLoader`.
 
     :param directory: Path to templates and data directories.
     """
@@ -49,9 +52,11 @@ def iter_conffiles(directory=None):
 
 def make_conffiles(host_and_role, directory=None):
     """
-    Create a ConfFiles object for a host_and_role in an environment.
+    Create a :class:`~confab.conffiles.ConfFiles` object for a
+    ``host_and_role`` in an :term:`environment`.
 
-    Uses the default FileSystemEnvironmentLoader and DataLoader.
+    Uses the default :class:`~confab.loaders.FileSystemEnvironmentLoader` and
+    :class:`~confab.data.DataLoader`.
 
     :param directory: Path to templates and data directories.
     """

@@ -1,8 +1,8 @@
 """
 Jinja2 Environment loading helper functions.
 
-Confab uses the environments list_templates() method to abstract
-template location from rendering and synchronization.
+Confab uses the environments :meth:`jinja2.Environment.list_templates` method
+to abstract template location from rendering and synchronization.
 
 Note that the default Jinja2 Loaders assume a charset (default: utf-8).
 """

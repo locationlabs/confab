@@ -21,7 +21,7 @@ def _clear_dir(dir_name):
 
 def _clear_file(file_name):
     """
-    Remove an entire directory tree.
+    Remove a single file.
     """
     if os.path.exists(file_name):
         os.remove(file_name)

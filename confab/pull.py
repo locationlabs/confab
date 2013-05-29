@@ -1,5 +1,6 @@
 """
-Pull configuration files from remote host into remotes_dir.
+Pull configuration files from remote :term:`host` into
+:ref:`remotes_dir<directories>`.
 """
 from fabric.api import task
 from gusset.output import status

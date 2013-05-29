@@ -1,14 +1,14 @@
 """
-Main function declaration for confab console_script.
+Main function declaration for the ``confab`` console_script.
 
-Confab may be used from within a fabfile or as a library. The main
-function here is provided as a simple default way to invoke confab's
+Confab may be used from within a :ref:`fabfile or as a library<usage>`.
+The main function here is provided as a simple default way to invoke confab's
 tasks:
 
- -  A single directory root is assumed, with templates, data, generated
-    and remotes directories defined as subdirectories.
+ -  A single directory root is assumed, with ``templates``, ``data``,
+    ``generated`` and ``remotes`` :ref:`directories` defined as subdirectories.
 
- -  A host list must be provided on the command line.
+ -  A :term:`host` list must be provided on the command line.
 
 For more complex invocation, a custom fabfile may be more appropriate.
 """
@@ -103,7 +103,7 @@ def load_environmentdef(environment,
                         roles=None):
     """
     Load settings, construct an environment definition, and save in Fabric env
-    as "confab" for use by subsequent confab tasks.
+    as ``confab`` for use by subsequent confab tasks.
 
     :param environment: environment name
     :param settings_path: path to settings module

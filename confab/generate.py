@@ -1,5 +1,5 @@
 """
-Generate configuration files into generated_dir.
+Generate configuration files into :ref:`generated_dir<directories>`.
 """
 from fabric.api import task
 from gusset.output import status

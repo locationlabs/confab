@@ -79,8 +79,8 @@ class DataLoader(object):
     where type is defined to include defaults, per-role values,
     per-component values, per-environment values and per-host values.
 
-    Configuration data also includes the current environment, component
-    and host string values under a 'confab' key.
+    Configuration data also includes the current environment
+    and host string values under a ``confab`` key.
     """
 
     ALL = ['default', 'component', 'role', 'environment', 'host']
