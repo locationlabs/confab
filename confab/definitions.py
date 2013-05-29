@@ -185,6 +185,13 @@ class EnvironmentDefinition(object):
             for role in roles:
                 yield HostAndRoleDefinition(self, host, role)
 
+    def hosts(self):
+        """
+        Iterate through all valid hosts.
+        """
+        for host, roles in self.host_roles.iteritems():
+            yield HostDefinition(self, host, roles)
+
     def components(self):
         """
         Iterate through all valid components of all host and role combinations.
@@ -212,6 +219,39 @@ class EnvironmentDefinition(object):
                     # And exclude hosts that have no such roles
                     host_roles[host] = selected_roles
         return host_roles
+
+
+class HostDefinition(object):
+    """
+    A host in the context of a specific environment.
+    """
+
+    def __init__(self, environmentdef, host, roles):
+        """
+        Constructor should not be called directly.
+        """
+        self.environmentdef = environmentdef
+        self.host = host
+        self.role_names = roles
+
+    def __iter__(self):
+        return iter([self.environment, self.host, self.role_names])
+
+    def __repr__(self):
+        return str((self.environment, self.host, self.role_names))
+
+    @property
+    def environment(self):
+        return self.environmentdef.name
+
+    def roles(self):
+        for role in self.role_names:
+            yield HostAndRoleDefinition(self.environmentdef, self.host, role)
+
+    def components(self):
+        for host_and_role in self.roles():
+            for component in host_and_role.components():
+                yield component
 
 
 class HostAndRoleDefinition(object):
