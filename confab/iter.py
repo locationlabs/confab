@@ -16,9 +16,9 @@ from confab.data import DataLoader
 from confab.conffiles import ConfFiles
 
 
-def iter_hosts_and_roles():
+def _get_environmentdef():
     """
-    Iterate over all hosts and roles in the configured environment.
+    Retreive the EnvironmentDefinition from the fabric env.
     """
     if 'environmentdef' not in env:
         abort("Environment needs to be configured")
@@ -29,6 +29,27 @@ def iter_hosts_and_roles():
     # to the current host.
     if env.host_string:
         environmentdef = environmentdef.with_hosts(env.host_string)
+
+    return environmentdef
+
+
+def iter_hosts():
+    """
+    Iterate over all hosts in the configured environment.
+    """
+    environmentdef = _get_environmentdef()
+
+    for host in environmentdef.hosts():
+        # fabric needs the host_string if we're calling from main()
+        with settings(host_string=host.host):
+            yield host
+
+
+def iter_hosts_and_roles():
+    """
+    Iterate over all hosts and roles in the configured environment.
+    """
+    environmentdef = _get_environmentdef()
 
     for host_and_role in environmentdef.all():
         # fabric needs the host_string if we're calling from main()
