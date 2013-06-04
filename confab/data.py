@@ -111,6 +111,7 @@ class DataLoader(object):
 
         confab_data = dict(confab=dict(environment=componentdef.environment,
                                        host=componentdef.host,
+                                       role=componentdef.role,
                                        component=componentdef.name))
 
         return merge(confab_data, *module_dicts)
