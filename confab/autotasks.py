@@ -29,7 +29,7 @@ def generate_tasks(settings_path=None):
     """
     def create_task(settings, environment):
         def select_environment(*roles):
-            if hasattr(env, "environmentdef"):
+            if hasattr(env, "environmentdef") and env.environmentdef.name != environment:
                 abort("Environment already defined as '{}'".format(env.environmentdef.name))
 
             # Do not select hosts here.
@@ -47,3 +47,4 @@ def generate_tasks(settings_path=None):
         _add_task(environment,
                   create_task(settings, environment),
                   "Set environment to '{environment}'".format(environment=environment))
+    return settings
