@@ -47,20 +47,9 @@ def parse_options():
 
     add_core_options(parser)
 
-    parser.add_option("-q", "--quiet", dest="quiet",
-                      action="store_true",
-                      default=False,
-                      help="minimize output verbosity")
-
     parser.add_option("-u", "--user", dest="user",
                       default=getpass.getuser(),
                       help="username to use when connecting to remote hosts")
-
-    parser.add_option("-v", "--verbose", dest="verbosity",
-                      action="count",
-                      default=0,
-                      help="control confab verbosity; by default, confab suppresses"
-                      "most output. Additional -v flags increase verbosity.")
 
     parser.add_option("-y", "--yes", dest="assume_yes",
                       action="store_true",
@@ -92,9 +81,20 @@ def add_core_options(parser):
                       default="",
                       help="comma-separated list of hosts to operate on")
 
+    parser.add_option("-q", "--quiet", dest="quiet",
+                      action="store_true",
+                      default=False,
+                      help="minimize output verbosity")
+
     parser.add_option("-R", "--roles", dest="roles",
                       default="",
                       help="comma-separated list of roles to operate on")
+
+    parser.add_option("-v", "--verbose", dest="verbosity",
+                      action="count",
+                      default=0,
+                      help="control confab verbosity; by default, confab suppresses"
+                      "most output. Additional -v flags increase verbosity.")
 
 
 def load_environmentdef(environment,
@@ -148,8 +148,7 @@ def main():
         # Parse and validate arguments
         parser, options, arguments = parse_options()
 
-        configure_output(options.verbosity,
-                         options.quiet)
+        configure_output(verbosity=options.verbosity, quiet=options.quiet)
 
         try:
             load_environmentdef(environment=options.environment,

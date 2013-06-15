@@ -4,8 +4,10 @@ Diagnostics output for Confab settings.
 from collections import OrderedDict
 from optparse import OptionParser
 from string import capwords
+
 from fabric.api import settings
 from fabric.colors import red, green, blue, magenta, white, yellow
+from gusset.output import configure_output
 
 from confab.definitions import Settings
 from confab.iter import iter_conffiles
@@ -112,6 +114,8 @@ def main():
     try:
         # Parse and validate arguments
         parser, options, arguments = parse_options()
+
+        configure_output(verbosity=options.verbosity, quiet=options.quiet)
 
         settings = Settings.load_from_module(options.directory)
 
