@@ -42,7 +42,7 @@ setup(name='confab',
           'Fabric>=1.4',
           'Jinja2>=2.4',
           'python-magic',
-          'gusset==1.1',
+          'gusset==1.2',
       ],
       tests_require=[
           'mock==1.0.1'
