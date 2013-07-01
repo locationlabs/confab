@@ -25,7 +25,7 @@ def parse_options():
 
 def make_row(conffile):
     """
-    Generate an dictionary describing this conffile.
+    Generate a dictionary describing this conffile.
     """
     return {
         "hash": conffile.hexdigest(),
