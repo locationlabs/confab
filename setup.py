@@ -6,11 +6,11 @@ from setuptools import setup, find_packages
 # Workaround for running "setup.py test"
 # See: http://bugs.python.org/issue15881
 try:
-    import multiprocessing # flake8: NOQA
+    import multiprocessing  # noqa
 except ImportError:
     pass
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 # Jenkins will replace __build__ with a unique value.
 __build__ = ''
