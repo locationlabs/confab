@@ -5,7 +5,6 @@ Iterations over :term:`hosts<host>`, :term:`roles<role>`,
 
 from fabric.api import env, settings, abort
 from os.path import join
-from os import getcwd
 from pkg_resources import iter_entry_points
 from warnings import warn
 
@@ -81,7 +80,7 @@ def make_conffiles(host_and_role, directory=None):
 
     :param directory: Path to templates and data directories.
     """
-    directories = [directory or env.environmentdef.directory or getcwd()]
+    directories = [directory or options.get_base_dir()]
     directories.extend(iter_extension_paths())
 
     # Construct directories
