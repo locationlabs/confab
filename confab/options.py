@@ -120,7 +120,7 @@ options = _AttributeDict({
     # How to get dictionary configuration from module data?
     'module_as_dict': _as_dict,
 
-    # Base directories for template and data directories.
+    # Base directory for template and data directories.
     'get_base_dir': _get_base_dir,
 
     # What is the name of the template directory?
