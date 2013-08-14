@@ -68,7 +68,8 @@ def make_table(settings_,
         with settings(environmentdef=environmentdef):
             for conffiles in iter_conffiles(settings_.directory):
                 for conffile in conffiles.conffiles:
-                    table.add(make_row(conffile))
+                    row = make_row(conffile)
+                    table.add(**row)
     return table
 
 
