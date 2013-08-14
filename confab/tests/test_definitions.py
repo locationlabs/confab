@@ -403,3 +403,65 @@ class TestComponents(TestCase):
         }
         with self.assertRaises(Exception):
             map(lambda c: c.name, self.settings.for_env("env").with_roles("role1").components())
+
+
+class TestHostDefinition(TestCase):
+    """
+    Test host iteration.
+    """
+    def setUp(self):
+        self.settings = Settings()
+        self.settings.environmentdefs = {
+            "test1": ["host1", "host2", "host3"],
+            "test2": ["host2", "host3"],
+            "test3": []
+        }
+        self.settings.roledefs = {
+            "role1": ["host1", "host2", "host3"],
+            "role2": ["host2", "host3"],
+            "role3": [],
+        }
+        self.settings.componentdefs = {
+            "role1": ["comp1", "compgroup"],
+            "compgroup": ["comp2", "comp3"],
+        }
+
+    def test_iter_hosts_roles(self):
+        """
+        Test iteration over an environment's hosts to get roles.
+        """
+        def get_hosts_roles(envdef):
+            return {hostdef.host: [host_and_role.role for host_and_role in hostdef.roles()]
+                    for hostdef in envdef.hosts()}
+
+        eq_({"host1": ["role1"],
+             "host2": ["role1", "role2"],
+             "host3": ["role1", "role2"]},
+            get_hosts_roles(self.settings.for_env("test1")))
+
+        eq_({"host2": ["role1", "role2"],
+             "host3": ["role1", "role2"]},
+            get_hosts_roles(self.settings.for_env("test2")))
+
+        eq_({},
+            get_hosts_roles(self.settings.for_env("test3")))
+
+    def test_iter_hosts_components(self):
+        """
+        Test iteration over an environment's hosts to get components.
+        """
+        def get_hosts_components(envdef):
+            return {hostdef.host: [compdef.name for compdef in hostdef.components()]
+                    for hostdef in envdef.hosts()}
+
+        eq_({"host1": ["comp1", "comp2", "comp3"],
+             "host2": ["comp1", "comp2", "comp3", "role2"],
+             "host3": ["comp1", "comp2", "comp3", "role2"]},
+            get_hosts_components(self.settings.for_env("test1")))
+
+        eq_({"host2": ["comp1", "comp2", "comp3", "role2"],
+             "host3": ["comp1", "comp2", "comp3", "role2"]},
+            get_hosts_components(self.settings.for_env("test2")))
+
+        eq_({},
+            get_hosts_components(self.settings.for_env("test3")))

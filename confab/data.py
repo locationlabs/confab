@@ -10,11 +10,19 @@ from confab.merge import merge
 from confab.options import options
 
 
-def import_configuration(module_name, data_dir):
+class ModuleNotFound(Exception):
+    """
+    Raised when a python module cannot be found.
+    """
+    pass
+
+
+def _import_configuration(module_name, data_dir):
     """
     Load configuration from file as python module.
-    """
 
+    :param data_dir: directory to load from.
+    """
     try:
         debug("Attempting to load {module_name}.py from {data_dir}",
               module_name=module_name,
@@ -41,9 +49,26 @@ def import_configuration(module_name, data_dir):
             debug("Could not load {module_name} from {data_dir}",
                   module_name=module_name,
                   data_dir=data_dir)
-            module = {}
+            raise ModuleNotFound("No module named {}".format(module_name))
 
-    return options.module_as_dict(module)
+    return module
+
+
+def import_configuration(module_name, *data_dirs):
+    """
+    Load configuration from a python module as a dictionary.
+
+    :param data_dirs: List of directories to load from.
+    """
+    for data_dir in data_dirs:
+        try:
+            module = _import_configuration(module_name, data_dir)
+            return options.module_as_dict(module)
+        except ModuleNotFound:
+            pass  # try the next directory
+
+    # module not found in any directory
+    return options.module_as_dict({})
 
 
 class DataLoader(object):
@@ -54,19 +79,20 @@ class DataLoader(object):
     where type is defined to include defaults, per-role values,
     per-component values, per-environment values and per-host values.
 
-    Configuration data also includes the current environment, component
-    and host string values under a 'confab' key.
+    Configuration data also includes the current environment
+    and host string values under a ``confab`` key.
     """
 
     ALL = ['default', 'component', 'role', 'environment', 'host']
 
-    def __init__(self, data_dir, data_modules=ALL):
+    def __init__(self, data_dirs, data_modules=ALL):
         """
-        Create a data loader for the given data directory.
+        Create a data loader for the given data directories.
 
+        :param data_dirs: list of data directories or a single data directory path.
         :param data_modules: list of modules to load in the order to load them.
         """
-        self.data_dir = data_dir
+        self.data_dirs = data_dirs if isinstance(data_dirs, list) else [data_dirs]
         self.data_modules = set(data_modules)
 
     def __call__(self, componentdef):
@@ -79,12 +105,13 @@ class DataLoader(object):
 
         module_names = filter(is_not_none, self._list_modules(componentdef))
 
-        load_module = lambda module_name: import_configuration(module_name, self.data_dir)
+        load_module = lambda module_name: import_configuration(module_name, *self.data_dirs)
 
         module_dicts = map(load_module, module_names)
 
         confab_data = dict(confab=dict(environment=componentdef.environment,
                                        host=componentdef.host,
+                                       role=componentdef.role,
                                        component=componentdef.name))
 
         return merge(confab_data, *module_dicts)

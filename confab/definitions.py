@@ -9,11 +9,11 @@ import os
 
 class Settings(object):
     """
-    Collection of environment, role, and component definitions.
+    Collection of :term:`environment`, :term:`role`, and :term:`component` definitions.
 
     :param directory: optional configuration directory
 
-    Supports convenient iteration. For example:
+    Supports convenient iteration. For example::
 
         # Iterate over all hosts and roles
         for host_and_role in settings.for_env("env").all():
@@ -49,7 +49,7 @@ class Settings(object):
         Load settings from a Python module.
 
         :param settings_path: path to settings module. a full path or directory name.
-                              module name defaults to 'settings'. directory defaults
+                              module name defaults to ``settings``. directory defaults
                               to the current working directory.
         """
         if settings_path:
@@ -85,7 +85,7 @@ class Settings(object):
 
     def for_env(self, environment):
         """
-        Obtain a specific environment definition.
+        Obtain a specific :term:`environment` definition.
 
         Raises exceptions if the environment is not known
         """
@@ -116,14 +116,17 @@ class Settings(object):
 
 class EnvironmentDefinition(object):
     """
-    A specific environment with an optional selection of specific hosts or
-    roles in the environment.
+    A specific :term:`environment` with an optional selection of specific
+    :term:`hosts<host>` or :term:`roles<role>` in the environment.
     """
 
     def __init__(self, settings, name, selected_hosts=None, selected_roles=None):
         """
-        Constructor should not be called directly. Either use `Settings.from_env()`,
-        `EnvironmentDefinition.with_hosts()` or `EnvironmentDefinition.with_roles()`
+        Constructor should not be called directly.
+
+        Either use :meth:`Settings.from_env`,
+        :meth:`EnvironmentDefinition.with_hosts` or
+        :meth:`EnvironmentDefinition.with_roles`.
         """
         self.settings = settings
         self.name = name
@@ -140,13 +143,13 @@ class EnvironmentDefinition(object):
     @property
     def host_roles(self):
         """
-        Return the host to roles mapping.
+        Return the :term:`host` to :term:`roles<role>` mapping.
         """
         return self._resolve_host_roles()
 
     def with_hosts(self, *hosts):
         """
-        Select hosts from within this environment.
+        Select :term:`hosts<host>` from within this :term:`environment`.
 
         Raises KeyError if hosts are not defined in this environment.
         """
@@ -163,7 +166,7 @@ class EnvironmentDefinition(object):
 
     def with_roles(self, *roles):
         """
-        Select roles from within this environment.
+        Select :term:`roles<role>` from within this :term:`environment`.
 
         Raises KeyError if role is not recognized.
         """
@@ -179,15 +182,23 @@ class EnvironmentDefinition(object):
 
     def all(self):
         """
-        Iterate through all valid host and role combinations.
+        Iterate through all valid :term:`host` and :term:`role` combinations.
         """
         for host, roles in self.host_roles.iteritems():
             for role in roles:
                 yield HostAndRoleDefinition(self, host, role)
 
+    def hosts(self):
+        """
+        Iterate through all valid hosts.
+        """
+        for host, roles in self.host_roles.iteritems():
+            yield HostDefinition(self, host, roles)
+
     def components(self):
         """
-        Iterate through all valid components of all host and role combinations.
+        Iterate through all valid components of all :term:`host` and
+        :term:`role` combinations.
         """
         for host_and_role in self.all():
             for component in host_and_role.components():
@@ -214,9 +225,43 @@ class EnvironmentDefinition(object):
         return host_roles
 
 
+class HostDefinition(object):
+    """
+    A host in the context of a specific environment.
+    """
+
+    def __init__(self, environmentdef, host, roles):
+        """
+        Constructor should not be called directly.
+        """
+        self.environmentdef = environmentdef
+        self.host = host
+        self.role_names = roles
+
+    def __iter__(self):
+        return iter([self.environment, self.host, self.role_names])
+
+    def __repr__(self):
+        return str((self.environment, self.host, self.role_names))
+
+    @property
+    def environment(self):
+        return self.environmentdef.name
+
+    def roles(self):
+        for role in self.role_names:
+            yield HostAndRoleDefinition(self.environmentdef, self.host, role)
+
+    def components(self):
+        for host_and_role in self.roles():
+            for component in host_and_role.components():
+                yield component
+
+
 class HostAndRoleDefinition(object):
     """
-    A host and role in the context of a specific environment.
+    A :term:`host` and :term:`role` in the context of a specific
+    :term:`environment`.
     """
 
     def __init__(self, environmentdef, host, role):
@@ -264,7 +309,7 @@ class HostAndRoleDefinition(object):
 
 class ComponentDefinition(object):
     """
-    A component in the context of a specific host and role.
+    A component in the context of a specific :term:`host` and :term:`role`.
     """
 
     def __init__(self, host_and_role, name):

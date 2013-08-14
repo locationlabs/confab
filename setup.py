@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from setuptools import setup, find_packages
 
 # Workaround for running "setup.py test"
@@ -9,14 +10,26 @@ try:
 except ImportError:
     pass
 
-__version__ = '1.2'
+__version__ = '1.3'
 
 # Jenkins will replace __build__ with a unique value.
 __build__ = ''
 
+here = os.path.abspath(os.path.dirname(__file__))
+
+try:
+    with open(os.path.join(here, 'README.rst')) as f:
+        README = f.read()
+    with open(os.path.join(here, 'CHANGES.rst')) as f:
+        CHANGES = f.read()
+except:
+    README = ''
+    CHANGES = ''
+
 setup(name='confab',
       version=__version__ + __build__,
       description='Configuration management with Fabric and Jinja2.',
+      long_description=README + '\n\n' + CHANGES,
       author='Location Labs',
       author_email='info@locationlabs.com',
       url='http://github.com/locationlabs/confab',
@@ -29,9 +42,9 @@ setup(name='confab',
           'Fabric>=1.4',
           'Jinja2>=2.4',
           'python-magic',
-          'gusset>=1.1c1,<1.2.dev',
+          'gusset==1.2',
       ],
-      test_requires=[
+      tests_require=[
           'mock==1.0.1'
       ],
       test_suite='confab.tests',

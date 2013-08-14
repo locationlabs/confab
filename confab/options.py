@@ -148,6 +148,6 @@ class Options(object):
 @task
 def assume_yes():
     """
-    Set the option to assume_yes in other tasks.
+    Set the option to ``assume_yes`` in other tasks.
     """
     options.assume_yes = True

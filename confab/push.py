@@ -1,5 +1,5 @@
 """
-Push generated configuration files to remote host.
+Push generated configuration files to remote :term:`host`.
 """
 from fabric.api import task
 from gusset.output import status

@@ -1,12 +1,12 @@
 """
-Auto-generate Fabric tasks for environments.
+Auto-generate Fabric tasks for :term:`environments<environment>`.
 
-The 'autogenerate_tasks' function creates fabric tasks to
-set the current environment definition and are intended to be
-used as a setup step to other standard Confab tasks (e.g. pull)
-to customize configuration data::
+The :func:`generate_tasks` function creates Fabric tasks to set the current
+environment definition and is intended to be used as a setup step to other
+standard Confab tasks (e.g. pull) to customize configuration data::
 
     fab dev:web,queue push
+
 """
 from fabric.api import abort, env
 from fabric.state import commands
@@ -29,7 +29,7 @@ def generate_tasks(settings_path=None):
     """
     def create_task(settings, environment):
         def select_environment(*roles):
-            if hasattr(env, "environmentdef"):
+            if hasattr(env, "environmentdef") and env.environmentdef.name != environment:
                 abort("Environment already defined as '{}'".format(env.environmentdef.name))
 
             # Do not select hosts here.
@@ -47,3 +47,4 @@ def generate_tasks(settings_path=None):
         _add_task(environment,
                   create_task(settings, environment),
                   "Set environment to '{environment}'".format(environment=environment))
+    return settings

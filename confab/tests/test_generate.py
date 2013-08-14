@@ -129,3 +129,28 @@ class TestGenerate(TestCase):
             self.assertEquals('foo', tmp_dir.read('generated/host1/foo.txt'))
             self.assertEquals('bar', tmp_dir.read('generated/host1/bar/bar.txt'))
             self.assertEquals('baz', tmp_dir.read('generated/host1/baz.conf'))
+
+    def test_multiple_directories(self):
+        """
+        Generate templates for roles with components
+        where templates and data are in multiple directories.
+        """
+        settings = Settings.load_from_dict(dict(environmentdefs={'any': ['host1']},
+                                                roledefs={'role1': ['host1'],
+                                                          'role2': ['host1']},
+                                                componentdefs={'role1': ['comp1', 'comp2']}))
+
+        subdirs = ['roles', 'components']
+        template_dirs = map(lambda d: join(dirname(__file__), 'templates/multidir', d), subdirs)
+        data_dirs = map(lambda d: join(dirname(__file__), 'data/multidir', d), subdirs)
+
+        with TempDir() as tmp_dir:
+            for host_and_role in settings.for_env('any').all():
+                conffiles = ConfFiles(host_and_role,
+                                      FileSystemEnvironmentLoader(*template_dirs),
+                                      DataLoader(data_dirs))
+                conffiles.generate(tmp_dir.path)
+
+            self.assertEquals('foo', tmp_dir.read('generated/host1/foo.txt'))
+            self.assertEquals('bar', tmp_dir.read('generated/host1/bar.txt'))
+            self.assertEquals('baz', tmp_dir.read('generated/host1/baz.conf'))
