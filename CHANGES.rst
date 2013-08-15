@@ -1,7 +1,7 @@
 Change History
 ==============
 
-1.3 - unreleased
+1.3 - 2013-08-14
 ----------------
 
 -   Supports specifying extra paths to templates and data directories via a
