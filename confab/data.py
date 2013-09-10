@@ -61,16 +61,16 @@ def import_configuration(module_name, *data_dirs, **kwargs):
     Load configuration from a python module as a dictionary.
 
     :param data_dirs: List of directories to load from.
+    :param scope: (kwargs) Containing folder name for module.
     """
     # First look for the file in 'scope'; otherwise, load from the data_dir
     scope = kwargs.get('scope')
     if scope is not None:
+        data_dirs_with_scope = []
         for data_dir in data_dirs:
-            try:
-                module = _import_configuration(module_name, join(data_dir, scope))
-                return options.module_as_dict(module)
-            except ModuleNotFound:
-                pass
+            data_dirs_with_scope.append(join(data_dir, scope))
+            data_dirs_with_scope.append(data_dir)
+        data_dirs = data_dirs_with_scope
 
     for data_dir in data_dirs:
         try:
