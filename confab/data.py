@@ -1,6 +1,8 @@
 """
 Functions for loading configuration data.
 """
+from os.path import join
+
 from fabric.api import puts
 from gusset.output import debug
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
@@ -54,12 +56,22 @@ def _import_configuration(module_name, data_dir):
     return module
 
 
-def import_configuration(module_name, *data_dirs):
+def import_configuration(module_name, *data_dirs, **kwargs):
     """
     Load configuration from a python module as a dictionary.
 
     :param data_dirs: List of directories to load from.
     """
+    # First look for the file in 'scope'; otherwise, load from the data_dir
+    scope = kwargs.get('scope')
+    if scope is not None:
+        for data_dir in data_dirs:
+            try:
+                module = _import_configuration(module_name, join(data_dir, scope))
+                return options.module_as_dict(module)
+            except ModuleNotFound:
+                pass
+
     for data_dir in data_dirs:
         try:
             module = _import_configuration(module_name, data_dir)
@@ -101,11 +113,13 @@ class DataLoader(object):
 
         :param component: a component definition.
         """
-        is_not_none = lambda x: x is not None
+        is_not_none = lambda (x, y): y is not None
 
         module_names = filter(is_not_none, self._list_modules(componentdef))
 
-        load_module = lambda module_name: import_configuration(module_name, *self.data_dirs)
+        load_module = lambda (scope, module_name): import_configuration(module_name,
+                                                                        *self.data_dirs,
+                                                                        scope=scope + 's')
 
         module_dicts = map(load_module, module_names)
 
@@ -128,4 +142,4 @@ class DataLoader(object):
             ('host', componentdef.host)
         ]
 
-        return [name for key, name in module_names if key in self.data_modules]
+        return [(key, name) for key, name in module_names if key in self.data_modules]
