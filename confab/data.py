@@ -2,6 +2,7 @@
 Functions for loading configuration data.
 """
 from os.path import join
+from itertools import chain
 
 from fabric.api import puts
 from gusset.output import debug
@@ -66,7 +67,7 @@ def import_configuration(module_name, *data_dirs, **kwargs):
     def add_scope(data_dirs, scope):
         if scope is None:
             return data_dirs
-        return [join(data_dir, scope) for data_dir in data_dirs] + list(data_dirs)
+        return list(chain(*zip(data_dirs, map(lambda data_dir: join(data_dir, scope), data_dirs))))
 
     for data_dir in add_scope(data_dirs, kwargs.get('scope')):
         try:
@@ -109,13 +110,11 @@ class DataLoader(object):
 
         :param component: a component definition.
         """
-        is_not_none = lambda (x, y): y is not None
-
-        module_names = filter(is_not_none, self._list_modules(componentdef))
+        module_names = self._list_modules(componentdef)
 
         load_module = lambda (scope, module_name): import_configuration(module_name,
                                                                         *self.data_dirs,
-                                                                        scope=scope + 's')
+                                                                        scope=scope)
 
         module_dicts = map(load_module, module_names)
 
@@ -138,4 +137,5 @@ class DataLoader(object):
             ('host', componentdef.host)
         ]
 
-        return [(key, name) for key, name in module_names if key in self.data_modules]
+        return [(key, name) for key, name in module_names
+                if key in self.data_modules and name is not None]
