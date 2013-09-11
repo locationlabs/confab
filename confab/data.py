@@ -63,16 +63,12 @@ def import_configuration(module_name, *data_dirs, **kwargs):
     :param data_dirs: List of directories to load from.
     :param scope: (kwargs) Containing folder name for module.
     """
-    # First look for the file in 'scope'; otherwise, load from the data_dir
-    scope = kwargs.get('scope')
-    if scope is not None:
-        data_dirs_with_scope = []
-        for data_dir in data_dirs:
-            data_dirs_with_scope.append(join(data_dir, scope))
-            data_dirs_with_scope.append(data_dir)
-        data_dirs = data_dirs_with_scope
+    def add_scope(data_dirs, scope):
+        if scope is None:
+            return data_dirs
+        return [join(data_dir, scope) for data_dir in data_dirs] + list(data_dirs)
 
-    for data_dir in data_dirs:
+    for data_dir in add_scope(data_dirs, kwargs.get('scope')):
         try:
             module = _import_configuration(module_name, data_dir)
             return options.module_as_dict(module)
