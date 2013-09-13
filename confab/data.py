@@ -94,6 +94,7 @@ class DataLoader(object):
         """
         self.data_dirs = data_dirs if isinstance(data_dirs, list) else [data_dirs]
         self.data_modules = set(data_modules)
+        self.callback_tasks = {k: [] for k in self.data_modules}
 
     def __call__(self, componentdef):
         """
@@ -115,7 +116,35 @@ class DataLoader(object):
                                        component=componentdef.name))
 
         return merge(confab_data, *module_dicts)
-
+    
+    def add_data_loader_hook(self, hook_func, scope, filter_func=None):
+        '''
+        Register callback by scope to load additional configuration data and merge with default.
+        
+        :param hook_func: callable that returns data for the given scope
+        :param scope: must be one of the available data scopes
+        :param filter_func: an optional callable that will be passed the current componentdef and
+            is expected to return a boolean to control whether the hook is called.
+        '''
+        if scope not in self.data_modules:
+            print 'handle error case'
+            
+        if not callable(hook_func):
+            print 'handle error case'
+            
+        if filter_func is not None and not fallable(filter_func):
+            print 'handle error case'
+            
+        self.callback_tasks[scope].append((hook_func, filter_func))
+            
+    def remove_data_loader_hook(self, hook_func, scope):
+        '''
+        Remove previously registered callback.
+        
+        Returns True if a the requested hook_func was found/removed.
+        '''
+        pass
+        
     def _list_modules(self, componentdef):
         """
         Get the list of modules to load.
