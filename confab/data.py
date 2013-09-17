@@ -20,6 +20,13 @@ class ModuleNotFound(Exception):
     pass
 
 
+class InvalidConfiguration(Exception):
+    """
+    Raised for invalid configuration from add_hook
+    """
+    pass
+
+
 def _import_configuration(module_name, data_dir):
     """
     Load configuration from file as python module.
@@ -93,6 +100,7 @@ class DataLoader(object):
     """
 
     ALL = ['default', 'component', 'role', 'environment', 'host']
+    _hooks = {k: [] for k in ALL}
 
     def __init__(self, data_dirs, data_modules=ALL):
         """
@@ -103,7 +111,6 @@ class DataLoader(object):
         """
         self.data_dirs = data_dirs if isinstance(data_dirs, list) else [data_dirs]
         self.data_modules = set(data_modules)
-        self.callback_tasks = {k: [] for k in self.data_modules}
 
     def __call__(self, componentdef):
         """
@@ -111,13 +118,14 @@ class DataLoader(object):
 
         :param component: a component definition.
         """
-        module_names = self._list_modules(componentdef)
+        def load_module(scope_module_tup):
+            scope, module_name = scope_module_tup
+            hook_dicts = [hook[0](module_name) for hook in self._hooks[scope]
+                          if hook[1](componentdef)]
+            return merge(import_configuration(module_name, *self.data_dirs, scope=scope),
+                         *hook_dicts)
 
-        load_module = lambda (scope, module_name): import_configuration(module_name,
-                                                                        *self.data_dirs,
-                                                                        scope=scope)
-
-        module_dicts = map(load_module, module_names)
+        module_dicts = map(load_module, self._list_modules(componentdef))
 
         confab_data = dict(confab=dict(environment=componentdef.environment,
                                        host=componentdef.host,
@@ -125,35 +133,7 @@ class DataLoader(object):
                                        component=componentdef.name))
 
         return merge(confab_data, *module_dicts)
-    
-    def add_data_loader_hook(self, hook_func, scope, filter_func=None):
-        '''
-        Register callback by scope to load additional configuration data and merge with default.
-        
-        :param hook_func: callable that returns data for the given scope
-        :param scope: must be one of the available data scopes
-        :param filter_func: an optional callable that will be passed the current componentdef and
-            is expected to return a boolean to control whether the hook is called.
-        '''
-        if scope not in self.data_modules:
-            print 'handle error case'
-            
-        if not callable(hook_func):
-            print 'handle error case'
-            
-        if filter_func is not None and not fallable(filter_func):
-            print 'handle error case'
-            
-        self.callback_tasks[scope].append((hook_func, filter_func))
-            
-    def remove_data_loader_hook(self, hook_func, scope):
-        '''
-        Remove previously registered callback.
-        
-        Returns True if a the requested hook_func was found/removed.
-        '''
-        pass
-        
+
     def _list_modules(self, componentdef):
         """
         Get the list of modules to load.
@@ -168,3 +148,37 @@ class DataLoader(object):
 
         return [(key, name) for key, name in module_names
                 if key in self.data_modules and name is not None]
+
+    def _truefunc(componentdef):
+        return True
+
+    @classmethod
+    def add_hook(cls, hook_func, scope, filter_func=_truefunc):
+        '''
+        Register callback by scope to load additional configuration data and merge with default.
+
+        :param hook_func: callable that returns data for the given scope
+        :param scope: must be one of the available data scopes
+        :param filter_func: an optional callable that will be passed the current componentdef and
+            is expected to return a boolean to control whether the hook is called.
+        '''
+        if not callable(hook_func) or not callable(filter_func):
+            raise InvalidConfiguration
+
+        try:
+            cls._hooks[scope].append((hook_func, filter_func))
+        except KeyError:
+            raise InvalidConfiguration('Invalid scope: {}'.format(scope))
+
+    @classmethod
+    def remove_hook(cls, hook_func, scope, filter_func=_truefunc):
+        '''
+        Remove previously registered callback.
+
+        Returns True if the requested hook_func was found/removed.
+        '''
+        try:
+            cls._hooks[scope].remove((hook_func, filter_func))
+        except ValueError:
+            return False
+        return True
