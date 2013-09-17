@@ -101,6 +101,7 @@ class DataLoader(object):
 
     ALL = ['default', 'component', 'role', 'environment', 'host']
     _hooks = {k: [] for k in ALL}
+    _hook_cache = {}
 
     def __init__(self, data_dirs, data_modules=ALL):
         """
@@ -120,7 +121,12 @@ class DataLoader(object):
         """
         def load_module(scope_module_tup):
             scope, module_name = scope_module_tup
-            hook_dicts = [hook[0](module_name) for hook in self._hooks[scope]
+            def hook_cache_call(hook, module_name):
+                if module_name not in self._hook_cache[hook]:
+                    self._hook_cache[hook][module_name] = hook[0](module_name)
+                return self._hook_cache[hook][module_name]
+
+            hook_dicts = [hook_cache_call(hook, module_name) for hook in self._hooks[scope]
                           if hook[1](componentdef)]
             return merge(import_configuration(module_name, *self.data_dirs, scope=scope),
                          *hook_dicts)
@@ -165,6 +171,9 @@ class DataLoader(object):
         if not callable(hook_func) or not callable(filter_func):
             raise InvalidConfiguration
 
+        # Initialize cache for hook_func; no data
+        cls._hook_cache[(hook_func,filter_func)] = {}
+
         try:
             cls._hooks[scope].append((hook_func, filter_func))
         except KeyError:
@@ -177,6 +186,9 @@ class DataLoader(object):
 
         Returns True if the requested hook_func was found/removed.
         '''
+        # Remove cached data value
+        del cls._hook_cache[(hook_func,filter_func)]
+
         try:
             cls._hooks[scope].remove((hook_func, filter_func))
         except ValueError:
