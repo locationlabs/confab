@@ -39,3 +39,23 @@ Confab's recursive merge operation can be futher customized by using callable
 wrappers around configuration values. Confab will always delegate to a callable
 to define how values are overriden, e.g. allowing lists values to be
 appended/prepended to default values.
+
+
+Data Hooks
+==========
+
+Dataloader now supports adding callbacks by scope in order to load additional 
+data. Hooks are added and removed via:
+
+    hook = Hook(hook_func)
+    hooks.add_data_hook(scope, hook)
+    hooks.remove_data_hook(scope, hook)
+
+Hooks can also be used via a ContextManager ``ScopeAndHooks`` which accepts an
+arbitrary number of hooks and loads them appropriately in context.
+
+    with ScopeAndHooks(scope, Hook(hook_func)):
+        dostuff()
+
+Hooks will be loaded after file data for each scope, but before the file data from
+the next scope.

@@ -11,18 +11,12 @@ from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 from confab.files import _import, _import_string
 from confab.merge import merge
 from confab.options import options
+from confab.hooks import hooks
 
 
 class ModuleNotFound(Exception):
     """
     Raised when a python module cannot be found.
-    """
-    pass
-
-
-class InvalidConfiguration(Exception):
-    """
-    Raised for invalid configuration from add_hook
     """
     pass
 
@@ -100,8 +94,6 @@ class DataLoader(object):
     """
 
     ALL = ['default', 'component', 'role', 'environment', 'host']
-    _hooks = {k: [] for k in ALL}
-    _hook_cache = {}
 
     def __init__(self, data_dirs, data_modules=ALL):
         """
@@ -121,13 +113,16 @@ class DataLoader(object):
         """
         def load_module(scope_module_tup):
             scope, module_name = scope_module_tup
-            def hook_cache_call(hook, module_name):
-                if module_name not in self._hook_cache[hook]:
-                    self._hook_cache[hook][module_name] = hook[0](module_name)
-                return self._hook_cache[hook][module_name]
 
-            hook_dicts = [hook_cache_call(hook, module_name) for hook in self._hooks[scope]
-                          if hook[1](componentdef)]
+            #def hook_cache_call(hook, module_name):
+            #    if module_name not in self._hook_cache[hook]:
+            #        self._hook_cache[hook][module_name] = hook[0](module_name)
+            #    return self._hook_cache[hook][module_name]
+            #
+            #hook_dicts = [hook_cache_call(hook, module_name) for hook in self._hooks[scope]
+            #              if hook[1](componentdef)]
+            hook_dicts = [hook(module_name) for hook in hooks.for_scope(scope)
+                          if hook.filter(componentdef)]
             return merge(import_configuration(module_name, *self.data_dirs, scope=scope),
                          *hook_dicts)
 
@@ -156,41 +151,4 @@ class DataLoader(object):
                 if key in self.data_modules and name is not None]
 
     def _truefunc(componentdef):
-        return True
-
-    @classmethod
-    def add_hook(cls, hook_func, scope, filter_func=_truefunc):
-        '''
-        Register callback by scope to load additional configuration data and merge with default.
-
-        :param hook_func: callable that returns data for the given scope
-        :param scope: must be one of the available data scopes
-        :param filter_func: an optional callable that will be passed the current componentdef and
-            is expected to return a boolean to control whether the hook is called.
-        '''
-        if not callable(hook_func) or not callable(filter_func):
-            raise InvalidConfiguration
-
-        # Initialize cache for hook_func; no data
-        cls._hook_cache[(hook_func,filter_func)] = {}
-
-        try:
-            cls._hooks[scope].append((hook_func, filter_func))
-        except KeyError:
-            raise InvalidConfiguration('Invalid scope: {}'.format(scope))
-
-    @classmethod
-    def remove_hook(cls, hook_func, scope, filter_func=_truefunc):
-        '''
-        Remove previously registered callback.
-
-        Returns True if the requested hook_func was found/removed.
-        '''
-        # Remove cached data value
-        del cls._hook_cache[(hook_func,filter_func)]
-
-        try:
-            cls._hooks[scope].remove((hook_func, filter_func))
-        except ValueError:
-            return False
         return True

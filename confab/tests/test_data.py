@@ -97,30 +97,6 @@ class TestData(TestCase):
              'environment': 'environment',
              'host': 'host'})
 
-    def test_dataloader_hook(self):
-        '''
-        Load additional configuration data via hook.
-
-        * Test adding new hook
-        * Test that new hook is being processed
-        * Test removing hook
-        '''
-        def test_hook(host):
-            return {'data': {'num_cores': 4}}
-
-        DataLoader.add_hook(test_hook, 'host')
-        loader = DataLoader(join(dirname(__file__), 'data/order'))
-
-        eq_(loader(self.component)['data'],
-            {'default': 'default',
-             'component': 'component',
-             'role': 'role',
-             'environment': 'environment',
-             'host': 'host',
-             'num_cores': 4})
-
-        DataLoader.remove_hook(test_hook, 'host')
-
     def test_missing_data_module(self):
         """
         If a data module does not exist, it is ignored.
