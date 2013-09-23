@@ -11,20 +11,25 @@ class Hook(object):
     * filter_func to determine whether it should be called for specific component
     """
     def __init__(self, hook_func, filter_func=None):
-        self.hook_func = hook_func
-        if filter_func is None:
-            self.filter_func = lambda componentdef: True
-        else:
-            self.filter_func = filter_func
+        self._hook_func = hook_func
+        self._filter_func = filter_func
         self._data = None
 
     def __call__(self, module_name):
         if self._data is None:
-            self._data = self.hook_func(module_name)
+            self._data = self._hook_func(module_name)
         return self._data
 
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return (self._hook_func == other._hook_func and
+                    self._filter_func == other._filter_func)
+        return False
+
     def filter(self, componentdef):
-        return self.filter_func(componentdef)
+        if self._filter_func is None:
+            return True
+        return self._filter_func(componentdef)
 
 
 class HookRegistry(object):
@@ -35,23 +40,17 @@ class HookRegistry(object):
         self._hooks = {}
 
     def add_hook(self, scope, hook):
-        try:
-            self._hooks[scope].append(hook)
-        except KeyError:
-            self._hooks[scope] = [hook]
+        self._hooks.setdefault(scope, []).append(hook)
 
     def remove_hook(self, scope, hook):
         try:
-            self._hooks[scope].remove(hook)
-        except (KeyError, ValueError):
+            self._hooks.get(scope, []).remove(hook)
+        except ValueError:
             return False
         return True
 
     def for_scope(self, scope):
-        try:
-            return self._hooks[scope]
-        except KeyError:
-            return []
+        return self._hooks.get(scope, [])
 
 
 class ScopeAndHooks(object):
@@ -62,15 +61,12 @@ class ScopeAndHooks(object):
         self._scope_and_hooks = scope_and_hooks
 
     def __enter__(self):
-        for scope_and_hook in self._scope_and_hooks:
-            scope, hook = scope_and_hook
+        for scope, hook in self._scope_and_hooks:
             add_data_hook(scope, hook)
 
     def __exit__(self, type, value, traceback):
-        for scope_and_hook in self._scope_and_hooks:
-            scope, hook = scope_and_hook
+        for scope, hook in self._scope_and_hooks:
             remove_data_hook(scope, hook)
-        print type, value, traceback
 
 
 def add_data_hook(scope, hook):

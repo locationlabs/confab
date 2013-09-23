@@ -111,16 +111,8 @@ class DataLoader(object):
 
         :param component: a component definition.
         """
-        def load_module(scope_module_tup):
-            scope, module_name = scope_module_tup
-
-            #def hook_cache_call(hook, module_name):
-            #    if module_name not in self._hook_cache[hook]:
-            #        self._hook_cache[hook][module_name] = hook[0](module_name)
-            #    return self._hook_cache[hook][module_name]
-            #
-            #hook_dicts = [hook_cache_call(hook, module_name) for hook in self._hooks[scope]
-            #              if hook[1](componentdef)]
+        def load_module(scope_and_module):
+            scope, module_name = scope_and_module
             hook_dicts = [hook(module_name) for hook in hooks.for_scope(scope)
                           if hook.filter(componentdef)]
             return merge(import_configuration(module_name, *self.data_dirs, scope=scope),

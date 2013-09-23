@@ -44,17 +44,19 @@ appended/prepended to default values.
 Data Hooks
 ==========
 
-Dataloader now supports adding callbacks by scope in order to load additional 
-data. Hooks are added and removed via:
+DataLoader now supports adding callbacks by scope in order to load additional 
+data. Hooks are added and removed via::
+
+    from confab.api import Hook, add_data_hook, remove_data_hook
 
     hook = Hook(hook_func)
     hooks.add_data_hook(scope, hook)
-    hooks.remove_data_hook(scope, hook)
+    hooks.remove_data_hook(scope, Hook(hook_func))
 
 Hooks can also be used via a ContextManager ``ScopeAndHooks`` which accepts an
-arbitrary number of hooks and loads them appropriately in context.
+arbitrary number of hooks and loads them appropriately in context.::
 
-    with ScopeAndHooks(scope, Hook(hook_func)):
+    with ScopeAndHooks((scope, Hook(hook_func))):
         dostuff()
 
 Hooks will be loaded after file data for each scope, but before the file data from

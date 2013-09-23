@@ -5,11 +5,11 @@ Tests for Hooks
 from unittest import TestCase
 from os.path import join, dirname
 
-from nose.tools import eq_, ok_, raises
+from nose.tools import eq_, ok_
 
 from confab.definitions import Settings
 from confab.data import DataLoader
-from confab.hooks import hooks, Hook, ScopeAndHooks, add_data_hook, remove_data_hook
+from confab.hooks import Hook, ScopeAndHooks, HookRegistry
 
 
 class TestHooks(TestCase):
@@ -26,37 +26,24 @@ class TestHooks(TestCase):
         }
         self.component = self.settings.for_env("environment").components().next()
 
-    @raises(ValueError)
-    def test_hook(self):
+    def test_add_remove_hook(self):
         """
         Load additional configuration data via hook.
 
         * Test adding new hook
-        * Test that new hook is being processed
         * Test removing hook
         """
         def test_hook(host):
             return {'data': {'num_cores': 4}}
 
-        try:
-            testhook = Hook(test_hook)
-            add_data_hook('host', testhook)
+        testhook = Hook(test_hook)
+        local_hooks = HookRegistry()
 
-            ok_(hooks._hooks['host'].index(testhook) >= 0)
+        local_hooks.add_hook('host', testhook)
+        ok_(testhook in local_hooks._hooks['host'])
 
-            loader = DataLoader(join(dirname(__file__), 'data/order'))
-
-            eq_(loader(self.component)['data'],
-                {'default': 'default',
-                 'component': 'component',
-                 'role': 'role',
-                 'environment': 'environment',
-                 'host': 'host',
-                 'num_cores': 4})
-        finally:
-            print remove_data_hook('host', testhook)
-
-        hooks._hooks['host'].index(testhook)  # raises ValueError
+        local_hooks.remove_hook('host', testhook)
+        ok_(testhook not in local_hooks._hooks['host'])
 
     def test_hook_override_data(self):
         """
@@ -92,7 +79,7 @@ class TestHooks(TestCase):
 
     def test_hook_load_order(self):
         """
-        Test that hooks overwrite eachother based on order they are defined.
+        Test that hooks overwrite each other based on order they are defined.
         """
         def test_hook1(host):
             return {'data': {'host': 'host1'}}
@@ -108,3 +95,23 @@ class TestHooks(TestCase):
                  'role': 'role',
                  'environment': 'environment',
                  'host': 'host2'})
+
+    def test_filter_func(self):
+        """
+        Test that hooks only run if the filter_func returns true
+        """
+        def test_hook1(host):
+            return {'data': {'host': 'host1'}}
+
+        def test_hook2(host):
+            return {'data': {'host': 'host2'}}
+
+        with ScopeAndHooks(('host', Hook(test_hook1)),
+                           ('host', Hook(test_hook2, lambda componentdef: False))):
+            loader = DataLoader(join(dirname(__file__), 'data/order'))
+            eq_(loader(self.component)['data'],
+                {'default': 'default',
+                 'component': 'component',
+                 'role': 'role',
+                 'environment': 'environment',
+                 'host': 'host1'})
