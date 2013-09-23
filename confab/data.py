@@ -95,7 +95,7 @@ class DataLoader(object):
 
     ALL = ['default', 'component', 'role', 'environment', 'host']
 
-    def __init__(self, data_dirs, data_modules=ALL):
+    def __init__(self, data_dirs, data_modules=ALL, ignore_hooks=False):
         """
         Create a data loader for the given data directories.
 
@@ -104,6 +104,7 @@ class DataLoader(object):
         """
         self.data_dirs = data_dirs if isinstance(data_dirs, list) else [data_dirs]
         self.data_modules = set(data_modules)
+        self._ignore_hooks = ignore_hooks
 
     def __call__(self, componentdef):
         """
@@ -114,7 +115,7 @@ class DataLoader(object):
         def load_module(scope_and_module):
             scope, module_name = scope_and_module
             hook_dicts = [hook(module_name) for hook in hooks.for_scope(scope)
-                          if hook.filter(componentdef)]
+                          if hook.filter(componentdef)] if not self._ignore_hooks else {}
             return merge(import_configuration(module_name, *self.data_dirs, scope=scope),
                          *hook_dicts)
 
