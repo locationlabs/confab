@@ -17,6 +17,9 @@ from confab.loaders import FileSystemEnvironmentLoader, PackageEnvironmentLoader
 # data loading
 from confab.data import DataLoader
 
+# hooks
+from confab.hooks import Hook, add_data_hook, remove_data_hook
+
 # options
 from confab.options import assume_yes, Options
 
@@ -36,6 +39,9 @@ __ignore__ = [
     FileSystemEnvironmentLoader,
     PackageEnvironmentLoader,
     DataLoader,
+    Hook,
+    add_data_hook,
+    remove_data_hook,
     diff,
     generate,
     pull,

@@ -1,6 +1,12 @@
 Change History
 ==============
 
+1.5 - 
+-----
+
+-   Support adding data hooks to a Dataloader import which will be called after the files 
+    are loaded and data merged after file data.
+
 1.3 - 2013-08-14
 ----------------
 

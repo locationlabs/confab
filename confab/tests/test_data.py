@@ -84,6 +84,19 @@ class TestData(TestCase):
              'environment': 'component',
              'host': 'host'})
 
+    def test_nested_configuration_files(self):
+        '''
+        Load configuration data from nested folder structure.
+        '''
+        loader = DataLoader(join(dirname(__file__), 'data/nested'))
+
+        eq_(loader(self.component)['data'],
+            {'default': 'default',
+             'component': 'component',
+             'role': 'role',
+             'environment': 'environment',
+             'host': 'host'})
+
     def test_missing_data_module(self):
         """
         If a data module does not exist, it is ignored.
