@@ -51,7 +51,7 @@ data. Hooks are added and removed via::
 
     hook = Hook(hook_func)
     hooks.add_data_hook(scope, hook)
-    hooks.remove_data_hook(scope, Hook(hook_func))
+    hooks.remove_data_hook(scope, hook)
 
 Hooks can also be used via a ContextManager ``ScopeAndHooks`` which accepts an
 arbitrary number of hooks and loads them appropriately in context.::
