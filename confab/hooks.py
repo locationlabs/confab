@@ -20,12 +20,6 @@ class Hook(object):
             self._data = self._hook_func(module_name)
         return self._data
 
-    def __eq__(self, other):
-        if type(self) is type(other):
-            return (self._hook_func == other._hook_func and
-                    self._filter_func == other._filter_func)
-        return False
-
     def filter(self, componentdef):
         if self._filter_func is None:
             return True
