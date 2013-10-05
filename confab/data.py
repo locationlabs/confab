@@ -142,6 +142,3 @@ class DataLoader(object):
 
         return [(key, name) for key, name in module_names
                 if key in self.data_modules and name is not None]
-
-    def _truefunc(componentdef):
-        return True

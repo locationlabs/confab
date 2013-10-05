@@ -14,6 +14,9 @@ from confab.autotasks import generate_tasks
 # jinja2 environment loading
 from confab.loaders import FileSystemEnvironmentLoader, PackageEnvironmentLoader
 
+# jinja2 filters
+from confab.jinja_filters import add_jinja_filter, remove_jinja_filter, JinjaFilters
+
 # data loading
 from confab.data import DataLoader
 
@@ -52,4 +55,7 @@ __ignore__ = [
     iter_hosts,
     iter_conffiles,
     make_conffiles,
+    add_jinja_filter,
+    remove_jinja_filter,
+    JinjaFilters,
 ]
