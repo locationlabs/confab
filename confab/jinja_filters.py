@@ -30,6 +30,9 @@ def rotate(list_, pivot):
 def map_format(sequence, format):
     """
     Apply format string on elements in sequence.
+
+    :param format: format string. can use one positional format argument, i.e. '{}' or '{0}',
+                   which will map to elements in the sequence.
     """
     return [format.format(item) for item in sequence]
 

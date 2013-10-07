@@ -115,6 +115,11 @@ def unique_union(*args):
 class Rotate(list):
     """
     Customized callable list that rotates its values around a pivot.
+
+    Please consider implementing list rotation in the template itself
+    using the `rotate` jinja filter, rather than using this data merging
+    callable, as list rotation relates to data manipulation as opposed
+    to data merging.
     """
 
     def __init__(self, pivot_func, *list_):
