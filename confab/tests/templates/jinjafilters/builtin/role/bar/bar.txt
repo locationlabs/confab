@@ -1,0 +1,1 @@
+{{bar | rotate(pivot) | map_format("+{}+")}}

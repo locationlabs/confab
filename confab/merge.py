@@ -110,3 +110,30 @@ class UniqueUnion(list):
 
 def unique_union(*args):
     return UniqueUnion(*args)
+
+
+class Rotate(list):
+    """
+    Customized callable list that rotates its values around a pivot.
+
+    Please consider implementing list rotation in the template itself
+    using the `rotate` jinja filter, rather than using this data merging
+    callable, as list rotation relates to data manipulation as opposed
+    to data merging.
+    """
+
+    def __init__(self, pivot_func, *list_):
+        super(Rotate, self).__init__(*list_)
+        self.pivot_func = pivot_func
+
+    def __call__(self, default=None):
+        try:
+            pos = self.index(self.pivot_func())
+        except (ValueError, TypeError):
+            return self
+        else:
+            return self[pos:] + self[:pos]
+
+
+def rotate(*args):
+    return Rotate(*args)
