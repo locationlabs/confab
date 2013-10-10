@@ -1,8 +1,10 @@
 """
 Options for managing Confab.
 """
+
+from os import getcwd
 from os.path import basename
-from fabric.api import task
+from fabric.api import env, task
 from fabric.utils import _AttributeDict
 
 from difflib import unified_diff
@@ -84,6 +86,13 @@ def _as_dict(module):
         return {}
 
 
+def _get_base_dir():
+    """
+    Returns the base directory for user's template and data directories.
+    """
+
+    return env.environmentdef.directory or getcwd()
+
 # Options that control how confab runs.
 #
 # These are in opposition to options likely to changed
@@ -110,6 +119,9 @@ options = _AttributeDict({
 
     # How to get dictionary configuration from module data?
     'module_as_dict': _as_dict,
+
+    # Base directory for template and data directories.
+    'get_base_dir': _get_base_dir,
 
     # What is the name of the template directory?
     'get_templates_dir': lambda: 'templates',
