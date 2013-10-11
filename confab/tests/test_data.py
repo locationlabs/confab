@@ -126,3 +126,15 @@ class TestData(TestCase):
 
         with self.assertRaises(ImportError):
             loader(self.component).get('data')
+
+    def test_data_callables(self):
+        """
+        Data callables are applied when merging.
+        """
+        loader = DataLoader(join(dirname(__file__), 'data/callables'))
+        data = loader(self.component)
+
+        eq_(data['appended'], ['default', 'environment'])
+        eq_(data['prepended'], ['environment', 'default'])
+        eq_(data['unique'], ['default'])
+        eq_(data['rotated'], ['pivot', 'itemB', 'itemA'])

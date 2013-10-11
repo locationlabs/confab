@@ -112,21 +112,21 @@ class DataLoader(object):
 
         :param component: a component definition.
         """
-        def load_module(scope_and_module):
-            scope, module_name = scope_and_module
-            hook_dicts = [hook(module_name) for hook in hooks.for_scope(scope)
-                          if hook.filter(componentdef)] if not self._ignore_hooks else {}
-            return merge(import_configuration(module_name, *self.data_dirs, scope=scope),
-                         *hook_dicts)
+        def load_modules():
+            for scope, module_name in self._list_modules(componentdef):
+                yield import_configuration(module_name, *self.data_dirs, scope=scope)
 
-        module_dicts = map(load_module, self._list_modules(componentdef))
+                if not self._ignore_hooks:
+                    for hook in hooks.for_scope(scope):
+                        if hook.filter(componentdef):
+                            yield hook(module_name)
 
         confab_data = dict(confab=dict(environment=componentdef.environment,
                                        host=componentdef.host,
                                        role=componentdef.role,
                                        component=componentdef.name))
 
-        return merge(confab_data, *module_dicts)
+        return merge(confab_data, *load_modules())
 
     def _list_modules(self, componentdef):
         """
