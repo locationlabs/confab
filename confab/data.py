@@ -1,6 +1,9 @@
 """
 Functions for loading configuration data.
 """
+from os.path import join
+from itertools import chain
+
 from fabric.api import puts
 from gusset.output import debug
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
@@ -8,6 +11,7 @@ from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 from confab.files import _import, _import_string
 from confab.merge import merge
 from confab.options import options
+from confab.hooks import hooks
 
 
 class ModuleNotFound(Exception):
@@ -54,13 +58,19 @@ def _import_configuration(module_name, data_dir):
     return module
 
 
-def import_configuration(module_name, *data_dirs):
+def import_configuration(module_name, *data_dirs, **kwargs):
     """
     Load configuration from a python module as a dictionary.
 
     :param data_dirs: List of directories to load from.
+    :param scope: (kwargs) Containing folder name for module.
     """
-    for data_dir in data_dirs:
+    def add_scope(data_dirs, scope):
+        if scope is None:
+            return data_dirs
+        return list(chain(*zip(data_dirs, map(lambda data_dir: join(data_dir, scope), data_dirs))))
+
+    for data_dir in add_scope(data_dirs, kwargs.get('scope')):
         try:
             module = _import_configuration(module_name, data_dir)
             return options.module_as_dict(module)
@@ -85,7 +95,7 @@ class DataLoader(object):
 
     ALL = ['default', 'component', 'role', 'environment', 'host']
 
-    def __init__(self, data_dirs, data_modules=ALL):
+    def __init__(self, data_dirs, data_modules=ALL, ignore_hooks=False):
         """
         Create a data loader for the given data directories.
 
@@ -94,6 +104,7 @@ class DataLoader(object):
         """
         self.data_dirs = data_dirs if isinstance(data_dirs, list) else [data_dirs]
         self.data_modules = set(data_modules)
+        self._ignore_hooks = ignore_hooks
 
     def __call__(self, componentdef):
         """
@@ -101,20 +112,21 @@ class DataLoader(object):
 
         :param component: a component definition.
         """
-        is_not_none = lambda x: x is not None
+        def load_modules():
+            for scope, module_name in self._list_modules(componentdef):
+                yield import_configuration(module_name, *self.data_dirs, scope=scope)
 
-        module_names = filter(is_not_none, self._list_modules(componentdef))
-
-        load_module = lambda module_name: import_configuration(module_name, *self.data_dirs)
-
-        module_dicts = map(load_module, module_names)
+                if not self._ignore_hooks:
+                    for hook in hooks.for_scope(scope):
+                        if hook.filter(componentdef):
+                            yield hook(module_name)
 
         confab_data = dict(confab=dict(environment=componentdef.environment,
                                        host=componentdef.host,
                                        role=componentdef.role,
                                        component=componentdef.name))
 
-        return merge(confab_data, *module_dicts)
+        return merge(confab_data, *load_modules())
 
     def _list_modules(self, componentdef):
         """
@@ -128,4 +140,5 @@ class DataLoader(object):
             ('host', componentdef.host)
         ]
 
-        return [name for key, name in module_names if key in self.data_modules]
+        return [(key, name) for key, name in module_names
+                if key in self.data_modules and name is not None]

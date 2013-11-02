@@ -13,6 +13,7 @@ from gusset.output import debug, status
 from confab.files import _clear_dir, _clear_file, _ensure_dir
 from confab.options import options
 from confab.validate import assert_may_be_created
+from confab.jinja_filters import jinja_filters
 
 import os
 import shutil
@@ -236,6 +237,7 @@ class ConfFiles(object):
 
             data = data_loader(component)
             environment = environment_loader(component.name)
+            jinja_filters.register(environment)
 
             for template_name in environment.list_templates(filter_func=options.filter_func):
                 debug("Adding template: {}".format(template_name))

@@ -84,6 +84,19 @@ class TestData(TestCase):
              'environment': 'component',
              'host': 'host'})
 
+    def test_nested_configuration_files(self):
+        '''
+        Load configuration data from nested folder structure.
+        '''
+        loader = DataLoader(join(dirname(__file__), 'data/nested'))
+
+        eq_(loader(self.component)['data'],
+            {'default': 'default',
+             'component': 'component',
+             'role': 'role',
+             'environment': 'environment',
+             'host': 'host'})
+
     def test_missing_data_module(self):
         """
         If a data module does not exist, it is ignored.
@@ -113,3 +126,15 @@ class TestData(TestCase):
 
         with self.assertRaises(ImportError):
             loader(self.component).get('data')
+
+    def test_data_callables(self):
+        """
+        Data callables are applied when merging.
+        """
+        loader = DataLoader(join(dirname(__file__), 'data/callables'))
+        data = loader(self.component)
+
+        eq_(data['appended'], ['default', 'environment'])
+        eq_(data['prepended'], ['environment', 'default'])
+        eq_(data['unique'], ['default'])
+        eq_(data['rotated'], ['pivot', 'itemB', 'itemA'])

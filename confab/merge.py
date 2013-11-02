@@ -53,13 +53,15 @@ def _entry(default, override, key):
 
 
 def _merge(default, override):
-    """Recursively merge two dictionaries.
+    """
+    Recursively merge two dictionaries.
     """
     return dict(_entry(default, override, key) for key in _iterkeys(default, override))
 
 
 def merge(*args):
-    """Recursively merge multiple dictionaries.
+    """
+    Recursively merge multiple dictionaries.
     """
     return reduce(_merge, args, {})
 
@@ -68,6 +70,7 @@ class Append(list):
     """
     Customized callable list that appends its values to the default.
     """
+
     def __init__(self, *args):
         super(Append, self).__init__(args)
 
@@ -105,8 +108,35 @@ class UniqueUnion(list):
         super(UniqueUnion, self).__init__(args)
 
     def __call__(self, default):
-        return list(set(default or []) | set(*self))
+        return list(set(default or []) | set(self))
 
 
 def unique_union(*args):
     return UniqueUnion(*args)
+
+
+class Rotate(list):
+    """
+    Customized callable list that rotates its values around a pivot.
+
+    Please consider implementing list rotation in the template itself
+    using the `rotate` jinja filter, rather than using this data merging
+    callable, as list rotation relates to data manipulation as opposed
+    to data merging.
+    """
+
+    def __init__(self, pivot_func, *list_):
+        super(Rotate, self).__init__(*list_)
+        self.pivot_func = pivot_func
+
+    def __call__(self, default=None):
+        try:
+            pos = self.index(self.pivot_func())
+        except (ValueError, TypeError):
+            return self
+        else:
+            return self[pos:] + self[:pos]
+
+
+def rotate(*args):
+    return Rotate(*args)
