@@ -53,13 +53,15 @@ def _entry(default, override, key):
 
 
 def _merge(default, override):
-    """Recursively merge two dictionaries.
+    """
+    Recursively merge two dictionaries.
     """
     return dict(_entry(default, override, key) for key in _iterkeys(default, override))
 
 
 def merge(*args):
-    """Recursively merge multiple dictionaries.
+    """
+    Recursively merge multiple dictionaries.
     """
     return reduce(_merge, args, {})
 
@@ -68,6 +70,7 @@ class Append(list):
     """
     Customized callable list that appends its values to the default.
     """
+
     def __init__(self, *args):
         super(Append, self).__init__(args)
 
@@ -105,7 +108,7 @@ class UniqueUnion(list):
         super(UniqueUnion, self).__init__(args)
 
     def __call__(self, default):
-        return list(set(default or []) | set(*self))
+        return list(set(default or []) | set(self))
 
 
 def unique_union(*args):

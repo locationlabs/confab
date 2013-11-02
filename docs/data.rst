@@ -44,8 +44,8 @@ appended/prepended to default values.
 Data Hooks
 ==========
 
-DataLoader now supports adding callbacks by scope in order to load additional 
-data. Hooks are added and removed via::
+DataLoader supports adding callbacks by scope in order to load additional data.
+Hooks are added and removed via::
 
     from confab.api import Hook, add_data_hook, remove_data_hook
 
