@@ -13,9 +13,7 @@ def select(value, key):
     the ``value`` is returned as is.
     """
 
-    if isinstance(value, dict) and key in value:
-        return value[key]
-    return value
+    return value.get(key, value) if isinstance(value, dict) else value
 
 
 def rotate(list_, pivot):
