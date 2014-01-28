@@ -8,8 +8,12 @@ Allows custom jinja filters.
 def select(value, key):
     """
     Select a key from a dictionary.
+
+    If ``value`` is not a dictionary or ``key`` does not exist in it,
+    the ``value`` is returned as is.
     """
-    if isinstance(value, dict):
+
+    if isinstance(value, dict) and key in value:
         return value[key]
     return value
 
