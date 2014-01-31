@@ -1,6 +1,12 @@
 Change History
 ==============
 
+1.6 - 
+-----
+
+-   Ensure that environment selection "runs once" and will work with `--parallel`
+-   Improve `select` Jinja filter.
+
 1.5 - 
 -----
 
