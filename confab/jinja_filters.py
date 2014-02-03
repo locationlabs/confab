@@ -8,10 +8,12 @@ Allows custom jinja filters.
 def select(value, key):
     """
     Select a key from a dictionary.
+
+    If ``value`` is not a dictionary or ``key`` does not exist in it,
+    the ``value`` is returned as is.
     """
-    if isinstance(value, dict):
-        return value[key]
-    return value
+
+    return value.get(key, value) if isinstance(value, dict) else value
 
 
 def rotate(list_, pivot):

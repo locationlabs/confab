@@ -8,7 +8,7 @@ standard Confab tasks (e.g. pull) to customize configuration data::
     fab dev:web,queue push
 
 """
-from fabric.api import abort, env
+from fabric.api import abort, env, runs_once
 from fabric.state import commands
 
 from confab.definitions import Settings
@@ -17,10 +17,13 @@ from confab.definitions import Settings
 def _add_task(name, task, doc):
     """
     Register a Fabric task.
+
+    The resulting task is declared runs_once to ensure that environment
+    definitions are loaded properly when other (subsequent) tasks are run in parallel.
     """
     task_wrapper = lambda *args: task(*args)
-    setattr(task_wrapper, '__doc__', doc)
-    commands[name] = task_wrapper
+    setattr(task_wrapper, "__doc__", doc)
+    commands[name] = runs_once(task_wrapper)
 
 
 def generate_tasks(settings_path=None):

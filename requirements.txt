@@ -1,7 +1,8 @@
-Fabric==1.8.0
-Jinja2==2.7.1
+Fabric==1.8.1
+Jinja2==2.7.2
 MarkupSafe==0.18
-gusset==1.2
-paramiko==1.11.0
-pycrypto==2.6
-python-magic==0.4.3
+ecdsa==0.10
+gusset==1.3
+paramiko==1.12.1
+pycrypto==2.6.1
+python-magic==0.4.6
