@@ -26,11 +26,7 @@ def this_hostname(hostname):
     """
     host_config = ssh_config(hostname)
 
-    # Using the hostname from the ssh config means that Fabric output might be misleading.
-    # For example, if the ssh config maps a host to a port forward from localhost
-    # (as is common with Vagrant), Fabric output might show: ["127.0.0.1"] instead of the
-    # actual hostname. The alternative is to pass the unresolved hostname and resolve this later.
-    host_string = host_config.get("hostname", hostname)
+    host_string = hostname
     port = host_config.get("port", env.default_port)
     user = host_config.get("user", env.user)
     key_filename = host_config.get("identityfile", env.key_filename)
