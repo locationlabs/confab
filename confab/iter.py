@@ -2,17 +2,44 @@
 Iterations over :term:`hosts<host>`, :term:`roles<role>`,
 :term:`components<component>` and config files.
 """
-
+from contextlib import contextmanager
 from fabric.api import env, settings, abort
 from os.path import join
 from pkg_resources import iter_entry_points
 from warnings import warn
+
+from fabric.network import ssh_config
 
 from confab.options import options
 from confab.validate import assert_exists
 from confab.loaders import FileSystemEnvironmentLoader
 from confab.data import DataLoader
 from confab.conffiles import ConfFiles
+
+
+@contextmanager
+def this_hostname(hostname):
+    """
+    Context manager that uses the current SSH confg to switch Fabric to a specific hostname.
+
+    Updates hostname, port, user, and identity file.
+    """
+    host_config = ssh_config(hostname)
+
+    # Using the hostname from the ssh config means that Fabric output might be misleading.
+    # For example, if the ssh config maps a host to a port forward from localhost
+    # (as is common with Vagrant), Fabric output might show: ["127.0.0.1"] instead of the
+    # actual hostname. The alternative is to pass the unresolved hostname and resolve this later.
+    host_string = host_config.get("hostname", hostname)
+    port = host_config.get("port", env.default_port)
+    user = host_config.get("user", env.user)
+    key_filename = host_config.get("identityfile", env.key_filename)
+
+    with settings(host_string=host_string,
+                  port=port,
+                  user=user,
+                  key_filename=key_filename):
+        yield
 
 
 def _get_environmentdef():
@@ -39,8 +66,8 @@ def iter_hosts():
     environmentdef = _get_environmentdef()
 
     for host in environmentdef.hosts():
-        # fabric needs the host_string if we're calling from main()
-        with settings(host_string=host.host):
+        # fabric needs the host if we're calling from main()
+        with this_hostname(host.host):
             yield host
 
 
@@ -51,8 +78,8 @@ def iter_hosts_and_roles():
     environmentdef = _get_environmentdef()
 
     for host_and_role in environmentdef.all():
-        # fabric needs the host_string if we're calling from main()
-        with settings(host_string=host_and_role.host):
+        # fabric needs the host if we're calling from main()
+        with this_hostname(host_and_role.host):
             yield host_and_role
 
 
