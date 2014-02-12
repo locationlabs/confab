@@ -1,6 +1,11 @@
 Change History
 ==============
 
+1.7 - 
+-----
+
+-   Adds `this_hostname` context manager.
+
 1.6 - 
 -----
 
