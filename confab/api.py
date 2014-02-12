@@ -27,7 +27,11 @@ from confab.hooks import Hook, add_data_hook, remove_data_hook
 from confab.options import assume_yes, Options
 
 # iterations
-from confab.iter import iter_hosts_and_roles, iter_hosts, iter_conffiles, make_conffiles
+from confab.iter import (iter_hosts_and_roles,
+                         iter_hosts,
+                         iter_conffiles,
+                         make_conffiles,
+                         this_hostname)
 
 # fabric tasks
 from confab.diff import diff
@@ -55,6 +59,7 @@ __ignore__ = [
     iter_hosts,
     iter_conffiles,
     make_conffiles,
+    this_hostname,
     add_jinja_filter,
     remove_jinja_filter,
     JinjaFilters,
