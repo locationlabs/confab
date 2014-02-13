@@ -22,19 +22,15 @@ def this_hostname(hostname):
     """
     Context manager that uses the current SSH confg to switch Fabric to a specific hostname.
 
-    Updates hostname, port, user, and identity file.
+    Updates hostname and port.
     """
     host_config = ssh_config(hostname)
 
     host_string = hostname
     port = host_config.get("port", env.default_port)
-    user = host_config.get("user", env.user)
-    key_filename = host_config.get("identityfile", env.key_filename)
 
     with settings(host_string=host_string,
-                  port=port,
-                  user=user,
-                  key_filename=key_filename):
+                  port=port):
         yield
 
 
