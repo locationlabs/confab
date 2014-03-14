@@ -10,7 +10,7 @@ try:
 except ImportError:
     pass
 
-__version__ = '1.7.1'
+__version__ = '1.7.2'
 
 # Jenkins will replace __build__ with a unique value.
 __build__ = ''
@@ -43,6 +43,7 @@ setup(name='confab',
           'Jinja2>=2.4',
           'python-magic',
           'gusset>=1.2',
+          'paramiko<1.13',
       ],
       tests_require=[
           'mock==1.0.1'
