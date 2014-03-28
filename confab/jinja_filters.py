@@ -2,6 +2,8 @@
 Allows custom jinja filters.
 """
 
+from jinja2.filters import contextfilter
+
 ### Built-in filters ###
 
 
@@ -39,6 +41,38 @@ def map_format(sequence, format):
     return [format.format(item) for item in sequence]
 
 
+def _hosts_with_roles(context, role):
+    """
+    returns the list of host names for the specified ``role`` in the current environment
+    defined by ``context``.
+
+    :param role: role to query
+    """
+
+    environmentdef = context["env"]["environmentdef"]
+    current_env = environmentdef.settings.for_env(environmentdef.name)
+    try:
+        return [host.host for host in current_env.with_roles(role).hosts()]
+    except KeyError:
+        return []
+
+
+@contextfilter
+def pick_value_per_host(context, role_values_pair):
+    """
+    Pick a value for the current host for hosts in ``role``, from a list of ``values```.
+    If ``values`` is not a list then return it as is.
+
+    :param role_values_pair: a pair of (role, values) where role is the role being worked on
+    and values is the list to pick a value from or the value if there is no choice available.
+    """
+
+    role, values = role_values_pair
+    return (values[_hosts_with_roles(context, role).index(context["confab"]["host"]) % len(values)]
+            if isinstance(values, list)
+            else values)
+
+
 def built_in_filters():
     """
     Confab built-in Jinja filters.
@@ -47,6 +81,7 @@ def built_in_filters():
         select,
         rotate,
         map_format,
+        pick_value_per_host,
     ]
 
 
