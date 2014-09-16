@@ -1,6 +1,9 @@
 """
 Allows custom jinja filters.
 """
+from ujson import dumps
+from fabric.api import env
+from random import shuffle
 
 ### Built-in filters ###
 
@@ -38,16 +41,66 @@ def map_format(sequence, format):
     """
     return [format.format(item) for item in sequence]
 
+def select_with_components_on_current_host(dictionary):
+    """
+    select values from the ``dictionary`` based on the
+    keys being the names of the components on the current host
+    """
+
+    if not dictionary:
+        return []
+
+    return [dictionary.get(name, [])
+            for name in
+            sorted(set([component.name
+                        for component in
+                        env.environmentdef.settings.for_env(env.environmentdef.name).components()
+                        if component.host == env.host_string]))]
+
+
+def flatten_list(unflattened_list):
+    """
+    Flatten a list of lists of lists ....
+    """
+    flattened_list = []
+    for item in unflattened_list:
+        if type(item) is list:
+            flattened_list.extend(flatten_list(item))
+        elif item:
+            flattened_list.append(item)
+    return flattened_list
+
+
+def shuffle_list(target_list):
+    shuffle(target_list)
+    return target_list
+
+
+def join_json(list_to_join, delimiter):
+    """
+    Join the json of each member of the ``list_to_join`` on ``delimiter``.
+    """
+    return delimiter.join([dumps(item) for item in list_to_join])
+
+
+def get_json(target):
+    return dumps(target)
 
 def built_in_filters():
     """
     Confab built-in Jinja filters.
     """
     return [
-        select,
-        rotate,
+        flatten_list,
+        get_json,
+        join_json,
         map_format,
+        rotate,
+        select,
+        select_with_components_on_current_host,
+        shuffle_list,
     ]
+
 
 
 ### End built-in filters ###
