@@ -1,12 +1,14 @@
 """
 Allows custom jinja filters.
 """
-from ujson import dumps
+from os.path import join
+from json import dumps
 from fabric.api import env
 from random import shuffle
+from confab.options import options
+from confab.data import DataLoader
 
 ### Built-in filters ###
-
 
 def select(value, key):
     """
@@ -41,22 +43,21 @@ def map_format(sequence, format):
     """
     return [format.format(item) for item in sequence]
 
-def select_with_components_on_current_host(dictionary):
-    """
-    select values from the ``dictionary`` based on the
-    keys being the names of the components on the current host
-    """
 
-    if not dictionary:
-        return []
-
-    return [dictionary.get(name, [])
-            for name in
-            sorted(set([component.name
+def merge_data_from_host_components(key):
+    """
+    This method creates a list from all the components data with the given key.
+    """
+    merged_list = []
+    data_dir = join(options.get_base_dir(), options.get_data_dir())
+    component_set = set([component
                         for component in
                         env.environmentdef.settings.for_env(env.environmentdef.name).components()
-                        if component.host == env.host_string]))]
+                        if component.host == env.host_string])
 
+    for component in component_set:
+        merged_list += DataLoader(data_dir)(component).get(key, {})
+    return merged_list
 
 def flatten_list(unflattened_list):
     """
@@ -70,21 +71,28 @@ def flatten_list(unflattened_list):
             flattened_list.append(item)
     return flattened_list
 
-
 def shuffle_list(target_list):
+    """
+    This method shuffles the given list.
+    """
     shuffle(target_list)
     return target_list
 
-
-def join_json(list_to_join, delimiter):
+def join_json(list_of_json):
     """
-    Join the json of each member of the ``list_to_join`` on ``delimiter``.
+    Join all the json item present in the given list.
     """
-    return delimiter.join([dumps(item) for item in list_to_join])
+    return ','.join([dumps(item) for item in list_of_json])
 
 
 def get_json(target):
+    """
+    Convert the given string into json string.
+    """
     return dumps(target)
+
+
+
 
 def built_in_filters():
     """
@@ -95,13 +103,11 @@ def built_in_filters():
         get_json,
         join_json,
         map_format,
+        merge_data_from_host_components,
         rotate,
         select,
-        select_with_components_on_current_host,
         shuffle_list,
     ]
-
-
 
 ### End built-in filters ###
 
